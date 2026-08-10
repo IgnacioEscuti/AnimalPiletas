@@ -1,0 +1,28 @@
+import { Schema, model } from "mongoose";
+
+const usoPastillasSchema = new Schema(
+  {
+    cliente: {
+      type: Schema.Types.ObjectId,
+      ref: "cliente",
+      required: true,
+    },
+    fecha: {
+      type: Date,
+      required: true,
+    },
+    cantidad: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+    precioUnitarioUsado: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+  },
+  { timestamps: true }
+);
+
+export const usoPastillasModel = model("usoPastillas", usoPastillasSchema);

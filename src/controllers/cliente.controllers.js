@@ -1,0 +1,38 @@
+import { clienteService } from "../services/cliente.service.js";
+import { ClienteDTO } from "../DTOs/cliente.dto.js";
+
+export async function createCliente(req, res, next) {
+  try {
+    const cliente = await clienteService.createCliente(req.body);
+    res.status(201).json({ cliente: new ClienteDTO(cliente) });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getClientes(req, res, next) {
+  try {
+    const clientes = await clienteService.getClientes();
+    res.status(200).json({ clientes: clientes.map((cliente) => new ClienteDTO(cliente)) });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getCliente(req, res, next) {
+  try {
+    const cliente = await clienteService.getClienteById(req.params.id);
+    res.status(200).json({ cliente: new ClienteDTO(cliente) });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function updateCliente(req, res, next) {
+  try {
+    const cliente = await clienteService.updateCliente(req.params.id, req.body);
+    res.status(200).json({ cliente: new ClienteDTO(cliente) });
+  } catch (error) {
+    next(error);
+  }
+}
