@@ -8,15 +8,28 @@ import usoPastillasRoutes from "./routes/usoPastillas.routes.js";
 import usoProductoRoutes from "./routes/usoProducto.routes.js";
 import resumenRoutes from "./routes/resumen.routes.js";
 import { errorHandler } from "./middlewares/error.middlewares.js";
+import { env } from "./config/env.js";
 
 const app = express();
 
-// TODO: restringir a origin: process.env.FRONTEND_URL (el dominio de
-// Vercel) una vez que el frontend esté deployado. Por ahora queda
-// abierto a cualquier origen para no bloquear el deploy inicial.
-app.use(cors({
-  origin: "animal-piletas-2xt6nygce-ignacioescutis-projects.vercel.app" 
-}));
+// FRONTEND_URLS: lista de orígenes permitidos separados por coma (ej.
+// "https://animal-piletas.vercel.app,http://localhost:5173"). Solo se
+// acepta un origin si está exactamente en esa lista.
+const origenesPermitidos = env.FRONTEND_URLS
+  ? env.FRONTEND_URLS.split(",").map((url) => url.trim())
+  : [];
+
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (!origin || origenesPermitidos.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Origen no permitido por CORS"));
+      }
+    },
+  })
+);
 app.use(express.json());
 
 app.use("/api/clientes", clienteRoutes);
