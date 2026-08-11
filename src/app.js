@@ -14,7 +14,9 @@ const app = express();
 // TODO: restringir a origin: process.env.FRONTEND_URL (el dominio de
 // Vercel) una vez que el frontend esté deployado. Por ahora queda
 // abierto a cualquier origen para no bloquear el deploy inicial.
-app.use(cors());
+app.use(cors({
+  origin: "animal-piletas-2xt6nygce-ignacioescutis-projects.vercel.app" // la URL real que te dio Vercel
+}));
 app.use(express.json());
 
 app.use("/api/clientes", clienteRoutes);
