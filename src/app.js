@@ -15,7 +15,7 @@ const app = express();
 // Vercel) una vez que el frontend esté deployado. Por ahora queda
 // abierto a cualquier origen para no bloquear el deploy inicial.
 app.use(cors({
-  origin: "animal-piletas-2xt6nygce-ignacioescutis-projects.vercel.app" // la URL real que te dio Vercel
+  origin: "animal-piletas-2xt6nygce-ignacioescutis-projects.vercel.app" 
 }));
 app.use(express.json());
 
