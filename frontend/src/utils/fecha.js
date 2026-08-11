@@ -9,6 +9,15 @@ export function hoyISO() {
   return fechaISO();
 }
 
+// "YYYY-MM-DD" (el formato que devuelve <input type="date">) -> Date
+// local. Se parsea a mano en vez de `new Date(fechaStr)` porque ese
+// formato lo interpreta como UTC y corre el día en zonas horarias
+// negativas.
+export function parsearFechaISO(fechaStr) {
+  const [anio, mes, dia] = fechaStr.split("-").map(Number);
+  return new Date(anio, mes - 1, dia);
+}
+
 // Número de semana ISO 8601 (1-53) de una fecha.
 export function semanaISO(fecha = new Date()) {
   const dia = new Date(Date.UTC(fecha.getFullYear(), fecha.getMonth(), fecha.getDate()));
@@ -63,8 +72,15 @@ export function formatoPeriodo(tipo, inicioISO, finISO) {
   const ultimoDia = new Date(finISO);
   ultimoDia.setDate(ultimoDia.getDate() - 1);
 
-  if (inicio.getMonth() === ultimoDia.getMonth()) {
-    return `${inicio.getDate()} al ${ultimoDia.getDate()} de ${MESES[inicio.getMonth()]}`;
+  const mismoAnio = inicio.getFullYear() === ultimoDia.getFullYear();
+  const mismoMes = mismoAnio && inicio.getMonth() === ultimoDia.getMonth();
+
+  if (mismoMes) {
+    return `${inicio.getDate()} al ${ultimoDia.getDate()} de ${MESES[inicio.getMonth()]} de ${inicio.getFullYear()}`;
   }
-  return `${inicio.getDate()} de ${MESES[inicio.getMonth()]} al ${ultimoDia.getDate()} de ${MESES[ultimoDia.getMonth()]}`;
+  if (mismoAnio) {
+    return `${inicio.getDate()} de ${MESES[inicio.getMonth()]} al ${ultimoDia.getDate()} de ${MESES[ultimoDia.getMonth()]} de ${inicio.getFullYear()}`;
+  }
+  // Semana que cruza de un año al siguiente (ej. fin/principio de año).
+  return `${inicio.getDate()} de ${MESES[inicio.getMonth()]} de ${inicio.getFullYear()} al ${ultimoDia.getDate()} de ${MESES[ultimoDia.getMonth()]} de ${ultimoDia.getFullYear()}`;
 }

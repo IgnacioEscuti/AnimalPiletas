@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { ResumenTable } from "../components/ResumenTable.jsx";
 import { getResumen } from "../services/resumenService.js";
-import { fechaISO, formatoPeriodo, fechaInicialMensual } from "../utils/fecha.js";
+import { fechaISO, formatoPeriodo, fechaInicialMensual, parsearFechaISO } from "../utils/fecha.js";
 
 function sumarSemanas(fecha, cantidad) {
   const nueva = new Date(fecha);
@@ -18,6 +18,7 @@ export function ResumenPage() {
   const [fechaSemanal, setFechaSemanal] = useState(new Date());
   const [fechaMensual, setFechaMensual] = useState(fechaInicialMensual());
   const [resumen, setResumen] = useState(null);
+  const [busqueda, setBusqueda] = useState("");
   const [error, setError] = useState("");
 
   const fechaActiva = tab === "semanal" ? fechaSemanal : fechaMensual;
@@ -25,6 +26,12 @@ export function ResumenPage() {
 
   useEffect(() => {
     let cancelado = false;
+
+    // Si no se limpia acá, mientras el fetch nuevo está en vuelo el label
+    // combina el "tab" ya actualizado con los datos viejos (de la otra
+    // pestaña o período) — ej. formato mensual aplicado a un rango
+    // semanal, mostrando un período que nunca se pidió.
+    setResumen(null);
 
     getResumen(tab, fechaISO(fechaActiva))
       .then((data) => {
@@ -51,6 +58,19 @@ export function ResumenPage() {
     if (tab === "semanal") setFechaSemanal((fecha) => sumarSemanas(fecha, 1));
     else setFechaMensual((fecha) => sumarMeses(fecha, 1));
   };
+
+  const handleFechaManual = (event) => {
+    if (!event.target.value) return;
+    const nuevaFecha = parsearFechaISO(event.target.value);
+    if (tab === "semanal") setFechaSemanal(nuevaFecha);
+    else setFechaMensual(nuevaFecha);
+  };
+
+  const filasFiltradas = resumen
+    ? resumen.clientes.filter((fila) =>
+        fila.clienteNombre.toLowerCase().includes(busqueda.toLowerCase())
+      )
+    : [];
 
   return (
     <section>
@@ -79,12 +99,26 @@ export function ResumenPage() {
         <button className="secondary" onClick={irSiguiente} title="Período siguiente">
           →
         </button>
+        <input
+          type="date"
+          className="periodo-fecha"
+          value={fechaISO(fechaActiva)}
+          onChange={handleFechaManual}
+        />
       </div>
+
+      <input
+        type="text"
+        placeholder="Buscar por nombre..."
+        value={busqueda}
+        onChange={(event) => setBusqueda(event.target.value)}
+        className="search-input"
+      />
 
       {error && <p className="error-message">{error}</p>}
 
       {resumen && (
-        <ResumenTable filas={resumen.clientes} totales={resumen.totales} periodo={periodo} />
+        <ResumenTable filas={filasFiltradas} totales={resumen.totales} periodo={periodo} />
       )}
     </section>
   );

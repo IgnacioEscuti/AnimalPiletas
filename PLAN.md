@@ -86,7 +86,9 @@ Agrupando por cliente y sumando los totales de cada colección se arma el total 
 - Total pastillas: suma de las cantidades de pastillas de todos los clientes
 - Total productos: igual que en la fila de cliente pero agregando entre todos — desglosado por nombre de producto (ej: "Cloro: 15, Algicida: 8"), sumando las apariciones de cada nombre en todos los clientes del período
 
-**Navegación entre períodos:** el endpoint recibe un tipo (`semanal` o `mensual`) y una fecha de referencia cualquiera dentro del período a mostrar. A partir de esa fecha calcula el inicio/fin (lunes-a-lunes o 1°-a-1°) y corre la misma consulta. Navegar hacia atrás o adelante es mandar una fecha de referencia distinta — un solo endpoint sirve para el período actual y para cualquier período pasado. En el frontend: dos pestañas (Semanal / Mensual), flechas anterior/siguiente, y un texto que muestra qué período se está viendo.
+**Navegación entre períodos:** el endpoint recibe un tipo (`semanal` o `mensual`) y una fecha de referencia cualquiera dentro del período a mostrar. A partir de esa fecha calcula el inicio/fin (lunes-a-lunes o 1°-a-1°) y corre la misma consulta. Navegar hacia atrás o adelante es mandar una fecha de referencia distinta — un solo endpoint sirve para el período actual y para cualquier período pasado. En el frontend: dos pestañas (Semanal / Mensual), flechas anterior/siguiente, un texto que muestra qué período se está viendo, y un selector de fecha nativo (`<input type="date">`) para saltar directo a cualquier período de cualquier año sin tener que ir clickeando flecha por flecha — al elegir una fecha, se manda como fecha de referencia y se recalcula el período que la contiene.
+
+**Buscador de clientes dentro del resumen:** igual que en la pantalla de Cliente, un campo de texto arriba de la tabla que filtra las filas por nombre — del lado del frontend, sobre los clientes que ya trajo la consulta del período (no hace falta pedirle nada nuevo al backend).
 
 **Período por defecto al entrar:**
 - Semanal: arranca en la semana actual (lo que haya cargado hasta hoy).
@@ -95,7 +97,11 @@ Agrupando por cliente y sumando los totales de cada colección se arma el total 
 ## Orden de funciones a implementar
 
 1. ✅ CRUD de Cliente (con tarifa de limpieza asignada) — hecho en Función 1
-2. ✅ Catálogo de TarifaLimpieza: seed de las 3 + endpoint/formulario para editar precio — hecho entre Función 1 y 2
+2. ✅ Catálogo de TarifaLimpieza: seed de las 3 (bajo/medio/alto) + endpoint/formulario para editar precio — hecho entre Función 1 y 2
 3. ✅ Pantalla de Cliente: lista con buscador, alta/edición vía modal, y en cada fila: marcar limpieza del día (tick/cruz), cantidad de pastillas, y nombre+precio de producto (carga manual) — hecho en Función 3
-4. ✅ Resumen (semanal y mensual, por cliente, con desglose de cantidad+precio por categoría y fila de totales) — hecho en Función 4
+4. ✅ Resumen (semanal y mensual, por cliente, con cantidad al lado del precio y totales al pie) — hecho en Función 4
 5. ✅ Campo semana en Cliente + filtro automático en la pantalla + toggle "ver todos" — hecho en Función 5
+6. Responsive (mobile) — pendiente, dejado para el final
+7. Login con roles (él carga, el jefe solo mira) — pendiente, dejado para el final
+
+App ya deployada: frontend en Vercel, backend en Render, base en MongoDB Atlas. Instalada como PWA en iPhone.
