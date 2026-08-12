@@ -3,8 +3,8 @@ import { UsoPastillasDTO } from "../DTOs/usoPastillas.dto.js";
 
 export async function createUsoPastillas(req, res, next) {
   try {
-    const { clienteId, cantidad } = req.body;
-    const usoPastillas = await usoPastillasService.registrarUso(clienteId, cantidad);
+    const { clienteId, cantidad, empleado } = req.body;
+    const usoPastillas = await usoPastillasService.registrarUso(clienteId, cantidad, empleado);
     res.status(201).json({ usoPastillas: new UsoPastillasDTO(usoPastillas) });
   } catch (error) {
     next(error);

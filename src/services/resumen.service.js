@@ -1,7 +1,7 @@
 import { clienteRepository } from "../repositories/cliente.repository.js";
 import { limpiezaRepository } from "../repositories/limpieza.repository.js";
 import { usoPastillasRepository } from "../repositories/usoPastillas.repository.js";
-import { usoProductoRepository } from "../repositories/usoProducto.repository.js";
+import { usoExtraRepository } from "../repositories/usoExtra.repository.js";
 import { rangoSemanal, rangoMensual } from "../utils/fecha.utils.js";
 
 function datosVacios() {
@@ -10,17 +10,17 @@ function datosVacios() {
     limpiezaPrecio: 0,
     pastillasCantidad: 0,
     pastillasPrecio: 0,
-    productos: new Map(),
-    productoPrecio: 0,
+    extras: new Map(),
+    extraPrecio: 0,
   };
 }
 
 export class ResumenService {
-  constructor(clienteRepository, limpiezaRepository, usoPastillasRepository, usoProductoRepository) {
+  constructor(clienteRepository, limpiezaRepository, usoPastillasRepository, usoExtraRepository) {
     this.clienteRepository = clienteRepository;
     this.limpiezaRepository = limpiezaRepository;
     this.usoPastillasRepository = usoPastillasRepository;
-    this.usoProductoRepository = usoProductoRepository;
+    this.usoExtraRepository = usoExtraRepository;
   }
 
   async getResumen(tipo, fecha) {
@@ -33,11 +33,11 @@ export class ResumenService {
     const { inicio, fin } = tipo === "semanal" ? rangoSemanal(fecha) : rangoMensual(fecha);
     const filtroFecha = { fecha: { $gte: inicio, $lt: fin } };
 
-    const [clientes, limpiezas, usosPastillas, usosProducto] = await Promise.all([
+    const [clientes, limpiezas, usosPastillas, usosExtra] = await Promise.all([
       this.clienteRepository.find(),
       this.limpiezaRepository.find(filtroFecha),
       this.usoPastillasRepository.find(filtroFecha),
-      this.usoProductoRepository.find(filtroFecha),
+      this.usoExtraRepository.find(filtroFecha),
     ]);
 
     const porCliente = new Map();
@@ -62,47 +62,47 @@ export class ResumenService {
       datos.pastillasPrecio += uso.cantidad * uso.precioUnitarioUsado;
     }
 
-    for (const uso of usosProducto) {
+    for (const uso of usosExtra) {
       const datos = datosDe(uso.cliente);
-      datos.productos.set(uso.nombreProducto, (datos.productos.get(uso.nombreProducto) ?? 0) + 1);
-      datos.productoPrecio += uso.precioUnitario;
+      datos.extras.set(uso.nombreExtra, (datos.extras.get(uso.nombreExtra) ?? 0) + 1);
+      datos.extraPrecio += uso.precioUnitario;
     }
 
     const filas = clientes.map((cliente) => {
       const datos = porCliente.get(cliente.id) ?? datosVacios();
-      const producto = {
-        productos: Array.from(datos.productos, ([nombre, cantidad]) => ({ nombre, cantidad })),
-        precio: datos.productoPrecio,
+      const extra = {
+        extras: Array.from(datos.extras, ([nombre, cantidad]) => ({ nombre, cantidad })),
+        precio: datos.extraPrecio,
       };
-      const totalGeneral = datos.limpiezaPrecio + datos.pastillasPrecio + datos.productoPrecio;
+      const totalGeneral = datos.limpiezaPrecio + datos.pastillasPrecio + datos.extraPrecio;
 
       return {
         clienteId: cliente.id,
         clienteNombre: cliente.nombre,
         limpieza: { cantidad: datos.limpiezaCantidad, precio: datos.limpiezaPrecio },
         pastillas: { cantidad: datos.pastillasCantidad, precio: datos.pastillasPrecio },
-        producto,
+        extra,
         totalGeneral,
       };
     });
 
     let totalLimpiezas = 0;
     let totalPastillas = 0;
-    const totalProductosMap = new Map();
+    const totalExtrasMap = new Map();
     for (const fila of filas) {
       totalLimpiezas += fila.limpieza.cantidad;
       totalPastillas += fila.pastillas.cantidad;
-      for (const { nombre, cantidad } of fila.producto.productos) {
-        totalProductosMap.set(nombre, (totalProductosMap.get(nombre) ?? 0) + cantidad);
+      for (const { nombre, cantidad } of fila.extra.extras) {
+        totalExtrasMap.set(nombre, (totalExtrasMap.get(nombre) ?? 0) + cantidad);
       }
     }
-    const totalProductos = Array.from(totalProductosMap, ([nombre, cantidad]) => ({ nombre, cantidad }));
+    const totalExtras = Array.from(totalExtrasMap, ([nombre, cantidad]) => ({ nombre, cantidad }));
 
     return {
       inicio,
       fin,
       clientes: filas,
-      totales: { totalLimpiezas, totalPastillas, totalProductos },
+      totales: { totalLimpiezas, totalPastillas, totalExtras },
     };
   }
 }
@@ -111,5 +111,5 @@ export const resumenService = new ResumenService(
   clienteRepository,
   limpiezaRepository,
   usoPastillasRepository,
-  usoProductoRepository
+  usoExtraRepository
 );

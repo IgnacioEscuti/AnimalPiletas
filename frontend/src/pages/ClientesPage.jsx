@@ -1,11 +1,16 @@
 import { useEffect, useState } from "react";
 import { ClienteModal } from "../components/ClienteModal.jsx";
 import { ClienteRow } from "../components/ClienteRow.jsx";
-import { getClientes, crearCliente, actualizarCliente } from "../services/clienteService.js";
+import {
+  getClientes,
+  crearCliente,
+  actualizarCliente,
+  cancelarCliente,
+} from "../services/clienteService.js";
 import { getTarifas } from "../services/tarifaService.js";
 import { getLimpiezasDeHoy, registrarLimpieza } from "../services/limpiezaService.js";
 import { getUsosPastillasDeHoy, registrarUsoPastillas } from "../services/usoPastillasService.js";
-import { getUsosProductoDeHoy, registrarUsoProducto } from "../services/usoProductoService.js";
+import { getUsosExtraDeHoy, registrarUsoExtra } from "../services/usoExtraService.js";
 import { semanaActual } from "../utils/fecha.js";
 
 const SEMANA_ACTUAL = semanaActual();
@@ -15,7 +20,7 @@ export function ClientesPage() {
   const [tarifas, setTarifas] = useState([]);
   const [limpiezas, setLimpiezas] = useState([]);
   const [pastillas, setPastillas] = useState([]);
-  const [productos, setProductos] = useState([]);
+  const [extras, setExtras] = useState([]);
   const [busqueda, setBusqueda] = useState("");
   const [verTodos, setVerTodos] = useState(false);
   const [clienteEnEdicion, setClienteEnEdicion] = useState(null);
@@ -28,19 +33,19 @@ export function ClientesPage() {
 
   const cargarTodo = async () => {
     try {
-      const [clientesData, tarifasData, limpiezasData, pastillasData, productosData] =
+      const [clientesData, tarifasData, limpiezasData, pastillasData, extrasData] =
         await Promise.all([
           getClientes(),
           getTarifas(),
           getLimpiezasDeHoy(),
           getUsosPastillasDeHoy(),
-          getUsosProductoDeHoy(),
+          getUsosExtraDeHoy(),
         ]);
       setClientes(clientesData);
       setTarifas(tarifasData);
       setLimpiezas(limpiezasData);
       setPastillas(pastillasData);
-      setProductos(productosData);
+      setExtras(extrasData);
     } catch {
       setError("No se pudieron cargar los datos.");
     }
@@ -66,31 +71,37 @@ export function ClientesPage() {
     await cargarTodo();
   };
 
-  const handleLimpieza = async (clienteId, realizada) => {
+  const handleLimpieza = async (clienteId, realizada, empleado) => {
     try {
-      await registrarLimpieza(clienteId, realizada);
+      await registrarLimpieza(clienteId, realizada, empleado);
       setLimpiezas(await getLimpiezasDeHoy());
     } catch {
       setError("No se pudo registrar la limpieza.");
     }
   };
 
-  const handlePastillas = async (clienteId, cantidad) => {
+  const handlePastillas = async (clienteId, cantidad, empleado) => {
     try {
-      await registrarUsoPastillas(clienteId, cantidad);
+      await registrarUsoPastillas(clienteId, cantidad, empleado);
       setPastillas(await getUsosPastillasDeHoy());
     } catch {
       setError("No se pudo registrar la carga de pastillas.");
     }
   };
 
-  const handleProducto = async (clienteId, nombreProducto, precioUnitario) => {
+  const handleExtra = async (clienteId, nombreExtra, precioUnitario, empleado) => {
     try {
-      await registrarUsoProducto(clienteId, nombreProducto, precioUnitario);
-      setProductos(await getUsosProductoDeHoy());
+      await registrarUsoExtra(clienteId, nombreExtra, precioUnitario, empleado);
+      setExtras(await getUsosExtraDeHoy());
     } catch {
-      setError("No se pudo registrar la carga de producto.");
+      setError("No se pudo registrar la carga de extra.");
     }
+  };
+
+  const handleCancelarCliente = async (id) => {
+    await cancelarCliente(id);
+    setModalAbierto(false);
+    await cargarTodo();
   };
 
   const handleSemana = async (clienteId, semana) => {
@@ -144,7 +155,8 @@ export function ClientesPage() {
               <th>Semana</th>
               <th>Limpieza</th>
               <th>Pastillas</th>
-              <th>Producto</th>
+              <th>Extra</th>
+              <th>Empleado</th>
               <th></th>
             </tr>
           </thead>
@@ -155,11 +167,11 @@ export function ClientesPage() {
                 cliente={cliente}
                 limpiezaHoy={limpiezas.find((limpieza) => limpieza.cliente === cliente.id)}
                 pastillasHoy={pastillas.find((uso) => uso.cliente === cliente.id)}
-                productoHoy={productos.find((uso) => uso.cliente === cliente.id)}
+                extraHoy={extras.find((uso) => uso.cliente === cliente.id)}
                 onEditar={abrirEdicion}
                 onLimpieza={handleLimpieza}
                 onPastillas={handlePastillas}
-                onProducto={handleProducto}
+                onExtra={handleExtra}
                 onSemana={handleSemana}
               />
             ))}
@@ -176,6 +188,7 @@ export function ClientesPage() {
           tarifas={tarifas}
           onClose={() => setModalAbierto(false)}
           onGuardar={handleGuardar}
+          onCancelar={handleCancelarCliente}
         />
       )}
     </section>

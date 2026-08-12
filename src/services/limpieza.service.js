@@ -9,7 +9,7 @@ export class LimpiezaService {
     this.clienteRepository = clienteRepository;
   }
 
-  async registrarLimpieza(clienteId, realizada, extra = 0) {
+  async registrarLimpieza(clienteId, realizada, extra = 0, empleado = "") {
     let cliente;
     try {
       cliente = await this.clienteRepository.findById(clienteId);
@@ -29,6 +29,7 @@ export class LimpiezaService {
         precioUnitarioUsado: cliente.tarifaLimpieza.precio,
         extra,
         realizada,
+        empleado,
       });
     } catch (error) {
       handleMongooseError(error);

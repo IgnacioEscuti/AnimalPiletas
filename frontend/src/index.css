@@ -374,31 +374,87 @@ tfoot tr td:last-child {
   padding: 8px 10px;
 }
 
-.producto-inputs {
+.extra-inputs {
   display: flex;
   gap: 6px;
   align-items: center;
 }
 
-.producto-inputs input {
+.extra-inputs input {
   min-width: 0;
   padding: 8px 10px;
   font-size: 14px;
 }
 
-.producto-inputs input[type="text"] {
+.extra-inputs input[type="text"] {
   flex: 2;
 }
 
-.producto-inputs input[type="number"] {
+.extra-inputs input[type="number"] {
   flex: 1;
   width: 80px;
 }
 
-.producto-hoy {
+.extra-hoy {
   margin: 6px 0 0;
   font-size: 12px;
   color: var(--text-muted);
+}
+
+.empleado-input {
+  width: 130px;
+  min-width: 0;
+  padding: 8px 10px;
+  font-size: 14px;
+}
+
+.chevron-button {
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin-right: 8px;
+  width: auto;
+  height: auto;
+  color: var(--text-muted);
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+.chevron-button:hover {
+  background: transparent;
+  color: var(--text);
+}
+
+.chevron {
+  display: inline-block;
+  font-size: 15px;
+  font-weight: 600;
+  transition: transform 0.15s ease;
+}
+
+.chevron-abierto {
+  transform: rotate(90deg);
+}
+
+.fila-expandida td {
+  background: transparent;
+  padding: 0 12px;
+}
+
+.detalle-cliente {
+  display: flex;
+  gap: 24px;
+  padding: 12px 16px;
+  background: var(--bg);
+  border-radius: 12px;
+  font-size: 14px;
+  color: var(--text-muted);
+  animation: fade-in 0.2s ease;
+}
+
+.detalle-cliente strong {
+  color: var(--text);
+  font-weight: 500;
 }
 
 /* Modal */
@@ -443,6 +499,21 @@ tfoot tr td:last-child {
   justify-content: flex-end;
   gap: 10px;
   margin-top: 8px;
+}
+
+button.modal-cancelar-cliente {
+  width: 100%;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  border-radius: 0;
+  background: transparent;
+  color: var(--danger);
+}
+
+button.modal-cancelar-cliente:hover {
+  background: var(--danger);
+  color: #fff;
 }
 
 /* Navegación principal y Resumen */

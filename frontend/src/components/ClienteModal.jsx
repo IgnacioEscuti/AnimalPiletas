@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 
-export function ClienteModal({ cliente, tarifas, onClose, onGuardar }) {
+export function ClienteModal({ cliente, tarifas, onClose, onGuardar, onCancelar }) {
   const [nombre, setNombre] = useState(cliente?.nombre ?? "");
+  const [direccion, setDireccion] = useState(cliente?.direccion ?? "");
+  const [telefono, setTelefono] = useState(cliente?.telefono ?? "");
   const [tarifaLimpieza, setTarifaLimpieza] = useState(cliente?.tarifaLimpieza?.id ?? "");
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState("");
@@ -22,9 +24,25 @@ export function ClienteModal({ cliente, tarifas, onClose, onGuardar }) {
     setEnviando(true);
     setError("");
     try {
-      await onGuardar({ nombre, tarifaLimpieza });
+      await onGuardar({ nombre, direccion, telefono, tarifaLimpieza });
     } catch (err) {
       setError(err.response?.data?.error || "No se pudo guardar el cliente.");
+      setEnviando(false);
+    }
+  };
+
+  const handleCancelarCliente = async () => {
+    const confirmado = window.confirm(
+      `¿Cancelar a ${cliente.nombre}? Va a dejar de aparecer en la lista.`
+    );
+    if (!confirmado) return;
+
+    setEnviando(true);
+    setError("");
+    try {
+      await onCancelar(cliente.id);
+    } catch (err) {
+      setError(err.response?.data?.error || "No se pudo cancelar el cliente.");
       setEnviando(false);
     }
   };
@@ -40,6 +58,18 @@ export function ClienteModal({ cliente, tarifas, onClose, onGuardar }) {
             value={nombre}
             onChange={(event) => setNombre(event.target.value)}
             required
+          />
+          <input
+            type="text"
+            placeholder="Dirección (opcional)"
+            value={direccion}
+            onChange={(event) => setDireccion(event.target.value)}
+          />
+          <input
+            type="text"
+            placeholder="Teléfono (opcional)"
+            value={telefono}
+            onChange={(event) => setTelefono(event.target.value)}
           />
           <select
             value={tarifaLimpieza}
@@ -62,6 +92,16 @@ export function ClienteModal({ cliente, tarifas, onClose, onGuardar }) {
             </button>
           </div>
         </form>
+        {cliente && (
+          <button
+            type="button"
+            className="danger modal-cancelar-cliente"
+            onClick={handleCancelarCliente}
+            disabled={enviando}
+          >
+            Cancelar cliente
+          </button>
+        )}
       </div>
     </div>
   );

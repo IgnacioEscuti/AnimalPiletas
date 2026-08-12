@@ -10,7 +10,7 @@ export class UsoPastillasService {
     this.clienteRepository = clienteRepository;
   }
 
-  async registrarUso(clienteId, cantidad) {
+  async registrarUso(clienteId, cantidad, empleado = "") {
     let cliente;
     try {
       cliente = await this.clienteRepository.findById(clienteId);
@@ -30,6 +30,7 @@ export class UsoPastillasService {
       return await this.repository.upsertPorClienteYFecha(clienteId, hoyNormalizado(), {
         cantidad,
         precioUnitarioUsado: precioPastillas.precio,
+        empleado,
       });
     } catch (error) {
       handleMongooseError(error);

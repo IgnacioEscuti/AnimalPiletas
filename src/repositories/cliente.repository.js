@@ -15,6 +15,14 @@ export class ClienteRepository {
     return this.dao.find();
   }
 
+  async findActivos() {
+    return this.dao.findActivos();
+  }
+
+  async findOne(filtros) {
+    return this.dao.findOne(filtros);
+  }
+
   async findById(id) {
     return this.dao.findById(id);
   }

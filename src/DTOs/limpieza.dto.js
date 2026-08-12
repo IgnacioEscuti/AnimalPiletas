@@ -7,5 +7,6 @@ export class LimpiezaDTO {
     this.precioUnitarioUsado = limpieza.precioUnitarioUsado;
     this.extra = limpieza.extra;
     this.realizada = limpieza.realizada;
+    this.empleado = limpieza.empleado;
   }
 }

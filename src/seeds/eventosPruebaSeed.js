@@ -5,7 +5,7 @@ import { tarifaLimpiezaModel } from "../models/tarifaLimpieza.model.js";
 import { precioPastillasModel } from "../models/precioPastillas.model.js";
 import { limpiezaModel } from "../models/limpieza.model.js";
 import { usoPastillasModel } from "../models/usoPastillas.model.js";
-import { usoProductoModel } from "../models/usoProducto.model.js";
+import { usoExtraModel } from "../models/usoExtra.model.js";
 import { hoyNormalizado } from "../utils/fecha.utils.js";
 
 // Carga clientes y eventos de prueba repartidos en al menos 3 semanas y
@@ -70,10 +70,10 @@ const seedEventosPrueba = async () => {
       { upsert: true, runValidators: true, returnDocument: "after" }
     );
 
-  const upsertProducto = (cliente, fecha, nombreProducto, precioUnitario) =>
-    usoProductoModel.findOneAndUpdate(
+  const upsertExtra = (cliente, fecha, nombreExtra, precioUnitario) =>
+    usoExtraModel.findOneAndUpdate(
       { cliente, fecha },
-      { nombreProducto, precioUnitario },
+      { nombreExtra, precioUnitario },
       { upsert: true, runValidators: true, returnDocument: "after" }
     );
 
@@ -83,27 +83,27 @@ const seedEventosPrueba = async () => {
   await upsertLimpieza(C, fechas.semanaActual, false); // no realizada: no debe sumar
   await upsertPastillas(A, fechas.semanaActual, 3);
   await upsertPastillas(B, fechas.semanaActual, 2);
-  await upsertProducto(A, fechas.semanaActual, "Cloro", 3000);
-  await upsertProducto(B, fechas.semanaActual, "Algicida", 4000);
+  await upsertExtra(A, fechas.semanaActual, "Cloro", 3000);
+  await upsertExtra(B, fechas.semanaActual, "Algicida", 4000);
 
   // Semana pasada
   await upsertLimpieza(A, fechas.semanaPasada, true);
   await upsertLimpieza(C, fechas.semanaPasada, true);
   await upsertPastillas(C, fechas.semanaPasada, 4);
-  await upsertProducto(A, fechas.semanaPasada, "Cloro", 3000);
+  await upsertExtra(A, fechas.semanaPasada, "Cloro", 3000);
 
   // Tres semanas atrás
   await upsertLimpieza(B, fechas.tresSemanasAtras, true);
   await upsertPastillas(A, fechas.tresSemanasAtras, 1);
-  await upsertProducto(C, fechas.tresSemanasAtras, "Algicida", 4000);
+  await upsertExtra(C, fechas.tresSemanasAtras, "Algicida", 4000);
 
   // Mes pasado
   await upsertLimpieza(A, fechas.mesPasado, true);
   await upsertLimpieza(B, fechas.mesPasado, true);
   await upsertLimpieza(C, fechas.mesPasado, true);
   await upsertPastillas(B, fechas.mesPasado, 5);
-  await upsertProducto(B, fechas.mesPasado, "Cloro", 3000);
-  await upsertProducto(C, fechas.mesPasado, "Pastilla multiacción", 6000);
+  await upsertExtra(B, fechas.mesPasado, "Cloro", 3000);
+  await upsertExtra(C, fechas.mesPasado, "Pastilla multiacción", 6000);
 
   console.log("Eventos de prueba cargados correctamente. Fechas usadas:");
   for (const [clave, fecha] of Object.entries(fechas)) {

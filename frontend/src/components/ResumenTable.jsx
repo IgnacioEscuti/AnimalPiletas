@@ -1,8 +1,8 @@
 import { useState } from "react";
 
-function listaProductos(productos) {
-  if (productos.length === 0) return "—";
-  return productos.map(({ nombre, cantidad }) => `${nombre} x${cantidad}`).join(", ");
+function listaExtras(extras) {
+  if (extras.length === 0) return "—";
+  return extras.map(({ nombre, cantidad }) => `${nombre} x${cantidad}`).join(", ");
 }
 
 function textoParaCopiar(fila, periodo) {
@@ -11,8 +11,8 @@ function textoParaCopiar(fila, periodo) {
     `Limpieza: ${fila.limpieza.cantidad} x $${fila.limpieza.precio}`,
     `Pastillas: ${fila.pastillas.cantidad} x $${fila.pastillas.precio}`,
   ];
-  if (fila.producto.productos.length > 0) {
-    lineas.push(`Producto: ${listaProductos(fila.producto.productos)}`);
+  if (fila.extra.extras.length > 0) {
+    lineas.push(`Extra: ${listaExtras(fila.extra.extras)}`);
   }
   lineas.push(`*Total: $${fila.totalGeneral}*`);
   return lineas.join("\n");
@@ -42,7 +42,7 @@ export function ResumenTable({ filas, totales, periodo }) {
           <th>Cliente</th>
           <th>Limpieza</th>
           <th>Pastillas</th>
-          <th>Producto</th>
+          <th>Extra</th>
           <th>Total</th>
           <th></th>
         </tr>
@@ -60,8 +60,8 @@ export function ResumenTable({ filas, totales, periodo }) {
               <div className="row-price">${fila.pastillas.precio}</div>
             </td>
             <td>
-              <div>{listaProductos(fila.producto.productos)}</div>
-              <div className="row-price">${fila.producto.precio}</div>
+              <div>{listaExtras(fila.extra.extras)}</div>
+              <div className="row-price">${fila.extra.precio}</div>
             </td>
             <td>
               <strong>${fila.totalGeneral}</strong>
@@ -81,7 +81,7 @@ export function ResumenTable({ filas, totales, periodo }) {
           </td>
           <td>{totales.totalLimpiezas}</td>
           <td>{totales.totalPastillas}</td>
-          <td>{listaProductos(totales.totalProductos)}</td>
+          <td>{listaExtras(totales.totalExtras)}</td>
           <td>—</td>
           <td></td>
         </tr>

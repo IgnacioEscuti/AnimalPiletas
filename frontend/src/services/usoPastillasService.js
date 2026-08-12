@@ -6,7 +6,7 @@ export const getUsosPastillasDeHoy = async () => {
   return data.usosPastillas;
 };
 
-export const registrarUsoPastillas = async (clienteId, cantidad) => {
-  const { data } = await api.post("/usos-pastillas", { clienteId, cantidad });
+export const registrarUsoPastillas = async (clienteId, cantidad, empleado) => {
+  const { data } = await api.post("/usos-pastillas", { clienteId, cantidad, empleado });
   return data.usoPastillas;
 };

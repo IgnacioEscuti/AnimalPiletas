@@ -1,6 +1,6 @@
 ---
 name: run-animalpiletas
-description: Build, run, and drive AnimalPiletas (Express API + React/Vite frontend). Use when asked to start the app, run the backend or frontend, seed tarifas, take a screenshot of the UI, or click through a CRUD flow (clientes, productos, tarifas de limpieza).
+description: Build, run, and drive AnimalPiletas (Express API + React/Vite frontend). Use when asked to start the app, run the backend or frontend, seed tarifas, take a screenshot of the UI, or click through a CRUD flow (clientes, extras, tarifas de limpieza).
 ---
 
 AnimalPiletas is a backend (Express + MongoDB, at repo root) and a
@@ -52,7 +52,7 @@ matters for a production bundle, not for driving the app locally.)
 
 ```bash
 npm start &                                        # backend → :3000
-timeout 30 bash -c 'until curl -sf http://localhost:3000/api/productos >/dev/null; do sleep 1; done'
+timeout 30 bash -c 'until curl -sf http://localhost:3000/api/clientes >/dev/null; do sleep 1; done'
 
 (cd frontend && npm run dev) &                     # frontend → :5173
 timeout 30 bash -c 'until curl -sf http://localhost:5173 >/dev/null; do sleep 1; done'
@@ -63,11 +63,11 @@ timeout 30 bash -c 'until curl -sf http://localhost:5173 >/dev/null; do sleep 1;
 ```bash
 node .claude/skills/run-animalpiletas/driver.mjs <<'EOF'
 nav http://localhost:5173
-wait-for text=Productos
+wait-for text=Clientes
 screenshot 01-inicial
-fill input[placeholder="Nombre del producto"] :: Pastillas de cloro
-fill input[placeholder="Precio unitario"] :: 1200
-click button:has-text("Agregar")
+fill input[placeholder="Extra"] :: Pastillas de cloro
+fill input[placeholder="Precio"] :: 1200
+click h2:has-text("Clientes")
 wait-for text=Pastillas de cloro
 screenshot 02-creado
 quit
@@ -83,7 +83,7 @@ Driver commands:
 | `nav <url>` | navigate |
 | `wait-for text=<text>` or `wait-for <css-selector>` | wait up to 15s for an element |
 | `click <selector>` or `click <scope> :: <selector>` | click, optionally scoped to a container (use scoping whenever the plain selector would match more than one element — e.g. every row has an "Editar" button) |
-| `fill <selector> :: <value>` or `fill <scope> :: <selector> :: <value>` | fill an input. `::` (with surrounding spaces) is the separator, so it never collides with selectors that contain spaces, like `input[placeholder="Nombre del producto"]` |
+| `fill <selector> :: <value>` or `fill <scope> :: <selector> :: <value>` | fill an input. `::` (with surrounding spaces) is the separator, so it never collides with selectors that contain spaces, like `input[placeholder="Precio unitario"]` |
 | `screenshot [name]` | full-page PNG, saved under `screenshots/` |
 | `text` | prints `document.body.textContent`, useful for asserting state without a screenshot |
 | `console` / `console --errors` | dumps captured browser console messages (JSON) |
@@ -127,15 +127,12 @@ No automated test suite yet — verification so far has been manual
   `netstat -ano | grep :3000` before concluding a restart picked up
   new code, and kill the PID directly if something's still listening.
 - **Unscoped selectors that "should" be unique often aren't.** Every
-  row in both the Productos list and the Tarifas list renders an
-  "Editar" button, so `li.row :: button:has-text("Editar")` resolves
-  to 4 elements and throws a strict-mode violation. Scope by content
-  instead: `` li.row:has-text("Pastillas de cloro") :: button:has-text("Editar") ``.
-  "Eliminar" and "Guardar", by contrast, only ever exist on the one
-  row involved (products have delete, tarifas don't; only the row
-  being edited shows "Guardar"), so those are safe unscoped.
+  row in both the Clientes table and the Tarifas list renders an
+  "Editar" button, so `tr :: button:has-text("Editar")` resolves
+  to several elements and throws a strict-mode violation. Scope by content
+  instead: `` tr:has-text("Cliente Prueba A") :: button:has-text("Editar") ``.
 - **Attribute selectors with spaces break naive `split(" ")` parsing.**
-  `input[placeholder="Nombre del producto"]` contains spaces inside
+  `input[placeholder="Precio unitario"]` contains spaces inside
   the selector itself, so `fill <selector> <value>` (splitting on the
   first space) mis-parses the selector. The driver requires ` :: ` as
   the explicit separator for exactly this reason.

@@ -5,5 +5,6 @@ export class UsoPastillasDTO {
     this.fecha = usoPastillas.fecha;
     this.cantidad = usoPastillas.cantidad;
     this.precioUnitarioUsado = usoPastillas.precioUnitarioUsado;
+    this.empleado = usoPastillas.empleado;
   }
 }

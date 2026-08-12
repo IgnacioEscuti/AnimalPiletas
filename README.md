@@ -1,6 +1,6 @@
 # AnimalPiletas
 
-App de gestión para una empresa de mantenimiento de piletas: clientes, tarifas de limpieza, y registro diario de limpieza, pastillas y productos, con (a futuro) resumen mensual por cliente.
+App de gestión para una empresa de mantenimiento de piletas: clientes, tarifas de limpieza, y registro diario de limpieza, pastillas y extras, con (a futuro) resumen mensual por cliente.
 
 ## Stack
 
@@ -42,7 +42,7 @@ AnimalPiletas/
 - **Cliente**: nombre, tarifa de limpieza asignada por defecto.
 - **TarifaLimpieza**: catálogo fijo (bajo / medio / alto), se carga una sola vez con el seed.
 - **PrecioPastillas**: catálogo de un solo documento con el precio fijo de pastillas.
-- **Limpieza / UsoPastillas / UsoProducto**: un documento por cliente y por día (cargar de nuevo el mismo día actualiza ese documento en vez de duplicarlo), con el precio congelado al momento de la carga para no afectar eventos pasados si cambia una tarifa.
+- **Limpieza / UsoPastillas / UsoExtra**: un documento por cliente y por día (cargar de nuevo el mismo día actualiza ese documento en vez de duplicarlo), con el precio congelado al momento de la carga para no afectar eventos pasados si cambia una tarifa.
 
 El detalle completo del modelo y el orden de funciones planificado está en [PLAN.md](PLAN.md).
 
@@ -62,8 +62,8 @@ El detalle completo del modelo y el orden de funciones planificado está en [PLA
 | Limpiezas | GET | `/api/limpiezas?fecha=YYYY-MM-DD` |
 | Usos de pastillas | POST | `/api/usos-pastillas` |
 | Usos de pastillas | GET | `/api/usos-pastillas?fecha=YYYY-MM-DD` |
-| Usos de producto | POST | `/api/usos-producto` |
-| Usos de producto | GET | `/api/usos-producto?fecha=YYYY-MM-DD` |
+| Usos de extra | POST | `/api/usos-extra` |
+| Usos de extra | GET | `/api/usos-extra?fecha=YYYY-MM-DD` |
 
 ## Cómo correr el proyecto
 

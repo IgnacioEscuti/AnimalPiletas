@@ -1,6 +1,6 @@
 import { Schema, model } from "mongoose";
 
-const usoProductoSchema = new Schema(
+const usoExtraSchema = new Schema(
   {
     cliente: {
       type: Schema.Types.ObjectId,
@@ -11,7 +11,7 @@ const usoProductoSchema = new Schema(
       type: Date,
       required: true,
     },
-    nombreProducto: {
+    nombreExtra: {
       type: String,
       required: true,
       trim: true,
@@ -21,8 +21,13 @@ const usoProductoSchema = new Schema(
       required: true,
       min: 0,
     },
+    empleado: {
+      type: String,
+      trim: true,
+      default: "",
+    },
   },
   { timestamps: true }
 );
 
-export const usoProductoModel = model("usoProducto", usoProductoSchema);
+export const usoExtraModel = model("usoExtra", usoExtraSchema);

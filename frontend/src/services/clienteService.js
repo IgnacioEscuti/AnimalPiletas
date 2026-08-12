@@ -14,3 +14,8 @@ export const actualizarCliente = async (id, cliente) => {
   const { data } = await api.put(`/clientes/${id}`, cliente);
   return data.cliente;
 };
+
+export const cancelarCliente = async (id) => {
+  const { data } = await api.put(`/clientes/${id}`, { status: "cancelado" });
+  return data.cliente;
+};

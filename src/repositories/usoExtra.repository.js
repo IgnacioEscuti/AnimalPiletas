@@ -1,8 +1,8 @@
-import { UsoProductoDAO } from "../DAOs/usoProducto.dao.js";
+import { UsoExtraDAO } from "../DAOs/usoExtra.dao.js";
 
-const usoProductoDAO = new UsoProductoDAO();
+const usoExtraDAO = new UsoExtraDAO();
 
-export class UsoProductoRepository {
+export class UsoExtraRepository {
   constructor(dao) {
     this.dao = dao;
   }
@@ -16,4 +16,4 @@ export class UsoProductoRepository {
   }
 }
 
-export const usoProductoRepository = new UsoProductoRepository(usoProductoDAO);
+export const usoExtraRepository = new UsoExtraRepository(usoExtraDAO);

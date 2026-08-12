@@ -5,7 +5,7 @@ import tarifaLimpiezaRoutes from "./routes/tarifaLimpieza.routes.js";
 import precioPastillasRoutes from "./routes/precioPastillas.routes.js";
 import limpiezaRoutes from "./routes/limpieza.routes.js";
 import usoPastillasRoutes from "./routes/usoPastillas.routes.js";
-import usoProductoRoutes from "./routes/usoProducto.routes.js";
+import usoExtraRoutes from "./routes/usoExtra.routes.js";
 import resumenRoutes from "./routes/resumen.routes.js";
 import { errorHandler } from "./middlewares/error.middlewares.js";
 import { env } from "./config/env.js";
@@ -37,7 +37,7 @@ app.use("/api/tarifas-limpieza", tarifaLimpiezaRoutes);
 app.use("/api/precio-pastillas", precioPastillasRoutes);
 app.use("/api/limpiezas", limpiezaRoutes);
 app.use("/api/usos-pastillas", usoPastillasRoutes);
-app.use("/api/usos-producto", usoProductoRoutes);
+app.use("/api/usos-extra", usoExtraRoutes);
 app.use("/api/resumen", resumenRoutes);
 
 app.use(errorHandler);

@@ -3,8 +3,8 @@ import { LimpiezaDTO } from "../DTOs/limpieza.dto.js";
 
 export async function createLimpieza(req, res, next) {
   try {
-    const { clienteId, realizada, extra } = req.body;
-    const limpieza = await limpiezaService.registrarLimpieza(clienteId, realizada, extra);
+    const { clienteId, realizada, extra, empleado } = req.body;
+    const limpieza = await limpiezaService.registrarLimpieza(clienteId, realizada, extra, empleado);
     res.status(201).json({ limpieza: new LimpiezaDTO(limpieza) });
   } catch (error) {
     next(error);

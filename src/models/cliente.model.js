@@ -7,6 +7,16 @@ const clienteSchema = new Schema(
       required: true,
       trim: true,
     },
+    direccion: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+    telefono: {
+      type: String,
+      trim: true,
+      default: "",
+    },
     tarifaLimpieza: {
       type: Schema.Types.ObjectId,
       ref: "tarifaLimpieza",
@@ -16,6 +26,11 @@ const clienteSchema = new Schema(
       type: String,
       enum: ["1", "2", "todas"],
       default: "todas",
+    },
+    status: {
+      type: String,
+      enum: ["activo", "cancelado"],
+      default: "activo",
     },
   },
   { timestamps: true }

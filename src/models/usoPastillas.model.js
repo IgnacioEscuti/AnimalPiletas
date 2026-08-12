@@ -21,6 +21,11 @@ const usoPastillasSchema = new Schema(
       required: true,
       min: 0,
     },
+    empleado: {
+      type: String,
+      trim: true,
+      default: "",
+    },
   },
   { timestamps: true }
 );

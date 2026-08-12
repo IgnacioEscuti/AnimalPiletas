@@ -6,7 +6,7 @@ export const getLimpiezasDeHoy = async () => {
   return data.limpiezas;
 };
 
-export const registrarLimpieza = async (clienteId, realizada) => {
-  const { data } = await api.post("/limpiezas", { clienteId, realizada });
+export const registrarLimpieza = async (clienteId, realizada, empleado) => {
+  const { data } = await api.post("/limpiezas", { clienteId, realizada, empleado });
   return data.limpieza;
 };

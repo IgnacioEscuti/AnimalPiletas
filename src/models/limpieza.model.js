@@ -30,6 +30,11 @@ const limpiezaSchema = new Schema(
       type: Boolean,
       required: true,
     },
+    empleado: {
+      type: String,
+      trim: true,
+      default: "",
+    },
   },
   { timestamps: true }
 );

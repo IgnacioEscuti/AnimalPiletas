@@ -9,9 +9,18 @@ App para gestionar clientes de una empresa de mantenimiento de piletas. Se const
 ### Cliente
 ```
 nombre: string
+direccion: string (opcional)
+telefono: string (opcional)
 tarifaLimpieza: ObjectId → ref TarifaLimpieza (tarifa asignada por defecto)
 semana: "1" | "2" | "todas" (con qué frecuencia se atiende)
+status: "activo" | "cancelado" (default "activo")
 ```
+
+**Dirección y teléfono en la pantalla de Cliente:** no van como columnas propias en la tabla — al lado del nombre hay una flechita (chevron) que expande/colapsa una fila debajo mostrando la dirección y el teléfono de ese cliente. Colapsado por defecto, para no ensanchar más la tabla.
+
+**Cancelar un cliente (soft-delete):** desde el modal de editar cliente, un botón para pasar su `status` a "cancelado". No se borra nada de la base — los eventos históricos (Limpieza, UsoPastillas, UsoExtra) siguen intactos y los resúmenes de períodos pasados los siguen mostrando igual, porque el resumen consulta esos eventos por fecha, no por el status actual del cliente. Un cliente cancelado desaparece por completo de la pantalla de Cliente — ni el toggle "ver todos" lo muestra, no hace falta ninguna pantalla nueva para "ver cancelados".
+
+**Reactivar:** si al crear un cliente nuevo el nombre coincide exactamente (sin importar mayúsculas/espacios) con uno ya cancelado, en vez de crear un duplicado se reactiva ese registro existente (status vuelve a "activo") con los datos nuevos que se cargaron.
 
 ### TarifaLimpieza (catálogo fijo: bajo / medio / alto)
 ```
@@ -27,6 +36,7 @@ fecha: Date
 tarifa: ObjectId → ref TarifaLimpieza (copiada de la tarifa del cliente al momento de crear el evento)
 precioUnitarioUsado: number (precio de esa tarifa, congelado en ese momento)
 extra: number (opcional, default 0)
+empleado: string (opcional, nombre de quién hizo el trabajo — puede quedar en blanco)
 ```
 
 ### UsoPastillas (un documento por cada carga de pastillas)
@@ -35,17 +45,21 @@ cliente: ObjectId → ref Cliente
 fecha: Date
 cantidad: number
 precioUnitarioUsado: number (precio fijo de pastillas, congelado en ese momento)
+empleado: string (opcional, nombre de quién hizo el trabajo — puede quedar en blanco)
 ```
 
-### UsoProducto (un documento por cada carga de un producto)
+### UsoExtra (un documento por cada carga de un extra — antes llamado "Producto")
 ```
 cliente: ObjectId → ref Cliente
 fecha: Date
-nombreProducto: string (cargado a mano, sin catálogo)
+nombreExtra: string (cargado a mano, sin catálogo)
 precioUnitario: number (cargado a mano en el momento, ya representa el total de esa carga)
+empleado: string (opcional, nombre de quién hizo el trabajo — puede quedar en blanco)
 ```
 
-**Por qué se congela el precio de la tarifa en Limpieza:** si más adelante se cambia el precio de una tarifa, los eventos ya cargados no se tienen que ver afectados. El precio histórico queda fijo tal cual era el día que se cargó. Esto no aplica a Producto, que ya se carga a mano cada vez.
+**El campo `empleado`:** en la pantalla de Cliente aparece una sola vez por fila (un cuarto campo, al mismo nivel que Limpieza/Pastillas/Extras) — un texto libre, opcional. Al guardar, ese mismo valor se copia a todos los eventos que se generen ese día para ese cliente (Limpieza, UsoPastillas, UsoExtra), sin importar si quedó vacío.
+
+**Por qué se congela el precio de la tarifa en Limpieza:** si más adelante se cambia el precio de una tarifa, los eventos ya cargados no se tienen que ver afectados. El precio histórico queda fijo tal cual era el día que se cargó. Esto no aplica a Extra, que ya se carga a mano cada vez.
 
 ## Cómo funciona el filtro de semana en la pantalla de Cliente
 
@@ -59,7 +73,7 @@ El resumen (semanal y mensual) no necesita ninguna lógica nueva por esto: sigue
 
 ## Cómo funciona el resumen (semanal y mensual)
 
-No existe una colección "resumen" que se cree a mano — se calcula consultando las 3 colecciones de eventos (Limpieza, UsoPastillas, UsoProducto) filtrando por rango de fechas. La función es genérica: recibe un `inicio` y un `fin`, y no le importa si ese rango es una semana o un mes.
+No existe una colección "resumen" que se cree a mano — se calcula consultando las 3 colecciones de eventos (Limpieza, UsoPastillas, UsoExtra) filtrando por rango de fechas. La función es genérica: recibe un `inicio` y un `fin`, y no le importa si ese rango es una semana o un mes.
 
 ```js
 // Mensual: 1° del mes hasta 1° del mes siguiente
@@ -71,7 +85,7 @@ const fin = new Date(anio, mes, 1);
 
 // Limpieza.find({ fecha: { $gte: inicio, $lt: fin } })
 // UsoPastillas.find({ fecha: { $gte: inicio, $lt: fin } })
-// UsoProducto.find({ fecha: { $gte: inicio, $lt: fin } })
+// UsoExtra.find({ fecha: { $gte: inicio, $lt: fin } })
 ```
 
 Agrupando por cliente y sumando los totales de cada colección se arma el total por cliente en ese período. La misma función sirve para el resumen semanal, el mensual, un período ya cerrado, o uno en curso — no hace falta lógica distinta para cada caso, solo el rango de fechas cambia.
@@ -79,12 +93,12 @@ Agrupando por cliente y sumando los totales de cada colección se arma el total 
 **Qué muestra cada fila (por cliente):** para cada una de las 3 categorías se muestra la cantidad al lado del precio:
 - **Limpieza:** cantidad = cuántas limpiezas con `realizada: true` hubo en el período (cada una suma 1) · precio = suma de `precioUnitarioUsado + extra` de esos eventos
 - **Pastillas:** cantidad = suma del campo `cantidad` de todos los eventos UsoPastillas del período · precio = suma de `cantidad × precioUnitarioUsado`
-- **Producto:** en vez de un solo número, se lista el nombre de cada producto cargado con cuántas veces apareció (ej: "Cloro x2, Algicida x1") — agrupando los eventos UsoProducto del cliente por `nombreProducto` · precio = suma de `precioUnitario` de todos esos eventos
+- **Extras:** en vez de un solo número, se lista el nombre de cada extra cargado con cuántas veces apareció (ej: "Cloro x2, Algicida x1") — agrupando los eventos UsoExtra del cliente por `nombreExtra` · precio = suma de `precioUnitario` de todos esos eventos
 
 **Fila de totales al pie de toda la lista** (solo cantidades, sin plata):
 - Total limpiezas: suma de limpiezas realizadas de todos los clientes (cada una suma 1)
 - Total pastillas: suma de las cantidades de pastillas de todos los clientes
-- Total productos: igual que en la fila de cliente pero agregando entre todos — desglosado por nombre de producto (ej: "Cloro: 15, Algicida: 8"), sumando las apariciones de cada nombre en todos los clientes del período
+- Total extras: igual que en la fila de cliente pero agregando entre todos — desglosado por nombre de extra (ej: "Cloro: 15, Algicida: 8"), sumando las apariciones de cada nombre en todos los clientes del período
 
 **Navegación entre períodos:** el endpoint recibe un tipo (`semanal` o `mensual`) y una fecha de referencia cualquiera dentro del período a mostrar. A partir de esa fecha calcula el inicio/fin (lunes-a-lunes o 1°-a-1°) y corre la misma consulta. Navegar hacia atrás o adelante es mandar una fecha de referencia distinta — un solo endpoint sirve para el período actual y para cualquier período pasado. En el frontend: dos pestañas (Semanal / Mensual), flechas anterior/siguiente, un texto que muestra qué período se está viendo, y un selector de fecha nativo (`<input type="date">`) para saltar directo a cualquier período de cualquier año sin tener que ir clickeando flecha por flecha — al elegir una fecha, se manda como fecha de referencia y se recalcula el período que la contiene.
 
@@ -98,10 +112,10 @@ Agrupando por cliente y sumando los totales de cada colección se arma el total 
 
 1. ✅ CRUD de Cliente (con tarifa de limpieza asignada) — hecho en Función 1
 2. ✅ Catálogo de TarifaLimpieza: seed de las 3 (bajo/medio/alto) + endpoint/formulario para editar precio — hecho entre Función 1 y 2
-3. ✅ Pantalla de Cliente: lista con buscador, alta/edición vía modal, y en cada fila: marcar limpieza del día (tick/cruz), cantidad de pastillas, y nombre+precio de producto (carga manual) — hecho en Función 3
+3. ✅ Pantalla de Cliente: lista con buscador, alta/edición vía modal, y en cada fila: marcar limpieza del día (tick/cruz), cantidad de pastillas, y nombre+precio de extra (carga manual, antes llamado "producto") — hecho en Función 3
 4. ✅ Resumen (semanal y mensual, por cliente, con cantidad al lado del precio y totales al pie) — hecho en Función 4
 5. ✅ Campo semana en Cliente + filtro automático en la pantalla + toggle "ver todos" — hecho en Función 5
-6. Responsive (mobile) — pendiente, dejado para el final
+6. Responsive (mobile) — pendiente, dejado para el final. Incluye: layout mobile de las tablas anchas (Cliente, Resumen), manifest.json + apple-touch-icon para PWA en iOS, y un service worker básico para que Chrome/Android ofrezca instalar la PWA de forma proactiva
 7. Login con roles (él carga, el jefe solo mira) — pendiente, dejado para el final
 
 App ya deployada: frontend en Vercel, backend en Render, base en MongoDB Atlas. Instalada como PWA en iPhone.
