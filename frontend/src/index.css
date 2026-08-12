@@ -261,9 +261,9 @@ li.row {
 }
 
 .semana-select {
-  width: auto;
+  width: 76px;
   min-width: 0;
-  padding: 8px 10px;
+  padding: 6px 6px;
   font-size: 14px;
   font-family: inherit;
   color: var(--text);
@@ -280,7 +280,7 @@ li.row {
 table {
   width: 100%;
   border-collapse: separate;
-  border-spacing: 0 8px;
+  border-spacing: 0 6px;
 }
 
 thead th {
@@ -290,7 +290,7 @@ thead th {
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.02em;
-  padding: 0 12px 10px;
+  padding: 0 8px 10px;
 }
 
 tbody tr {
@@ -299,7 +299,7 @@ tbody tr {
 
 tbody td {
   background: var(--bg);
-  padding: 14px 12px;
+  padding: 12px 8px;
   vertical-align: middle;
 }
 
@@ -338,7 +338,7 @@ tfoot tr td:last-child {
 
 .limpieza-buttons {
   display: flex;
-  gap: 6px;
+  gap: 3px;
 }
 
 .icon-button {
@@ -369,30 +369,42 @@ tfoot tr td:last-child {
 }
 
 .pastillas-input {
-  width: 80px;
+  width: 56px;
   min-width: 0;
   padding: 8px 10px;
 }
 
 .extra-inputs {
   display: flex;
-  gap: 6px;
   align-items: center;
+  gap: 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  overflow: hidden;
+  width: fit-content;
 }
 
 .extra-inputs input {
   min-width: 0;
   padding: 8px 10px;
   font-size: 14px;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+}
+
+.extra-inputs input:focus {
+  background: var(--surface);
 }
 
 .extra-inputs input[type="text"] {
-  flex: 2;
+  width: 88px;
+  border-right: 1px solid var(--border);
 }
 
 .extra-inputs input[type="number"] {
-  flex: 1;
-  width: 80px;
+  width: 60px;
 }
 
 .extra-hoy {
@@ -402,7 +414,7 @@ tfoot tr td:last-child {
 }
 
 .empleado-input {
-  width: 130px;
+  width: 100px;
   min-width: 0;
   padding: 8px 10px;
   font-size: 14px;
