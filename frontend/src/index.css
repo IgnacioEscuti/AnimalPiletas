@@ -575,3 +575,10 @@ button.modal-cancelar-cliente:hover {
   padding: 8px 10px;
   font-size: 14px;
 }
+
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
