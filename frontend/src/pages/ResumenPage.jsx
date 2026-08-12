@@ -118,7 +118,13 @@ export function ResumenPage() {
       {error && <p className="error-message">{error}</p>}
 
       {resumen && (
-        <ResumenTable filas={filasFiltradas} totales={resumen.totales} periodo={periodo} />
+        <ResumenTable
+          filas={filasFiltradas}
+          totales={resumen.totales}
+          periodo={periodo}
+          tab={tab}
+          inicioISO={resumen.inicio}
+        />
       )}
     </section>
   );

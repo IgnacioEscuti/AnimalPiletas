@@ -1,11 +1,16 @@
 import { useState } from "react";
+import { MESES } from "../utils/fecha.js";
 
 function listaExtras(extras) {
   if (extras.length === 0) return "—";
   return extras.map(({ nombre, cantidad }) => `${nombre} x${cantidad}`).join(", ");
 }
 
-function textoParaCopiar(fila, periodo) {
+function capitalizar(palabra) {
+  return palabra.charAt(0).toUpperCase() + palabra.slice(1);
+}
+
+function textoParaCopiarSemanal(fila, periodo) {
   const lineas = [
     `*Resumen de ${fila.clienteNombre} — ${periodo}*`,
     `Limpieza: ${fila.limpieza.cantidad} x $${fila.limpieza.precio}`,
@@ -18,12 +23,42 @@ function textoParaCopiar(fila, periodo) {
   return lineas.join("\n");
 }
 
-export function ResumenTable({ filas, totales, periodo }) {
+// Solo el número de día (el mes ya va arriba, en el saludo), en orden
+// cronológico — las fechas ya llegan ordenadas desde el backend.
+function diasDeLimpieza(fechas) {
+  return fechas.map((fecha) => new Date(fecha).getDate()).join("/");
+}
+
+function textoParaCopiarMensual(fila, inicioISO) {
+  const nombreMes = capitalizar(MESES[new Date(inicioISO).getMonth()]);
+  const lineas = ["Buenas!", `En ${nombreMes} fuimos`];
+
+  if (fila.limpieza.cantidad > 0) {
+    lineas.push(
+      `${fila.limpieza.cantidad} veces $${fila.limpieza.precio} (${diasDeLimpieza(fila.limpieza.fechas)})`
+    );
+  }
+  if (fila.pastillas.cantidad > 0) {
+    lineas.push(`${fila.pastillas.cantidad} pastillas $${fila.pastillas.precio}`);
+  }
+  if (fila.extra.extras.length > 0) {
+    lineas.push(`${listaExtras(fila.extra.extras)} $${fila.extra.precio}`);
+  }
+  lineas.push(`Total $${fila.totalGeneral}`);
+  lineas.push("Avíseme cuando lo podamos cobrar , saludos");
+  return lineas.join("\n");
+}
+
+export function ResumenTable({ filas, totales, periodo, tab, inicioISO }) {
   const [copiadoId, setCopiadoId] = useState(null);
 
   const handleCopiar = async (fila) => {
     try {
-      await navigator.clipboard.writeText(textoParaCopiar(fila, periodo));
+      const texto =
+        tab === "mensual"
+          ? textoParaCopiarMensual(fila, inicioISO)
+          : textoParaCopiarSemanal(fila, periodo);
+      await navigator.clipboard.writeText(texto);
       setCopiadoId(fila.clienteId);
       setTimeout(() => setCopiadoId(null), 1200);
     } catch {

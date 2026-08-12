@@ -8,6 +8,7 @@ function datosVacios() {
   return {
     limpiezaCantidad: 0,
     limpiezaPrecio: 0,
+    limpiezaFechas: [],
     pastillasCantidad: 0,
     pastillasPrecio: 0,
     extras: new Map(),
@@ -53,6 +54,7 @@ export class ResumenService {
         const datos = datosDe(limpieza.cliente);
         datos.limpiezaCantidad += 1;
         datos.limpiezaPrecio += limpieza.precioUnitarioUsado + limpieza.extra;
+        datos.limpiezaFechas.push(limpieza.fecha);
       }
     }
 
@@ -79,7 +81,11 @@ export class ResumenService {
       return {
         clienteId: cliente.id,
         clienteNombre: cliente.nombre,
-        limpieza: { cantidad: datos.limpiezaCantidad, precio: datos.limpiezaPrecio },
+        limpieza: {
+          cantidad: datos.limpiezaCantidad,
+          precio: datos.limpiezaPrecio,
+          fechas: [...datos.limpiezaFechas].sort((a, b) => a - b),
+        },
         pastillas: { cantidad: datos.pastillasCantidad, precio: datos.pastillasPrecio },
         extra,
         totalGeneral,

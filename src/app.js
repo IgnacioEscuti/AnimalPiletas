@@ -12,9 +12,6 @@ import { env } from "./config/env.js";
 
 const app = express();
 
-// FRONTEND_URLS: lista de orígenes permitidos separados por coma (ej.
-// "https://animal-piletas.vercel.app,http://localhost:5173"). Solo se
-// acepta un origin si está exactamente en esa lista.
 const origenesPermitidos = env.FRONTEND_URLS
   ? env.FRONTEND_URLS.split(",").map((url) => url.trim())
   : [];
