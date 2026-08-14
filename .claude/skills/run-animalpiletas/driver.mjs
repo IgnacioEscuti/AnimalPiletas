@@ -72,6 +72,31 @@ async function handle(line) {
         console.log(`OK fill ${arg}`);
         break;
       }
+      case "select": {
+        // "select <selector> :: <label>" or scoped "select <scope> :: <selector> :: <label>"
+        const parts = arg.split(" :: ");
+        if (parts.length === 2) {
+          await page.selectOption(parts[0], { label: parts[1] }, { timeout: 10000 });
+        } else if (parts.length === 3) {
+          await page.locator(parts[0]).locator(parts[1]).selectOption({ label: parts[2] });
+        } else {
+          console.log('ERR select espera "<selector> :: <label>" o "<scope> :: <selector> :: <label>"');
+          break;
+        }
+        console.log(`OK select ${arg}`);
+        break;
+      }
+      case "drag": {
+        // "drag <sourceSelector> :: <targetSelector>" — native HTML5 drag-and-drop
+        const parts = arg.split(" :: ");
+        if (parts.length !== 2) {
+          console.log('ERR drag espera "<sourceSelector> :: <targetSelector>"');
+          break;
+        }
+        await page.dragAndDrop(parts[0], parts[1], { timeout: 10000 });
+        console.log(`OK drag ${arg}`);
+        break;
+      }
       case "screenshot": {
         const name = arg || `shot-${Date.now()}`;
         const file = path.join(screenshotDir, name.endsWith(".png") ? name : `${name}.png`);

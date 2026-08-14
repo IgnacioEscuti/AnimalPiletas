@@ -10,6 +10,9 @@ export function ClienteRow({
   onPastillas,
   onExtra,
   onSemana,
+  onDragStart,
+  onDragOver,
+  onDrop,
 }) {
   const [cantidadPastillas, setCantidadPastillas] = useState(
     pastillasHoy?.cantidad ? String(pastillasHoy.cantidad) : ""
@@ -32,8 +35,16 @@ export function ClienteRow({
 
   return (
     <>
-      <tr>
+      <tr onDragOver={onDragOver} onDrop={onDrop}>
         <td>
+          <span
+            className="drag-handle"
+            draggable
+            onDragStart={onDragStart}
+            title="Arrastrar para reordenar"
+          >
+            ⠿
+          </span>
           <button
             type="button"
             className="chevron-button"

@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 
-export function ClienteModal({ cliente, tarifas, onClose, onGuardar, onCancelar }) {
+export function ClienteModal({ cliente, tarifas, barrios, onClose, onGuardar, onCancelar }) {
   const [nombre, setNombre] = useState(cliente?.nombre ?? "");
   const [direccion, setDireccion] = useState(cliente?.direccion ?? "");
   const [telefono, setTelefono] = useState(cliente?.telefono ?? "");
   const [tarifaLimpieza, setTarifaLimpieza] = useState(cliente?.tarifaLimpieza?.id ?? "");
+  const [barrio, setBarrio] = useState(cliente?.barrio?.id ?? "");
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState("");
 
@@ -24,7 +25,7 @@ export function ClienteModal({ cliente, tarifas, onClose, onGuardar, onCancelar 
     setEnviando(true);
     setError("");
     try {
-      await onGuardar({ nombre, direccion, telefono, tarifaLimpieza });
+      await onGuardar({ nombre, direccion, telefono, tarifaLimpieza, barrio: barrio || null });
     } catch (err) {
       setError(err.response?.data?.error || "No se pudo guardar el cliente.");
       setEnviando(false);
@@ -79,6 +80,14 @@ export function ClienteModal({ cliente, tarifas, onClose, onGuardar, onCancelar 
             {tarifas.map((tarifa) => (
               <option key={tarifa.id} value={tarifa.id}>
                 {tarifa.nombre} (${tarifa.precio})
+              </option>
+            ))}
+          </select>
+          <select value={barrio} onChange={(event) => setBarrio(event.target.value)}>
+            <option value="">Sin barrio</option>
+            {barrios.map((b) => (
+              <option key={b.id} value={b.id}>
+                {b.nombre}
               </option>
             ))}
           </select>

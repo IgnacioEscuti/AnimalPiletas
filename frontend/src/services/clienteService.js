@@ -19,3 +19,7 @@ export const cancelarCliente = async (id) => {
   const { data } = await api.put(`/clientes/${id}`, { status: "cancelado" });
   return data.cliente;
 };
+
+export const reordenarClientesEnBarrio = async (ids) => {
+  await api.put("/clientes/reordenar-en-barrio", { ids });
+};

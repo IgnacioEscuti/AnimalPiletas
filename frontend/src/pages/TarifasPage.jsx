@@ -1,12 +1,16 @@
 import { useEffect, useState } from "react";
 import { TarifaList } from "../components/TarifaList.jsx";
 import { PrecioPastillasRow } from "../components/PrecioPastillasRow.jsx";
+import { BarrioList } from "../components/BarrioList.jsx";
 import { getTarifas, actualizarTarifa } from "../services/tarifaService.js";
 import { getPrecioPastillas, actualizarPrecioPastillas } from "../services/precioPastillasService.js";
+import { getBarrios, crearBarrio } from "../services/barrioService.js";
 
 export function TarifasPage() {
   const [tarifas, setTarifas] = useState([]);
   const [precioPastillas, setPrecioPastillas] = useState(null);
+  const [barrios, setBarrios] = useState([]);
+  const [nombreBarrio, setNombreBarrio] = useState("");
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -15,12 +19,14 @@ export function TarifasPage() {
 
   const cargarTodo = async () => {
     try {
-      const [tarifasData, precioPastillasData] = await Promise.all([
+      const [tarifasData, precioPastillasData, barriosData] = await Promise.all([
         getTarifas(),
         getPrecioPastillas(),
+        getBarrios(),
       ]);
       setTarifas(tarifasData);
       setPrecioPastillas(precioPastillasData);
+      setBarrios(barriosData);
     } catch {
       setError("No se pudieron cargar las tarifas.");
     }
@@ -46,19 +52,51 @@ export function TarifasPage() {
     }
   };
 
+  const handleAgregarBarrio = async (event) => {
+    event.preventDefault();
+    if (!nombreBarrio.trim()) return;
+    try {
+      setError("");
+      await crearBarrio(nombreBarrio.trim());
+      setNombreBarrio("");
+      setBarrios(await getBarrios());
+    } catch (err) {
+      setError(err.response?.data?.error || "No se pudo agregar el barrio.");
+    }
+  };
+
   return (
-    <section>
-      <h2>Tarifas de limpieza</h2>
-      {error && <p className="error-message">{error}</p>}
-      <ul>
-        <TarifaList tarifas={tarifas} onActualizar={handleActualizarTarifa} />
-        {precioPastillas && (
-          <PrecioPastillasRow
-            precioPastillas={precioPastillas}
-            onActualizar={handleActualizarPastillas}
+    <>
+      <section>
+        <h2>Tarifas de limpieza</h2>
+        {error && <p className="error-message">{error}</p>}
+        <ul>
+          <TarifaList tarifas={tarifas} onActualizar={handleActualizarTarifa} />
+          {precioPastillas && (
+            <PrecioPastillasRow
+              precioPastillas={precioPastillas}
+              onActualizar={handleActualizarPastillas}
+            />
+          )}
+        </ul>
+      </section>
+
+      <section>
+        <h2>Barrios</h2>
+        <form onSubmit={handleAgregarBarrio}>
+          <input
+            type="text"
+            placeholder="Nombre del barrio"
+            value={nombreBarrio}
+            onChange={(event) => setNombreBarrio(event.target.value)}
           />
-        )}
-      </ul>
-    </section>
+          <button type="submit">Agregar</button>
+        </form>
+        <ul>
+          <BarrioList barrios={barrios} />
+        </ul>
+        {barrios.length === 0 && <p className="empty-state">Todavía no hay barrios cargados.</p>}
+      </section>
+    </>
   );
 }

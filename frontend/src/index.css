@@ -420,6 +420,43 @@ tfoot tr td:last-child {
   font-size: 14px;
 }
 
+.drag-handle {
+  display: inline-block;
+  margin-right: 8px;
+  color: var(--text-muted);
+  font-size: 16px;
+  line-height: 1;
+  cursor: grab;
+  user-select: none;
+  vertical-align: middle;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+.barrio-header-row td {
+  background: transparent;
+  padding: 22px 8px 8px;
+}
+
+tbody:first-of-type .barrio-header-row td {
+  padding-top: 0;
+}
+
+.barrio-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.barrio-header .drag-handle {
+  margin-right: 0;
+}
+
 .chevron-button {
   background: transparent;
   border: none;

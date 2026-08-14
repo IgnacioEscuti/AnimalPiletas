@@ -14,7 +14,23 @@ telefono: string (opcional)
 tarifaLimpieza: ObjectId → ref TarifaLimpieza (tarifa asignada por defecto)
 semana: "1" | "2" | "todas" (con qué frecuencia se atiende)
 status: "activo" | "cancelado" (default "activo")
+barrio: ObjectId → ref Barrio (opcional)
+ordenEnBarrio: number (posición dentro de su barrio, para el orden manual por arrastre)
 ```
+
+### Barrio (catálogo abierto — a diferencia de TarifaLimpieza, se pueden seguir agregando con el tiempo)
+```
+nombre: string
+orden: number (posición de la sección en la pantalla de Cliente, se cambia arrastrando ahí mismo)
+```
+
+**Agregar barrios nuevos:** vive dentro de la pestaña Tarifas ya existente — un campo de texto + botón "Agregar", con la lista de barrios ya creados debajo. Por ahora solo crear y listar, sin editar ni eliminar.
+
+**Agrupar clientes por barrio en la pantalla de Cliente:** en vez de una tabla plana, la lista se organiza en secciones — una por barrio, con su nombre como header (no se repite el nombre del barrio en cada fila de cliente, solo aparece una vez arriba de su sección). Los clientes sin barrio asignado caen en una sección "Sin barrio" al final. Las secciones no son colapsables — siempre se ven todas expandidas.
+
+**Orden por arrastre (drag and drop), directo en la pantalla de Cliente:**
+- Arrastrando el header de una sección de barrio, se reordenan las secciones entre sí — actualiza el campo `orden` de los barrios afectados.
+- Arrastrando la fila de un cliente, se reordena su posición dentro de su misma sección de barrio — actualiza `ordenEnBarrio`. Arrastrar un cliente a la sección de OTRO barrio no le cambia el barrio asignado — cambiar de barrio se sigue haciendo únicamente desde el modal de editar cliente.
 
 **Dirección y teléfono en la pantalla de Cliente:** no van como columnas propias en la tabla — al lado del nombre hay una flechita (chevron) que expande/colapsa una fila debajo mostrando la dirección y el teléfono de ese cliente. Colapsado por defecto, para no ensanchar más la tabla.
 

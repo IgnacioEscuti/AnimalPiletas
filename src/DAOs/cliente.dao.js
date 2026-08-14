@@ -8,7 +8,10 @@ export class ClienteDAO {
   // Sin filtro de status — la usa el Resumen, que tiene que seguir
   // mostrando eventos históricos de clientes ya cancelados.
   async find() {
-    return clienteModel.find().populate("tarifaLimpieza", "nombre precio");
+    return clienteModel
+      .find()
+      .populate("tarifaLimpieza", "nombre precio")
+      .populate("barrio", "nombre orden");
   }
 
   // Para la pantalla de Cliente: nunca debe listar cancelados.
@@ -20,20 +23,28 @@ export class ClienteDAO {
   async findActivos() {
     return clienteModel
       .find({ status: { $ne: "cancelado" } })
-      .populate("tarifaLimpieza", "nombre precio");
+      .populate("tarifaLimpieza", "nombre precio")
+      .populate("barrio", "nombre orden");
   }
 
   async findOne(filtros) {
-    return clienteModel.findOne(filtros).populate("tarifaLimpieza", "nombre precio");
+    return clienteModel
+      .findOne(filtros)
+      .populate("tarifaLimpieza", "nombre precio")
+      .populate("barrio", "nombre orden");
   }
 
   async findById(id) {
-    return clienteModel.findById(id).populate("tarifaLimpieza", "nombre precio");
+    return clienteModel
+      .findById(id)
+      .populate("tarifaLimpieza", "nombre precio")
+      .populate("barrio", "nombre orden");
   }
 
   async findByIdAndUpdate(id, data) {
     return clienteModel
       .findByIdAndUpdate(id, data, { new: true, runValidators: true })
-      .populate("tarifaLimpieza", "nombre precio");
+      .populate("tarifaLimpieza", "nombre precio")
+      .populate("barrio", "nombre orden");
   }
 }

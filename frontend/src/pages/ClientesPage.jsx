@@ -6,18 +6,22 @@ import {
   crearCliente,
   actualizarCliente,
   cancelarCliente,
+  reordenarClientesEnBarrio,
 } from "../services/clienteService.js";
 import { getTarifas } from "../services/tarifaService.js";
+import { getBarrios, reordenarBarrios } from "../services/barrioService.js";
 import { getLimpiezasDeHoy, registrarLimpieza } from "../services/limpiezaService.js";
 import { getUsosPastillasDeHoy, registrarUsoPastillas } from "../services/usoPastillasService.js";
 import { getUsosExtraDeHoy, registrarUsoExtra } from "../services/usoExtraService.js";
 import { semanaActual } from "../utils/fecha.js";
 
 const SEMANA_ACTUAL = semanaActual();
+const SIN_BARRIO = "sin-barrio";
 
 export function ClientesPage() {
   const [clientes, setClientes] = useState([]);
   const [tarifas, setTarifas] = useState([]);
+  const [barrios, setBarrios] = useState([]);
   const [limpiezas, setLimpiezas] = useState([]);
   const [pastillas, setPastillas] = useState([]);
   const [extras, setExtras] = useState([]);
@@ -26,6 +30,8 @@ export function ClientesPage() {
   const [clienteEnEdicion, setClienteEnEdicion] = useState(null);
   const [modalAbierto, setModalAbierto] = useState(false);
   const [error, setError] = useState("");
+  const [dragBarrioId, setDragBarrioId] = useState(null);
+  const [dragCliente, setDragCliente] = useState(null);
 
   useEffect(() => {
     cargarTodo();
@@ -33,16 +39,18 @@ export function ClientesPage() {
 
   const cargarTodo = async () => {
     try {
-      const [clientesData, tarifasData, limpiezasData, pastillasData, extrasData] =
+      const [clientesData, tarifasData, barriosData, limpiezasData, pastillasData, extrasData] =
         await Promise.all([
           getClientes(),
           getTarifas(),
+          getBarrios(),
           getLimpiezasDeHoy(),
           getUsosPastillasDeHoy(),
           getUsosExtraDeHoy(),
         ]);
       setClientes(clientesData);
       setTarifas(tarifasData);
+      setBarrios(barriosData);
       setLimpiezas(limpiezasData);
       setPastillas(pastillasData);
       setExtras(extrasData);
@@ -113,11 +121,87 @@ export function ClientesPage() {
     }
   };
 
+  const handleBarrioDragStart = (event, barrioId) => {
+    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.setData("text/plain", barrioId);
+    setDragBarrioId(barrioId);
+  };
+
+  const handleBarrioDrop = async (targetBarrioId) => {
+    const origenId = dragBarrioId;
+    setDragBarrioId(null);
+    if (!origenId || origenId === targetBarrioId || targetBarrioId === SIN_BARRIO) return;
+
+    const ids = barrios.map((barrio) => barrio.id);
+    const fromIndex = ids.indexOf(origenId);
+    const toIndex = ids.indexOf(targetBarrioId);
+    ids.splice(fromIndex, 1);
+    ids.splice(toIndex, 0, origenId);
+
+    try {
+      await reordenarBarrios(ids);
+      setBarrios(await getBarrios());
+    } catch {
+      setError("No se pudo reordenar los barrios.");
+    }
+  };
+
+  const handleClienteDragStart = (event, clienteId, grupoKey) => {
+    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.setData("text/plain", clienteId);
+    setDragCliente({ id: clienteId, grupoKey });
+  };
+
+  const handleClienteDrop = async (targetClienteId, grupoKey) => {
+    const origen = dragCliente;
+    setDragCliente(null);
+    if (!origen || origen.grupoKey !== grupoKey || origen.id === targetClienteId) return;
+
+    const ids = clientes
+      .filter((cliente) => (cliente.barrio?.id ?? SIN_BARRIO) === grupoKey)
+      .sort((a, b) => a.ordenEnBarrio - b.ordenEnBarrio)
+      .map((cliente) => cliente.id);
+    const fromIndex = ids.indexOf(origen.id);
+    const toIndex = ids.indexOf(targetClienteId);
+    ids.splice(fromIndex, 1);
+    ids.splice(toIndex, 0, origen.id);
+
+    try {
+      await reordenarClientesEnBarrio(ids);
+      setClientes(await getClientes());
+    } catch {
+      setError("No se pudo reordenar los clientes.");
+    }
+  };
+
   const clientesFiltrados = clientes
     .filter((cliente) => cliente.nombre.toLowerCase().includes(busqueda.toLowerCase()))
     .filter(
       (cliente) => verTodos || cliente.semana === "todas" || cliente.semana === SEMANA_ACTUAL
     );
+
+  const porBarrio = new Map();
+  clientesFiltrados.forEach((cliente) => {
+    const key = cliente.barrio?.id ?? SIN_BARRIO;
+    if (!porBarrio.has(key)) porBarrio.set(key, []);
+    porBarrio.get(key).push(cliente);
+  });
+
+  const grupos = barrios
+    .filter((barrio) => porBarrio.has(barrio.id))
+    .map((barrio) => ({
+      key: barrio.id,
+      nombre: barrio.nombre,
+      clientes: porBarrio.get(barrio.id).sort((a, b) => a.ordenEnBarrio - b.ordenEnBarrio),
+    }));
+
+  if (porBarrio.has(SIN_BARRIO)) {
+    grupos.push({
+      key: SIN_BARRIO,
+      nombre: "Sin barrio",
+      clientes: porBarrio.get(SIN_BARRIO).sort((a, b) => a.ordenEnBarrio - b.ordenEnBarrio),
+    });
+  }
 
   return (
     <section>
@@ -160,32 +244,57 @@ export function ClientesPage() {
               <th></th>
             </tr>
           </thead>
-          <tbody>
-            {clientesFiltrados.map((cliente) => (
-              <ClienteRow
-                key={cliente.id}
-                cliente={cliente}
-                limpiezaHoy={limpiezas.find((limpieza) => limpieza.cliente === cliente.id)}
-                pastillasHoy={pastillas.find((uso) => uso.cliente === cliente.id)}
-                extraHoy={extras.find((uso) => uso.cliente === cliente.id)}
-                onEditar={abrirEdicion}
-                onLimpieza={handleLimpieza}
-                onPastillas={handlePastillas}
-                onExtra={handleExtra}
-                onSemana={handleSemana}
-              />
-            ))}
-          </tbody>
+          {grupos.map((grupo) => (
+            <tbody key={grupo.key}>
+              <tr
+                className="barrio-header-row"
+                onDragOver={(event) => event.preventDefault()}
+                onDrop={() => handleBarrioDrop(grupo.key)}
+              >
+                <td colSpan="100%">
+                  <div className="barrio-header">
+                    {grupo.key !== SIN_BARRIO && (
+                      <span
+                        className="drag-handle"
+                        draggable
+                        onDragStart={(event) => handleBarrioDragStart(event, grupo.key)}
+                        title="Arrastrar para reordenar el barrio"
+                      >
+                        ⠿
+                      </span>
+                    )}
+                    {grupo.nombre}
+                  </div>
+                </td>
+              </tr>
+              {grupo.clientes.map((cliente) => (
+                <ClienteRow
+                  key={cliente.id}
+                  cliente={cliente}
+                  limpiezaHoy={limpiezas.find((limpieza) => limpieza.cliente === cliente.id)}
+                  pastillasHoy={pastillas.find((uso) => uso.cliente === cliente.id)}
+                  extraHoy={extras.find((uso) => uso.cliente === cliente.id)}
+                  onEditar={abrirEdicion}
+                  onLimpieza={handleLimpieza}
+                  onPastillas={handlePastillas}
+                  onExtra={handleExtra}
+                  onSemana={handleSemana}
+                  onDragStart={(event) => handleClienteDragStart(event, cliente.id, grupo.key)}
+                  onDragOver={(event) => event.preventDefault()}
+                  onDrop={() => handleClienteDrop(cliente.id, grupo.key)}
+                />
+              ))}
+            </tbody>
+          ))}
         </table>
-        {clientesFiltrados.length === 0 && (
-          <p className="empty-state">No hay clientes para mostrar.</p>
-        )}
+        {grupos.length === 0 && <p className="empty-state">No hay clientes para mostrar.</p>}
       </div>
 
       {modalAbierto && (
         <ClienteModal
           cliente={clienteEnEdicion}
           tarifas={tarifas}
+          barrios={barrios}
           onClose={() => setModalAbierto(false)}
           onGuardar={handleGuardar}
           onCancelar={handleCancelarCliente}

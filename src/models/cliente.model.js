@@ -32,6 +32,15 @@ const clienteSchema = new Schema(
       enum: ["activo", "cancelado"],
       default: "activo",
     },
+    barrio: {
+      type: Schema.Types.ObjectId,
+      ref: "barrio",
+      default: null,
+    },
+    ordenEnBarrio: {
+      type: Number,
+      default: 0,
+    },
   },
   { timestamps: true }
 );

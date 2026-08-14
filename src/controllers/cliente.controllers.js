@@ -36,3 +36,12 @@ export async function updateCliente(req, res, next) {
     next(error);
   }
 }
+
+export async function reordenarClientesEnBarrio(req, res, next) {
+  try {
+    await clienteService.reordenarEnBarrio(req.body.ids);
+    res.status(200).json({ ok: true });
+  } catch (error) {
+    next(error);
+  }
+}

@@ -1,5 +1,6 @@
 import { clienteRepository } from "../repositories/cliente.repository.js";
 import { tarifaLimpiezaRepository } from "../repositories/tarifaLimpieza.repository.js";
+import { barrioRepository } from "../repositories/barrio.repository.js";
 import { handleMongooseError } from "../utils/mongooseError.utils.js";
 
 function escaparRegExp(texto) {
@@ -16,9 +17,27 @@ function regexNombreExacto(nombre) {
 }
 
 export class ClienteService {
-  constructor(repository, tarifaLimpiezaRepository) {
+  constructor(repository, tarifaLimpiezaRepository, barrioRepository) {
     this.repository = repository;
     this.tarifaLimpiezaRepository = tarifaLimpiezaRepository;
+    this.barrioRepository = barrioRepository;
+  }
+
+  async validarBarrioExiste(barrioId) {
+    if (!barrioId) return;
+
+    let barrio;
+    try {
+      barrio = await this.barrioRepository.findById(barrioId);
+    } catch (error) {
+      handleMongooseError(error);
+    }
+
+    if (!barrio) {
+      const error = new Error("el barrio indicado no existe");
+      error.statusCode = 400;
+      throw error;
+    }
   }
 
   async validarTarifaExiste(tarifaId) {
@@ -56,6 +75,7 @@ export class ClienteService {
 
   async createCliente(data) {
     await this.validarTarifaExiste(data.tarifaLimpieza);
+    await this.validarBarrioExiste(data.barrio);
     await this.validarNombreDisponible(data.nombre);
 
     let cancelado;
@@ -106,6 +126,7 @@ export class ClienteService {
     if (data.tarifaLimpieza) {
       await this.validarTarifaExiste(data.tarifaLimpieza);
     }
+    await this.validarBarrioExiste(data.barrio);
     if (data.nombre) {
       await this.validarNombreDisponible(data.nombre, id);
     }
@@ -125,6 +146,20 @@ export class ClienteService {
 
     return cliente;
   }
+
+  async reordenarEnBarrio(ids) {
+    try {
+      await Promise.all(
+        ids.map((id, index) => this.repository.findByIdAndUpdate(id, { ordenEnBarrio: index }))
+      );
+    } catch (error) {
+      handleMongooseError(error);
+    }
+  }
 }
 
-export const clienteService = new ClienteService(clienteRepository, tarifaLimpiezaRepository);
+export const clienteService = new ClienteService(
+  clienteRepository,
+  tarifaLimpiezaRepository,
+  barrioRepository
+);
