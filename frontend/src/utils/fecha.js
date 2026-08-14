@@ -52,14 +52,19 @@ function capitalizar(palabra) {
 }
 
 export function formatoPeriodo(tipo, inicioISO, finISO) {
-  const inicio = new Date(inicioISO);
+  // inicioISO/finISO llegan como datetime completo en UTC (ej.
+  // "2026-08-01T00:00:00.000Z"). Igual que con el input de fecha, se
+  // toma solo la parte "YYYY-MM-DD" y se parsea a mano en vez de
+  // `new Date(inicioISO)`, que la reinterpreta en la zona horaria
+  // local y corre el día en zonas horarias negativas como Argentina.
+  const inicio = parsearFechaISO(inicioISO.slice(0, 10));
 
   if (tipo === "mensual") {
     return `${capitalizar(MESES[inicio.getMonth()])} ${inicio.getFullYear()}`;
   }
 
   // fin es exclusivo (el lunes siguiente): el último día real es fin - 1.
-  const ultimoDia = new Date(finISO);
+  const ultimoDia = parsearFechaISO(finISO.slice(0, 10));
   ultimoDia.setDate(ultimoDia.getDate() - 1);
 
   const mismoAnio = inicio.getFullYear() === ultimoDia.getFullYear();
