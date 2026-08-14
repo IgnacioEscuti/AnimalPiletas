@@ -32,16 +32,6 @@ export function semanaActual() {
   return semanaISO() % 2 === 1 ? "1" : "2";
 }
 
-// Con qué mes arranca la pestaña Mensual del Resumen al entrar. Recibe
-// "hoy" por parámetro (en vez de usar `new Date()` adentro) para poder
-// probar la regla del día 1° pasándole cualquier fecha a mano.
-export function fechaInicialMensual(hoy = new Date()) {
-  if (hoy.getDate() === 1) {
-    return new Date(hoy.getFullYear(), hoy.getMonth() - 1, 1);
-  }
-  return hoy;
-}
-
 export const MESES = [
   "enero",
   "febrero",

@@ -104,9 +104,7 @@ Agrupando por cliente y sumando los totales de cada colección se arma el total 
 
 **Buscador de clientes dentro del resumen:** igual que en la pantalla de Cliente, un campo de texto arriba de la tabla que filtra las filas por nombre — del lado del frontend, sobre los clientes que ya trajo la consulta del período (no hace falta pedirle nada nuevo al backend).
 
-**Período por defecto al entrar:**
-- Semanal: arranca en la semana actual (lo que haya cargado hasta hoy).
-- Mensual: si hoy es el día 1° del mes, arranca mostrando el mes anterior (el que se acaba de cerrar, para cobrarle a los clientes). Cualquier otro día del mes, arranca en el mes actual en curso.
+**Período por defecto al entrar:** tanto semanal como mensual arrancan siempre mostrando el período que contiene la fecha de hoy (la semana en curso, o el mes en curso) — sin ninguna excepción para el día 1° del mes. Se eliminó la regla anterior (que el día 1° mostraba el mes anterior por defecto) porque generaba una lógica condicional extra y terminó siendo la fuente de un bug. Si al 1° del mes hace falta ver el mes que se acaba de cerrar, se navega con la flecha "anterior" o el selector de fecha — un solo click.
 
 ## Orden de funciones a implementar
 

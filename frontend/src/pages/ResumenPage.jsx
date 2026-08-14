@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { ResumenTable } from "../components/ResumenTable.jsx";
 import { getResumen } from "../services/resumenService.js";
-import { fechaISO, formatoPeriodo, fechaInicialMensual, parsearFechaISO } from "../utils/fecha.js";
+import { fechaISO, formatoPeriodo, parsearFechaISO } from "../utils/fecha.js";
 
 function sumarSemanas(fecha, cantidad) {
   const nueva = new Date(fecha);
@@ -16,7 +16,7 @@ function sumarMeses(fecha, cantidad) {
 export function ResumenPage() {
   const [tab, setTab] = useState("semanal");
   const [fechaSemanal, setFechaSemanal] = useState(new Date());
-  const [fechaMensual, setFechaMensual] = useState(fechaInicialMensual());
+  const [fechaMensual, setFechaMensual] = useState(new Date());
   const [resumen, setResumen] = useState(null);
   const [busqueda, setBusqueda] = useState("");
   const [error, setError] = useState("");
