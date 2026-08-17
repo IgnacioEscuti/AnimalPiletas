@@ -8,10 +8,10 @@ export function getCookieOptions() {
   return {
     httpOnly: true,
     secure: esProduccion,
-    // En producción el frontend (Vercel) y el backend (Render) son dominios distintos,
-    // así que la cookie necesita sameSite "none" para viajar en llamadas cross-site.
-    // En desarrollo localhost:5173 -> localhost:3000 es same-site, "lax" alcanza.
-    sameSite: esProduccion ? "none" : "lax",
+    // El frontend llama a /api en su propio dominio (Vercel reenvía internamente
+    // al backend en Render vía rewrite), así que desde la perspectiva del navegador
+    // el pedido es same-site en todos los entornos. "lax" alcanza.
+    sameSite: "lax",
     maxAge: OCHO_HORAS_EN_MS,
   };
 }

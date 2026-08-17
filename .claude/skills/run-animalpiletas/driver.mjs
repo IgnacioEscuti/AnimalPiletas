@@ -18,6 +18,11 @@ const consoleMessages = [];
 page.on("console", (msg) => consoleMessages.push({ type: msg.type(), text: msg.text() }));
 page.on("pageerror", (err) => consoleMessages.push({ type: "error", text: err.message }));
 
+const networkLog = [];
+page.on("response", (res) => {
+  networkLog.push({ method: res.request().method(), url: res.url(), status: res.status() });
+});
+
 const rl = readline.createInterface({ input: process.stdin, terminal: false });
 
 async function handle(line) {
@@ -114,6 +119,10 @@ async function handle(line) {
         } else {
           console.log(JSON.stringify(consoleMessages));
         }
+        break;
+      }
+      case "network": {
+        console.log(JSON.stringify(networkLog));
         break;
       }
       case "quit": {
