@@ -18,5 +18,5 @@ export async function logout(req, res) {
 }
 
 export async function getUsuarioActual(req, res) {
-  res.status(200).json({ usuario: new UsuarioDTO(req.usuario) });
+  res.status(200).json({ usuario: req.usuario ? new UsuarioDTO(req.usuario) : null });
 }

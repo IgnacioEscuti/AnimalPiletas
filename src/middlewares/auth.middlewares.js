@@ -9,6 +9,14 @@ export function authenticateActual(req, res, next) {
   })(req, res, next);
 }
 
+export function identificarUsuarioOpcional(req, res, next) {
+  passport.authenticate("actual", { session: false }, (err, usuario) => {
+    if (err) return next(err);
+    req.usuario = usuario || null;
+    next();
+  })(req, res, next);
+}
+
 export function autorizarRol(...rolesPermitidos) {
   return (req, res, next) => {
     if (!rolesPermitidos.includes(req.usuario.rol)) {
