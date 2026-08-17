@@ -183,6 +183,5 @@ Completamente separado de `barrio` (que sigue siendo solo agrupación visual) �
 6. Responsive (mobile) — pendiente, dejado para el final. Incluye: layout mobile de las tablas anchas (Cliente, Resumen), manifest.json + apple-touch-icon para PWA en iOS, y un service worker básico para que Chrome/Android ofrezca instalar la PWA de forma proactiva
 7. ✅ Login (email + PIN de 4 dígitos, sin roles todavía) — hecho en Función 7
 8. ✅ Roles (admin ve/modifica todo, encargado solo sus propios clientes vía campo Cliente.encargado) — hecho en Función 8
-9. Roles (jefe con permisos de modificar registros antiguos) — pendiente, en función separada
 
 App ya deployada: frontend en Vercel, backend en Render, base en MongoDB Atlas. Instalada como PWA en iPhone.

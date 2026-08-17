@@ -10,13 +10,22 @@ export function AuthProvider({ children }) {
   const [cargando, setCargando] = useState(true);
 
   useEffect(() => {
+    const controller = new AbortController();
     setOnUnauthorized(() => setUsuario(null));
 
     authService
-      .obtenerUsuarioActual()
+      .obtenerUsuarioActual(controller.signal)
       .then(setUsuario)
-      .catch(() => setUsuario(null))
-      .finally(() => setCargando(false));
+      .catch((error) => {
+        if (error.code !== "ERR_CANCELED") setUsuario(null);
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setCargando(false);
+      });
+
+    return () => {
+      controller.abort();
+    };
   }, []);
 
   const login = async (email, pin) => {
