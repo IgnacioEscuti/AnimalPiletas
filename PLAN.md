@@ -122,6 +122,33 @@ Agrupando por cliente y sumando los totales de cada colección se arma el total 
 
 **Período por defecto al entrar:** tanto semanal como mensual arrancan siempre mostrando el período que contiene la fecha de hoy (la semana en curso, o el mes en curso) — sin ninguna excepción para el día 1° del mes. Se eliminó la regla anterior (que el día 1° mostraba el mes anterior por defecto) porque generaba una lógica condicional extra y terminó siendo la fuente de un bug. Si al 1° del mes hace falta ver el mes que se acaba de cerrar, se navega con la flecha "anterior" o el selector de fecha — un solo click.
 
+## Login (Función 7 — sin roles todavía, eso es la Función 8)
+
+### Usuario
+```
+email: string (único, requerido)
+passwordHash: string (bcrypt, hash del PIN de 4 dígitos)
+nombre: string (opcional)
+intentosFallidos: number (default 0)
+bloqueadoHasta: Date (opcional — si está en el futuro, la cuenta está bloqueada)
+```
+
+**Registro:** email + PIN numérico de 4 dígitos. El PIN se hashea con bcrypt antes de guardar, nunca se guarda en texto plano. El registro queda abierto — cualquiera con la URL puede crear una cuenta (decisión consciente, dado que el repo ya es privado y son solo 2 usuarios reales esperados).
+
+**Login:** email + PIN.
+- Si el email no existe, error genérico ("credenciales inválidas") — no revelar si el email existe o no.
+- Si la cuenta está bloqueada (`bloqueadoHasta` en el futuro), rechazar con el tiempo restante.
+- Si el PIN no coincide: incrementar `intentosFallidos`. Al llegar a 10 fallidos seguidos, setear `bloqueadoHasta` a 2 minutos en el futuro.
+- Si el PIN coincide: resetear `intentosFallidos` a 0, generar sesión.
+
+**Sesión:** cookie httpOnly (secure solo en producción, sameSite lax — mismo patrón que ya usa Gestión de Eventos), duración 8 horas. Todos los endpoints existentes de la app (clientes, limpiezas, resumen, etc.) pasan a requerir esta cookie válida — un middleware de autenticación se aplica a todas las rutas actuales.
+
+**"Recordar email" en el dispositivo:** después de un login exitoso, el frontend guarda el email en `localStorage`. La próxima vez que se abre la app en ese mismo dispositivo, si hay un email guardado, la pantalla de login solo pide el PIN (mostrando el email guardado como texto). Un link "¿No sos vos?" borra el email guardado y vuelve a pedir los dos campos. Esto es puramente cosmético del lado del frontend — el login real en el backend siempre recibe el par completo (email + PIN).
+
+**Sin Google OAuth** — se evaluó y se descartó, no se justifica la complejidad (Google Cloud Console, callbacks, etc.) para 2 usuarios.
+
+**Arquitectura:** reusar el mismo patrón de Passport.js que ya está probado en Gestión de Eventos (estrategias register/login/current), agregando lo específico de PIN+bcrypt+bloqueo por intentos en vez de reinventar el mecanismo de sesión.
+
 ## Orden de funciones a implementar
 
 1. ✅ CRUD de Cliente (con tarifa de limpieza asignada) — hecho en Función 1
@@ -130,6 +157,7 @@ Agrupando por cliente y sumando los totales de cada colección se arma el total 
 4. ✅ Resumen (semanal y mensual, por cliente, con cantidad al lado del precio y totales al pie) — hecho en Función 4
 5. ✅ Campo semana en Cliente + filtro automático en la pantalla + toggle "ver todos" — hecho en Función 5
 6. Responsive (mobile) — pendiente, dejado para el final. Incluye: layout mobile de las tablas anchas (Cliente, Resumen), manifest.json + apple-touch-icon para PWA en iOS, y un service worker básico para que Chrome/Android ofrezca instalar la PWA de forma proactiva
-7. Login con roles (él carga, el jefe solo mira) — pendiente, dejado para el final
+7. ✅ Login (email + PIN de 4 dígitos, sin roles todavía) — hecho en Función 7
+8. Roles (jefe con permisos de modificar registros antiguos) — pendiente, en función separada después del login
 
 App ya deployada: frontend en Vercel, backend en Render, base en MongoDB Atlas. Instalada como PWA en iPhone.
