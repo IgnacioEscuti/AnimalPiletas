@@ -9,7 +9,6 @@ export function ClienteRow({
   onLimpieza,
   onPastillas,
   onExtra,
-  onSemana,
   onDragStart,
   onDragOver,
   onDrop,
@@ -54,20 +53,6 @@ export function ClienteRow({
             <span className={`chevron ${expandido ? "chevron-abierto" : ""}`}>▸</span>
           </button>
           {cliente.nombre}
-        </td>
-        <td>
-          <span className="badge">{cliente.tarifaLimpieza?.nombre}</span>
-        </td>
-        <td>
-          <select
-            className="semana-select"
-            value={cliente.semana}
-            onChange={(event) => onSemana(cliente.id, event.target.value)}
-          >
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="todas">todas</option>
-          </select>
         </td>
         <td>
           <div className="limpieza-buttons">
@@ -141,6 +126,10 @@ export function ClienteRow({
         <tr className="fila-expandida">
           <td colSpan="100%">
             <div className="detalle-cliente">
+              <span>
+                <strong>Tarifa:</strong>{" "}
+                <span className="badge">{cliente.tarifaLimpieza?.nombre}</span>
+              </span>
               <span>
                 <strong>Dirección:</strong> {cliente.direccion || "—"}
               </span>

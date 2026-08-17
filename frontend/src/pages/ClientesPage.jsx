@@ -126,15 +126,6 @@ export function ClientesPage() {
     await cargarTodo();
   };
 
-  const handleSemana = async (clienteId, semana) => {
-    try {
-      await actualizarCliente(clienteId, { semana });
-      setClientes(await getClientes());
-    } catch {
-      setError("No se pudo actualizar la semana.");
-    }
-  };
-
   const handleBarrioDragStart = (event, barrioId) => {
     event.dataTransfer.effectAllowed = "move";
     event.dataTransfer.setData("text/plain", barrioId);
@@ -249,8 +240,6 @@ export function ClientesPage() {
           <thead>
             <tr>
               <th>Nombre</th>
-              <th>Tarifa</th>
-              <th>Semana</th>
               <th>Limpieza</th>
               <th>Pastillas</th>
               <th>Extra</th>
@@ -292,7 +281,6 @@ export function ClientesPage() {
                   onLimpieza={handleLimpieza}
                   onPastillas={handlePastillas}
                   onExtra={handleExtra}
-                  onSemana={handleSemana}
                   onDragStart={(event) => handleClienteDragStart(event, cliente.id, grupo.key)}
                   onDragOver={(event) => event.preventDefault()}
                   onDrop={() => handleClienteDrop(cliente.id, grupo.key)}

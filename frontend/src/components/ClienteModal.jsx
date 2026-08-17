@@ -14,6 +14,7 @@ export function ClienteModal({
   const [direccion, setDireccion] = useState(cliente?.direccion ?? "");
   const [telefono, setTelefono] = useState(cliente?.telefono ?? "");
   const [tarifaLimpieza, setTarifaLimpieza] = useState(cliente?.tarifaLimpieza?.id ?? "");
+  const [semana, setSemana] = useState(cliente?.semana ?? "1");
   const [barrio, setBarrio] = useState(cliente?.barrio?.id ?? "");
   const [encargado, setEncargado] = useState(cliente?.encargado?.id ?? "");
   const [enviando, setEnviando] = useState(false);
@@ -35,7 +36,7 @@ export function ClienteModal({
     setEnviando(true);
     setError("");
     try {
-      const datos = { nombre, direccion, telefono, tarifaLimpieza, barrio: barrio || null };
+      const datos = { nombre, direccion, telefono, tarifaLimpieza, semana, barrio: barrio || null };
       if (esAdmin) {
         datos.encargado = encargado || null;
       }
@@ -96,6 +97,11 @@ export function ClienteModal({
                 {tarifa.nombre} (${tarifa.precio})
               </option>
             ))}
+          </select>
+          <select value={semana} onChange={(event) => setSemana(event.target.value)} required>
+            <option value="1">Semana 1</option>
+            <option value="2">Semana 2</option>
+            <option value="todas">Todas las semanas</option>
           </select>
           <select value={barrio} onChange={(event) => setBarrio(event.target.value)}>
             <option value="">Sin barrio</option>
