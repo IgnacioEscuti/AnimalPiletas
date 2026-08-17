@@ -131,6 +131,7 @@ passwordHash: string (bcrypt, hash del PIN de 4 dígitos)
 nombre: string (opcional)
 intentosFallidos: number (default 0)
 bloqueadoHasta: Date (opcional — si está en el futuro, la cuenta está bloqueada)
+rol: "admin" | "encargado" (default "encargado")
 ```
 
 **Registro:** email + PIN numérico de 4 dígitos. El PIN se hashea con bcrypt antes de guardar, nunca se guarda en texto plano. El registro queda abierto — cualquiera con la URL puede crear una cuenta (decisión consciente, dado que el repo ya es privado y son solo 2 usuarios reales esperados).
@@ -149,6 +150,29 @@ bloqueadoHasta: Date (opcional — si está en el futuro, la cuenta está bloque
 
 **Arquitectura:** reusar el mismo patrón de Passport.js que ya está probado en Gestión de Eventos (estrategias register/login/current), agregando lo específico de PIN+bcrypt+bloqueo por intentos en vez de reinventar el mecanismo de sesión.
 
+## Roles (Función 8)
+
+**Los dos roles:**
+- **Admin** — 1 solo (el jefe). Ve y modifica todos los clientes de todas las pantallas, sin restricción.
+- **Encargado** — cantidad variable. Ve y modifica solo sus propios clientes, en todas las pantallas (Cliente, Resumen, copiado de WhatsApp — el mismo filtro se aplica en todos lados).
+
+**Cómo se asigna el rol:** todo usuario que se registra queda como "encargado" automáticamente — no hay forma de auto-asignarse admin desde la app. Para que el jefe sea admin, se cambia el campo `rol` a mano una sola vez directo en MongoDB Atlas — no se construye ninguna pantalla para esto, es un cambio que prácticamente no se repite.
+
+**Cliente gana un campo nuevo, independiente de `barrio`:**
+```
+encargado: ObjectId → ref Usuario (opcional)
+```
+Completamente separado de `barrio` (que sigue siendo solo agrupación visual) — un cambio de barrio nunca afecta quién puede ver o tocar un cliente.
+
+**Al crear o editar un cliente:**
+- Admin: elige de un desplegable a qué usuario pertenece ese cliente — el desplegable incluye tanto a los encargados como al propio admin (para poder asignarse clientes a sí mismo).
+- Encargado: el campo `encargado` se completa automáticamente con su propio usuario, sin mostrarle ningún selector — no tiene forma de elegir ni cambiar a otro usuario, ni por error ni a propósito.
+
+**Visibilidad, aplicada en TODAS las pantallas (Cliente, Resumen, y lo que se copia para WhatsApp):**
+- Encargado: solo ve y puede modificar los clientes donde `encargado` sea él mismo.
+- Admin: ve y modifica todos, sin filtrar por este campo.
+- Clientes sin `encargado` asignado (por ejemplo, los que ya existen en la base de antes de esta función): solo los ve el admin, hasta que se los asigne a alguien.
+
 ## Orden de funciones a implementar
 
 1. ✅ CRUD de Cliente (con tarifa de limpieza asignada) — hecho en Función 1
@@ -158,6 +182,7 @@ bloqueadoHasta: Date (opcional — si está en el futuro, la cuenta está bloque
 5. ✅ Campo semana en Cliente + filtro automático en la pantalla + toggle "ver todos" — hecho en Función 5
 6. Responsive (mobile) — pendiente, dejado para el final. Incluye: layout mobile de las tablas anchas (Cliente, Resumen), manifest.json + apple-touch-icon para PWA en iOS, y un service worker básico para que Chrome/Android ofrezca instalar la PWA de forma proactiva
 7. ✅ Login (email + PIN de 4 dígitos, sin roles todavía) — hecho en Función 7
-8. Roles (jefe con permisos de modificar registros antiguos) — pendiente, en función separada después del login
+8. ✅ Roles (admin ve/modifica todo, encargado solo sus propios clientes vía campo Cliente.encargado) — hecho en Función 8
+9. Roles (jefe con permisos de modificar registros antiguos) — pendiente, en función separada
 
 App ya deployada: frontend en Vercel, backend en Render, base en MongoDB Atlas. Instalada como PWA en iPhone.

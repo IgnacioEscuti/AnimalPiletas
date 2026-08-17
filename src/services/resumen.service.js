@@ -24,7 +24,7 @@ export class ResumenService {
     this.usoExtraRepository = usoExtraRepository;
   }
 
-  async getResumen(tipo, fecha) {
+  async getResumen(tipo, fecha, usuarioActual) {
     if (tipo !== "semanal" && tipo !== "mensual") {
       const error = new Error("el tipo debe ser 'semanal' o 'mensual'");
       error.statusCode = 400;
@@ -33,9 +33,15 @@ export class ResumenService {
 
     const { inicio, fin } = tipo === "semanal" ? rangoSemanal(fecha) : rangoMensual(fecha);
     const filtroFecha = { fecha: { $gte: inicio, $lt: fin } };
+    // Igual que en la pantalla de Cliente: un "encargado" solo ve sus propios
+    // clientes, un "admin" ve todos. Alcanza con filtrar la lista de clientes
+    // acá — como las filas del resumen se arman iterando esa lista, los
+    // eventos de clientes ajenos nunca terminan en la respuesta.
+    const filtroClientes =
+      usuarioActual.rol === "encargado" ? { encargado: usuarioActual.id ?? usuarioActual._id } : {};
 
     const [clientes, limpiezas, usosPastillas, usosExtra] = await Promise.all([
-      this.clienteRepository.find(),
+      this.clienteRepository.find(filtroClientes),
       this.limpiezaRepository.find(filtroFecha),
       this.usoPastillasRepository.find(filtroFecha),
       this.usoExtraRepository.find(filtroFecha),

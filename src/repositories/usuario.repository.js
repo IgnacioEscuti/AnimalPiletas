@@ -18,6 +18,10 @@ export class UsuarioRepository {
   async findById(id) {
     return this.dao.findById(id);
   }
+
+  async findAll() {
+    return this.dao.findAll();
+  }
 }
 
 export const usuarioRepository = new UsuarioRepository(usuarioDAO);

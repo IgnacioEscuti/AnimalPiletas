@@ -13,15 +13,20 @@ import { getBarrios, reordenarBarrios } from "../services/barrioService.js";
 import { getLimpiezasDeHoy, registrarLimpieza } from "../services/limpiezaService.js";
 import { getUsosPastillasDeHoy, registrarUsoPastillas } from "../services/usoPastillasService.js";
 import { getUsosExtraDeHoy, registrarUsoExtra } from "../services/usoExtraService.js";
+import { getUsuarios } from "../services/usuarioService.js";
+import { useAuth } from "../context/AuthContext.jsx";
 import { semanaActual } from "../utils/fecha.js";
 
 const SEMANA_ACTUAL = semanaActual();
 const SIN_BARRIO = "sin-barrio";
 
 export function ClientesPage() {
+  const { usuario } = useAuth();
+  const esAdmin = usuario?.rol === "admin";
   const [clientes, setClientes] = useState([]);
   const [tarifas, setTarifas] = useState([]);
   const [barrios, setBarrios] = useState([]);
+  const [usuarios, setUsuarios] = useState([]);
   const [limpiezas, setLimpiezas] = useState([]);
   const [pastillas, setPastillas] = useState([]);
   const [extras, setExtras] = useState([]);
@@ -39,21 +44,30 @@ export function ClientesPage() {
 
   const cargarTodo = async () => {
     try {
-      const [clientesData, tarifasData, barriosData, limpiezasData, pastillasData, extrasData] =
-        await Promise.all([
-          getClientes(),
-          getTarifas(),
-          getBarrios(),
-          getLimpiezasDeHoy(),
-          getUsosPastillasDeHoy(),
-          getUsosExtraDeHoy(),
-        ]);
+      const [
+        clientesData,
+        tarifasData,
+        barriosData,
+        limpiezasData,
+        pastillasData,
+        extrasData,
+        usuariosData,
+      ] = await Promise.all([
+        getClientes(),
+        getTarifas(),
+        getBarrios(),
+        getLimpiezasDeHoy(),
+        getUsosPastillasDeHoy(),
+        getUsosExtraDeHoy(),
+        esAdmin ? getUsuarios() : Promise.resolve([]),
+      ]);
       setClientes(clientesData);
       setTarifas(tarifasData);
       setBarrios(barriosData);
       setLimpiezas(limpiezasData);
       setPastillas(pastillasData);
       setExtras(extrasData);
+      setUsuarios(usuariosData);
     } catch {
       setError("No se pudieron cargar los datos.");
     }
@@ -295,6 +309,8 @@ export function ClientesPage() {
           cliente={clienteEnEdicion}
           tarifas={tarifas}
           barrios={barrios}
+          usuarios={usuarios}
+          esAdmin={esAdmin}
           onClose={() => setModalAbierto(false)}
           onGuardar={handleGuardar}
           onCancelar={handleCancelarCliente}

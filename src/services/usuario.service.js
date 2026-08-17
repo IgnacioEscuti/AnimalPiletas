@@ -66,6 +66,10 @@ export class UsuarioService {
     return usuario;
   }
 
+  async getUsuarios() {
+    return this.repository.findAll();
+  }
+
   generarToken(usuario) {
     const dto = new UsuarioDTO(usuario);
     return generateToken({ id: dto.id, email: dto.email });

@@ -12,8 +12,9 @@ import limpiezaRoutes from "./routes/limpieza.routes.js";
 import usoPastillasRoutes from "./routes/usoPastillas.routes.js";
 import usoExtraRoutes from "./routes/usoExtra.routes.js";
 import resumenRoutes from "./routes/resumen.routes.js";
+import usuarioRoutes from "./routes/usuario.routes.js";
 import { errorHandler } from "./middlewares/error.middlewares.js";
-import { authenticateActual } from "./middlewares/auth.middlewares.js";
+import { authenticateActual, autorizarRol } from "./middlewares/auth.middlewares.js";
 import { env } from "./config/env.js";
 
 const app = express();
@@ -48,6 +49,7 @@ app.use("/api/limpiezas", authenticateActual, limpiezaRoutes);
 app.use("/api/usos-pastillas", authenticateActual, usoPastillasRoutes);
 app.use("/api/usos-extra", authenticateActual, usoExtraRoutes);
 app.use("/api/resumen", authenticateActual, resumenRoutes);
+app.use("/api/usuarios", authenticateActual, autorizarRol("admin"), usuarioRoutes);
 
 app.use(errorHandler);
 

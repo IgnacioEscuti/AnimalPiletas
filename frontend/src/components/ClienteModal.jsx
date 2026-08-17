@@ -1,11 +1,21 @@
 import { useState, useEffect } from "react";
 
-export function ClienteModal({ cliente, tarifas, barrios, onClose, onGuardar, onCancelar }) {
+export function ClienteModal({
+  cliente,
+  tarifas,
+  barrios,
+  usuarios,
+  esAdmin,
+  onClose,
+  onGuardar,
+  onCancelar,
+}) {
   const [nombre, setNombre] = useState(cliente?.nombre ?? "");
   const [direccion, setDireccion] = useState(cliente?.direccion ?? "");
   const [telefono, setTelefono] = useState(cliente?.telefono ?? "");
   const [tarifaLimpieza, setTarifaLimpieza] = useState(cliente?.tarifaLimpieza?.id ?? "");
   const [barrio, setBarrio] = useState(cliente?.barrio?.id ?? "");
+  const [encargado, setEncargado] = useState(cliente?.encargado?.id ?? "");
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState("");
 
@@ -25,7 +35,11 @@ export function ClienteModal({ cliente, tarifas, barrios, onClose, onGuardar, on
     setEnviando(true);
     setError("");
     try {
-      await onGuardar({ nombre, direccion, telefono, tarifaLimpieza, barrio: barrio || null });
+      const datos = { nombre, direccion, telefono, tarifaLimpieza, barrio: barrio || null };
+      if (esAdmin) {
+        datos.encargado = encargado || null;
+      }
+      await onGuardar(datos);
     } catch (err) {
       setError(err.response?.data?.error || "No se pudo guardar el cliente.");
       setEnviando(false);
@@ -91,6 +105,23 @@ export function ClienteModal({ cliente, tarifas, barrios, onClose, onGuardar, on
               </option>
             ))}
           </select>
+          {esAdmin && (
+            <select
+              value={encargado}
+              onChange={(event) => setEncargado(event.target.value)}
+              required
+            >
+              <option value="" disabled>
+                Elegir encargado
+              </option>
+              {usuarios.map((u) => (
+                <option key={u.id} value={u.id}>
+                  {u.nombre || u.email}
+                  {u.rol === "admin" ? " (admin)" : ""}
+                </option>
+              ))}
+            </select>
+          )}
           {error && <p className="error-message">{error}</p>}
           <div className="modal-actions">
             <button type="button" className="secondary" onClick={onClose}>

@@ -25,5 +25,10 @@ export class ClienteDTO {
       orden: cliente.barrio.orden,
     };
     this.ordenEnBarrio = cliente.ordenEnBarrio;
+    this.encargado = cliente.encargado && {
+      id: cliente.encargado.id ?? cliente.encargado._id,
+      nombre: cliente.encargado.nombre,
+      email: cliente.encargado.email,
+    };
   }
 }

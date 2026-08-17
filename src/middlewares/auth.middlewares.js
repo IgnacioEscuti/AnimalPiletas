@@ -8,3 +8,12 @@ export function authenticateActual(req, res, next) {
     next();
   })(req, res, next);
 }
+
+export function autorizarRol(...rolesPermitidos) {
+  return (req, res, next) => {
+    if (!rolesPermitidos.includes(req.usuario.rol)) {
+      return res.status(403).json({ error: "No tenés permiso para realizar esta acción" });
+    }
+    next();
+  };
+}

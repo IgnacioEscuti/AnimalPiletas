@@ -41,6 +41,11 @@ const clienteSchema = new Schema(
       type: Number,
       default: 0,
     },
+    encargado: {
+      type: Schema.Types.ObjectId,
+      ref: "usuario",
+      default: null,
+    },
   },
   { timestamps: true }
 );

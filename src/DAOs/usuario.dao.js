@@ -12,4 +12,8 @@ export class UsuarioDAO {
   async findById(id) {
     return usuarioModel.findById(id);
   }
+
+  async findAll() {
+    return usuarioModel.find();
+  }
 }

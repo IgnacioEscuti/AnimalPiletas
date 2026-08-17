@@ -11,12 +11,12 @@ export class ClienteRepository {
     return this.dao.create(data);
   }
 
-  async find() {
-    return this.dao.find();
+  async find(filtro) {
+    return this.dao.find(filtro);
   }
 
-  async findActivos() {
-    return this.dao.findActivos();
+  async findActivos(filtro) {
+    return this.dao.findActivos(filtro);
   }
 
   async findOne(filtros) {

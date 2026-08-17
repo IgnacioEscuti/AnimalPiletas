@@ -26,6 +26,11 @@ const usuarioSchema = new Schema(
     bloqueadoHasta: {
       type: Date,
     },
+    rol: {
+      type: String,
+      enum: ["admin", "encargado"],
+      default: "encargado",
+    },
   },
   { timestamps: true }
 );
