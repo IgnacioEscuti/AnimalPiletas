@@ -1,0 +1,35 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "design-system-color",
+        "value": "rgba(0, 0, 0, 0.3)",
+        "files": [
+          "frontend/src/index.css"
+        ],
+        "createdAt": "2026-08-18T20:30:23.512Z",
+        "reason": "sombra del modal de escritorio, documentada en .impeccable/design.json extensions.shadows[modal]; no es un color de paleta"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "rgba(0, 0, 0, 0.45)",
+        "files": [
+          "frontend/src/index.css"
+        ],
+        "createdAt": "2026-08-18T20:30:23.610Z",
+        "reason": "sombra de la tab bar fija de mobile, documentada en .impeccable/design.json extensions.shadows[nav-floating]; no es un color de paleta"
+      },
+      {
+        "rule": "design-system-radius",
+        "value": "8px",
+        "files": [
+          "frontend/src/index.css"
+        ],
+        "createdAt": "2026-08-18T20:30:55.105Z",
+        "reason": "radio del stepper +/- de pastillas (28x28px), documentado en DESIGN.md como rounded.control-compact"
+      }
+    ]
+  }
+}

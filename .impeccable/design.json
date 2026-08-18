@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-18T00:00:00.000Z",
+  "title": "Design System: AnimalPiletas",
+  "extensions": {
+    "colorMeta": {
+      "bg": { "role": "neutral", "displayName": "Casi-negro", "canonical": "#14151f" },
+      "surface": { "role": "neutral", "displayName": "Navy tarjeta", "canonical": "#1c1e2c" },
+      "text": { "role": "neutral", "displayName": "Texto", "canonical": "#e9e9ed" },
+      "text-muted": { "role": "neutral", "displayName": "Texto muted", "canonical": "rgba(233, 233, 237, 0.55)" },
+      "border": { "role": "neutral", "displayName": "Borde sutil", "canonical": "rgba(233, 233, 237, 0.1)" },
+      "accent": { "role": "primary", "displayName": "Violeta guardia", "canonical": "#9184d9" },
+      "accent-hover": { "role": "primary", "displayName": "Violeta guardia (hover)", "canonical": "#7c6fc4" },
+      "accent-bg": { "role": "primary", "displayName": "Violeta tintado", "canonical": "rgba(145, 132, 217, 0.14)" },
+      "success": { "role": "semantic", "displayName": "Verde confirmado", "canonical": "#34c759" },
+      "success-bg": { "role": "semantic", "displayName": "Verde tintado", "canonical": "rgba(52, 199, 89, 0.16)" },
+      "danger": { "role": "semantic", "displayName": "Rojo rechazado", "canonical": "#f05064" },
+      "danger-bg": { "role": "semantic", "displayName": "Rojo tintado", "canonical": "rgba(240, 80, 100, 0.16)" },
+      "on-fill": { "role": "neutral", "displayName": "Texto sobre color", "canonical": "#ffffff" },
+      "scrim": { "role": "neutral", "displayName": "Scrim de modal", "canonical": "rgba(10, 10, 16, 0.6)" },
+      "nav-blur": { "role": "neutral", "displayName": "Vidrio de tab bar", "canonical": "rgba(28, 30, 42, 0.92)" }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Título de página en desktop." },
+      "title": { "displayName": "Title", "purpose": "Subtítulo de sección (desktop) / título de página (mobile)." },
+      "subtitle": { "displayName": "Subtitle", "purpose": "Subtítulo de sección en mobile." },
+      "lead": { "displayName": "Lead", "purpose": "Bajada de página y controles destacados de peso medio." },
+      "body": { "displayName": "Body", "purpose": "Texto de control estándar: inputs, botones." },
+      "bodySmall": { "displayName": "Body Small", "purpose": "Indicadores chicos: chevron, header de barrio desktop." },
+      "caption": { "displayName": "Caption", "purpose": "Inputs y botones compactos." },
+      "captionSmall": { "displayName": "Caption Small", "purpose": "Encabezados de columna, badges secundarios." },
+      "small": { "displayName": "Small", "purpose": "Badge de pastillas cargadas." },
+      "label": { "displayName": "Label", "purpose": "Etiqueta de sección en mayúscula — separa contenido sin líneas." },
+      "micro": { "displayName": "Micro", "purpose": "Labels de la tab bar inferior en mobile." }
+    },
+    "shadows": [
+      {
+        "name": "modal",
+        "value": "0 20px 60px rgba(0, 0, 0, 0.3)",
+        "purpose": "Despega el modal centrado de desktop del scrim que tiene detrás."
+      },
+      {
+        "name": "nav-floating",
+        "value": "0 8px 30px rgba(0, 0, 0, 0.45)",
+        "purpose": "Despega la tab bar fija inferior de mobile del contenido que scrollea debajo (combinada con blur de fondo sobre nav-blur)."
+      }
+    ]
+  },
+  "components": [],
+  "narrative": {
+    "northStar": "El tablero de guardia nocturna",
+    "overview": "Una sola pantalla oscura que se lee tan bien de noche, con el sol pegando en la pantalla junto a una pileta, como sentado en un escritorio armando el resumen del mes. No hay modo claro: el fondo casi negro y las tarjetas navy son la superficie por defecto, no una preferencia de sistema. Un único acento violeta marca todo lo interactivo o activo. El verde y el rojo están reservados exclusivamente para \"confirmado\" y \"cancelado/rechazado\".",
+    "keyCharacteristics": [
+      "Tema oscuro fijo, sin alternativa clara.",
+      "Un solo acento (violeta) para todo lo interactivo; nada de paleta múltiple.",
+      "Verde y rojo son estados semánticos exclusivos, nunca decorativos.",
+      "Bordes muy redondeados en toda la app — controles, tarjetas, pills.",
+      "Etiquetas de sección en mayúscula chica y gris como recurso de separación.",
+      "Misma paleta en escritorio y mobile; solo cambia la densidad/composición por superficie."
+    ],
+    "rules": [
+      { "name": "La Regla del Acento Único", "body": "El violeta es la única voz de color no semántica en toda la app.", "section": "colors" },
+      { "name": "La Regla del Verde y Rojo Reservados", "body": "Verde = confirmado/ok. Rojo = rechazado/cancelado. Ningún otro uso.", "section": "colors" },
+      { "name": "La Regla del Tinte por Opacidad", "body": "Ningún color tintado es un valor nuevo: es un color ya nombrado a opacidad baja.", "section": "colors" },
+      { "name": "La Regla de las Dos Sombras", "body": "Solo el modal y la tab bar fija usan box-shadow. Todo lo demás resuelve profundidad con tono.", "section": "elevation" },
+      { "name": "La Regla del Label en Mayúscula", "body": "Toda separación de contenido dentro de una tarjeta se resuelve con un label chico en mayúscula, nunca con una línea divisoria.", "section": "typography" }
+    ],
+    "dos": [
+      "Do usar violeta para cualquier control interactivo o activo que no sea un estado de confirmación/rechazo.",
+      "Do usar labels en mayúscula chica para separar secciones dentro de una tarjeta, nunca una línea divisoria.",
+      "Do mantener 100% de los controles y superficies con esquinas redondeadas.",
+      "Do transmitir profundidad con capas de tono, no con sombras, salvo en modal y tab bar."
+    ],
+    "donts": [
+      "Don't introducir un segundo color de acento.",
+      "Don't usar verde o rojo fuera de los estados confirmado/rechazado.",
+      "Don't agregar box-shadow fuera del modal y la tab bar fija.",
+      "Don't permitir scroll horizontal en ningún breakpoint."
+    ]
+  }
+}

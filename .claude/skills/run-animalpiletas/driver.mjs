@@ -121,6 +121,11 @@ async function handle(line) {
         console.log(await page.textContent("body"));
         break;
       }
+      case "sleep": {
+        await page.waitForTimeout(Number(arg) || 300);
+        console.log(`OK sleep ${arg}`);
+        break;
+      }
       case "eval": {
         const result = await page.evaluate(arg);
         console.log(JSON.stringify(result));

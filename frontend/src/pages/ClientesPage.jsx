@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { ClienteModal } from "../components/ClienteModal.jsx";
 import { ClienteRow } from "../components/ClienteRow.jsx";
 import {
@@ -37,6 +37,9 @@ export function ClientesPage() {
   const [error, setError] = useState("");
   const [dragBarrioId, setDragBarrioId] = useState(null);
   const [dragCliente, setDragCliente] = useState(null);
+  const [touchDragId, setTouchDragId] = useState(null);
+  const [touchOverId, setTouchOverId] = useState(null);
+  const touchDragRef = useRef(null);
 
   useEffect(() => {
     cargarTodo();
@@ -157,19 +160,18 @@ export function ClientesPage() {
     setDragCliente({ id: clienteId, grupoKey });
   };
 
-  const handleClienteDrop = async (targetClienteId, grupoKey) => {
-    const origen = dragCliente;
-    setDragCliente(null);
-    if (!origen || origen.grupoKey !== grupoKey || origen.id === targetClienteId) return;
+  const reordenarCliente = async (origenId, targetClienteId, grupoKey) => {
+    if (!origenId || origenId === targetClienteId) return;
 
     const ids = clientes
       .filter((cliente) => (cliente.barrio?.id ?? SIN_BARRIO) === grupoKey)
       .sort((a, b) => a.ordenEnBarrio - b.ordenEnBarrio)
       .map((cliente) => cliente.id);
-    const fromIndex = ids.indexOf(origen.id);
+    const fromIndex = ids.indexOf(origenId);
     const toIndex = ids.indexOf(targetClienteId);
+    if (fromIndex === -1 || toIndex === -1) return;
     ids.splice(fromIndex, 1);
-    ids.splice(toIndex, 0, origen.id);
+    ids.splice(toIndex, 0, origenId);
 
     try {
       await reordenarClientesEnBarrio(ids);
@@ -177,6 +179,81 @@ export function ClientesPage() {
     } catch {
       setError("No se pudo reordenar los clientes.");
     }
+  };
+
+  const handleClienteDrop = async (targetClienteId, grupoKey) => {
+    const origen = dragCliente;
+    setDragCliente(null);
+    if (!origen || origen.grupoKey !== grupoKey) return;
+    await reordenarCliente(origen.id, targetClienteId, grupoKey);
+  };
+
+  // Drag táctil: HTML5 drag-and-drop (arriba) no dispara con touch, así que
+  // acá replicamos el mismo gesto con Pointer Events y un long-press, pero
+  // reutilizamos reordenarCliente para persistir el orden — sin lógica de
+  // guardado nueva.
+  const handlePointerDownDrag = (event, clienteId, grupoKey) => {
+    if (event.pointerType !== "touch") return;
+    const el = event.currentTarget;
+    const startX = event.clientX;
+    const startY = event.clientY;
+    const state = { dragging: false, clienteId, grupoKey };
+    touchDragRef.current = state;
+
+    const cleanup = () => {
+      clearTimeout(state.timer);
+      el.removeEventListener("pointermove", onMove);
+      el.removeEventListener("pointerup", onUp);
+      el.removeEventListener("pointercancel", onCancel);
+      touchDragRef.current = null;
+    };
+
+    const onMove = (moveEvent) => {
+      if (!state.dragging) {
+        if (Math.abs(moveEvent.clientX - startX) > 10 || Math.abs(moveEvent.clientY - startY) > 10) {
+          cleanup();
+        }
+        return;
+      }
+      moveEvent.preventDefault();
+      const target = document.elementFromPoint(moveEvent.clientX, moveEvent.clientY);
+      const fila = target?.closest("tr[data-cliente-id]");
+      if (fila && fila.dataset.grupo === grupoKey && fila.dataset.clienteId !== clienteId) {
+        setTouchOverId(fila.dataset.clienteId);
+      } else {
+        setTouchOverId(null);
+      }
+    };
+
+    const onUp = async (upEvent) => {
+      const wasDragging = state.dragging;
+      const target = document.elementFromPoint(upEvent.clientX, upEvent.clientY);
+      const fila = target?.closest("tr[data-cliente-id]");
+      const targetId = fila?.dataset.grupo === grupoKey ? fila.dataset.clienteId : null;
+      cleanup();
+      setTouchDragId(null);
+      setTouchOverId(null);
+      if (wasDragging && targetId && targetId !== clienteId) {
+        await reordenarCliente(clienteId, targetId, grupoKey);
+      }
+    };
+
+    const onCancel = () => {
+      cleanup();
+      setTouchDragId(null);
+      setTouchOverId(null);
+    };
+
+    state.timer = setTimeout(() => {
+      state.dragging = true;
+      el.setPointerCapture(event.pointerId);
+      setTouchDragId(clienteId);
+      if (navigator.vibrate) navigator.vibrate(10);
+    }, 350);
+
+    el.addEventListener("pointermove", onMove);
+    el.addEventListener("pointerup", onUp, { once: true });
+    el.addEventListener("pointercancel", onCancel, { once: true });
   };
 
   const clientesFiltrados = clientes
@@ -227,7 +304,7 @@ export function ClientesPage() {
       <div className="filtros-clientes">
         <input
           type="text"
-          placeholder="Buscar por nombre..."
+          placeholder="Buscar cliente"
           value={busqueda}
           onChange={(event) => setBusqueda(event.target.value)}
           className="search-input"
@@ -257,32 +334,35 @@ export function ClientesPage() {
             </tr>
           </thead>
           {grupos.map((grupo) => (
-            <tbody key={grupo.key}>
-              <tr
-                className="barrio-header-row"
-                onDragOver={(event) => event.preventDefault()}
-                onDrop={() => handleBarrioDrop(grupo.key)}
-              >
-                <td colSpan="100%">
-                  <div className="barrio-header">
-                    {grupo.key !== SIN_BARRIO && (
-                      <span
-                        className="drag-handle"
-                        draggable
-                        onDragStart={(event) => handleBarrioDragStart(event, grupo.key)}
-                        title="Arrastrar para reordenar el barrio"
-                      >
-                        ⠿
-                      </span>
-                    )}
-                    {grupo.nombre}
-                  </div>
-                </td>
-              </tr>
+            <Fragment key={grupo.key}>
+              <tbody>
+                <tr
+                  className="barrio-header-row"
+                  onDragOver={(event) => event.preventDefault()}
+                  onDrop={() => handleBarrioDrop(grupo.key)}
+                >
+                  <td colSpan="100%">
+                    <div className="barrio-header">
+                      {grupo.key !== SIN_BARRIO && (
+                        <span
+                          className="drag-handle"
+                          draggable
+                          onDragStart={(event) => handleBarrioDragStart(event, grupo.key)}
+                          title="Arrastrar para reordenar el barrio"
+                        >
+                          ⠿
+                        </span>
+                      )}
+                      {grupo.nombre}
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
               {grupo.clientes.map((cliente) => (
                 <ClienteRow
                   key={cliente.id}
                   cliente={cliente}
+                  grupoKey={grupo.key}
                   limpiezaHoy={limpiezas.find((limpieza) => limpieza.cliente === cliente.id)}
                   pastillasHoy={pastillas.find((uso) => uso.cliente === cliente.id)}
                   extraHoy={extras.find((uso) => uso.cliente === cliente.id)}
@@ -293,9 +373,12 @@ export function ClientesPage() {
                   onDragStart={(event) => handleClienteDragStart(event, cliente.id, grupo.key)}
                   onDragOver={(event) => event.preventDefault()}
                   onDrop={() => handleClienteDrop(cliente.id, grupo.key)}
+                  onPointerDownDrag={handlePointerDownDrag}
+                  arrastrando={touchDragId === cliente.id}
+                  dragOver={touchOverId === cliente.id}
                 />
               ))}
-            </tbody>
+            </Fragment>
           ))}
         </table>
         {grupos.length === 0 && <p className="empty-state">No hay clientes para mostrar.</p>}

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 
 export function ClienteRow({
   cliente,
+  grupoKey,
   limpiezaHoy,
   pastillasHoy,
   extraHoy,
@@ -12,6 +13,9 @@ export function ClienteRow({
   onDragStart,
   onDragOver,
   onDrop,
+  onPointerDownDrag,
+  arrastrando,
+  dragOver,
 }) {
   const [cantidadPastillas, setCantidadPastillas] = useState(
     pastillasHoy?.cantidad ? String(pastillasHoy.cantidad) : ""
@@ -43,18 +47,28 @@ export function ClienteRow({
   const simboloEstado = estadoLimpieza === "tick" ? "✓" : estadoLimpieza === "cross" ? "✕" : "–";
 
   return (
-    <>
+    <tbody className="fila-cliente-grupo">
       <tr
-        className={`fila-cliente ${expandido ? "expandido" : ""}`}
+        className={`fila-cliente ${expandido ? "expandido" : ""} ${arrastrando ? "arrastrando" : ""} ${
+          dragOver ? "drag-over" : ""
+        }`}
+        data-cliente-id={cliente.id}
+        data-grupo={grupoKey}
         onDragOver={onDragOver}
         onDrop={onDrop}
       >
-        <td className="td-titulo">
+        <td
+          className="td-titulo"
+          onClick={() => setExpandido((valor) => !valor)}
+          title={expandido ? "Colapsar" : "Expandir"}
+        >
           <span
             className="drag-handle"
             draggable
             onDragStart={onDragStart}
-            title="Arrastrar para reordenar"
+            onPointerDown={(event) => onPointerDownDrag?.(event, cliente.id, grupoKey)}
+            onClick={(event) => event.stopPropagation()}
+            title="Mantené presionado para reordenar"
           >
             ⠿
           </span>
@@ -64,37 +78,39 @@ export function ClienteRow({
           <span className="cliente-nombre">{cliente.nombre}</span>
           <span className="td-titulo-derecha">
             {pastillasHoy?.cantidad > 0 && (
-              <span className="badge-pastillas">{pastillasHoy.cantidad}</span>
+              <span className="badge-pastillas">{pastillasHoy.cantidad} past.</span>
             )}
-            <button
-              type="button"
-              className="chevron-button"
-              onClick={() => setExpandido((valor) => !valor)}
-              title={expandido ? "Colapsar" : "Expandir"}
-            >
-              <span className={`chevron ${expandido ? "chevron-abierto" : ""}`}>▸</span>
-            </button>
+            <span className={`chevron ${expandido ? "chevron-abierto" : ""}`} aria-hidden="true">
+              ▸
+            </span>
           </span>
         </td>
-        <td data-label="Limpieza">
+        <td data-label="Limpieza de hoy">
           <div className="limpieza-buttons">
             <button
               className={`icon-button ${limpiezaHoy?.realizada === true ? "active-tick" : ""}`}
               onClick={() => onLimpieza(cliente.id, true, empleado)}
               title="Limpieza realizada"
             >
-              ✓
+              <span className="limpieza-icono" aria-hidden="true">
+                ✓
+              </span>
+              <span className="limpieza-label">Confirmar</span>
             </button>
             <button
               className={`icon-button ${limpiezaHoy?.realizada === false ? "active-cross" : ""}`}
               onClick={() => onLimpieza(cliente.id, false, empleado)}
               title="Limpieza no realizada"
             >
-              ✕
+              <span className="limpieza-icono" aria-hidden="true">
+                ✕
+              </span>
+              <span className="limpieza-label">No se pudo</span>
             </button>
           </div>
         </td>
-        <td data-label="Pastillas">
+        <td>
+          <span className="pastillas-label">Pastillas cargadas</span>
           <div className="pastillas-stepper">
             <button type="button" className="stepper-btn" onClick={() => ajustarPastillas(-1)}>
               −
@@ -113,29 +129,32 @@ export function ClienteRow({
             </button>
           </div>
         </td>
-        <td data-label="Extra">
-          <div className="extra-inputs">
-            <input
-              type="text"
-              placeholder="Extra"
-              value={nombreExtra}
-              onChange={(event) => setNombreExtra(event.target.value)}
-              onBlur={handleBlurExtra}
-            />
-            <input
-              type="number"
-              min="0"
-              placeholder="Precio"
-              value={precioExtra}
-              onChange={(event) => setPrecioExtra(event.target.value)}
-              onBlur={handleBlurExtra}
-            />
+        <td data-label="Extra de hoy">
+          <div className="extra-columna">
+            <div className="extra-inputs">
+              <input
+                type="text"
+                placeholder="Extra"
+                value={nombreExtra}
+                onChange={(event) => setNombreExtra(event.target.value)}
+                onBlur={handleBlurExtra}
+              />
+              <input
+                type="number"
+                min="0"
+                placeholder="Precio"
+                value={precioExtra}
+                onChange={(event) => setPrecioExtra(event.target.value)}
+                onBlur={handleBlurExtra}
+              />
+            </div>
+            {extraHoy && (
+              <div className="extra-hoy">
+                <span>{extraHoy.nombreExtra}</span>
+                <span className="extra-hoy-precio">${extraHoy.precioUnitario}</span>
+              </div>
+            )}
           </div>
-          {extraHoy && (
-            <p className="extra-hoy">
-              Hoy: {extraHoy.nombreExtra} (${extraHoy.precioUnitario})
-            </p>
-          )}
         </td>
         <td data-label="Empleado">
           <input
@@ -147,8 +166,11 @@ export function ClienteRow({
           />
         </td>
         <td className="td-accion">
-          <button className="secondary" onClick={() => onEditar(cliente)}>
-            Editar
+          <button className="btn-outline-accent" onClick={() => onEditar(cliente)}>
+            <svg width="14" height="14" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true">
+              <path d="M227.32,73.37,182.63,28.68a16,16,0,0,0-22.63,0L36.69,152A15.86,15.86,0,0,0,32,163.31V208a16,16,0,0,0,16,16H92.69A15.86,15.86,0,0,0,104,219.31L227.32,96A16,16,0,0,0,227.32,73.37ZM192,88,168,64l16-16,24,24ZM48,172.69,152,68.69,171.31,88,67.31,192H48Z" />
+            </svg>
+            Editar cliente
           </button>
         </td>
       </tr>
@@ -156,10 +178,6 @@ export function ClienteRow({
         <tr className="fila-expandida">
           <td colSpan="100%">
             <div className="detalle-cliente">
-              <span>
-                <strong>Tarifa:</strong>{" "}
-                <span className="badge">{cliente.tarifaLimpieza?.nombre}</span>
-              </span>
               <span className="detalle-item">
                 <svg
                   className="detalle-icono"
@@ -187,12 +205,19 @@ export function ClienteRow({
                 {cliente.telefono || "—"}
               </span>
             </div>
-            <button type="button" className="secondary btn-editar-mobile" onClick={() => onEditar(cliente)}>
-              Editar
+            <button
+              type="button"
+              className="btn-outline-accent btn-editar-mobile"
+              onClick={() => onEditar(cliente)}
+            >
+              <svg width="14" height="14" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true">
+                <path d="M227.32,73.37,182.63,28.68a16,16,0,0,0-22.63,0L36.69,152A15.86,15.86,0,0,0,32,163.31V208a16,16,0,0,0,16,16H92.69A15.86,15.86,0,0,0,104,219.31L227.32,96A16,16,0,0,0,227.32,73.37ZM192,88,168,64l16-16,24,24ZM48,172.69,152,68.69,171.31,88,67.31,192H48Z" />
+              </svg>
+              Editar cliente
             </button>
           </td>
         </tr>
       )}
-    </>
+    </tbody>
   );
 }
