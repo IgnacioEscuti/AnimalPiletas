@@ -102,6 +102,7 @@ export function ClienteModal({
             <option value="1">Semana 1</option>
             <option value="2">Semana 2</option>
             <option value="todas">Todas las semanas</option>
+            <option value="unaVez">Una vez</option>
           </select>
           <select value={barrio} onChange={(event) => setBarrio(event.target.value)}>
             <option value="">Sin barrio</option>

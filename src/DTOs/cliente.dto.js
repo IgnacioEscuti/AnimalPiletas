@@ -18,6 +18,7 @@ export class ClienteDTO {
       precio: cliente.tarifaLimpieza.precio,
     };
     this.semana = cliente.semana;
+    this.semanaUnaVezDesde = cliente.semanaUnaVezDesde;
     this.status = cliente.status;
     this.barrio = cliente.barrio && {
       id: cliente.barrio.id ?? cliente.barrio._id,

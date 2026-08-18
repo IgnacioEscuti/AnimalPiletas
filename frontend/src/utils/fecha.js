@@ -32,6 +32,23 @@ export function semanaActual() {
   return semanaISO() % 2 === 1 ? "1" : "2";
 }
 
+// Lunes (00:00 local) de la semana que contiene `fecha`.
+function inicioDeSemana(fecha = new Date()) {
+  const dia = new Date(fecha.getFullYear(), fecha.getMonth(), fecha.getDate());
+  const diaDeSemana = dia.getDay(); // domingo=0, lunes=1, ..., sábado=6
+  const diasHastaElLunes = diaDeSemana === 0 ? -6 : 1 - diaDeSemana;
+  dia.setDate(dia.getDate() + diasHastaElLunes);
+  return dia;
+}
+
+// True si `fecha` cae dentro de la semana (lunes a lunes) que contiene hoy.
+// Usado para el cliente "unaVez": deja de aparecer en el filtro apenas se
+// cruza a la semana siguiente a la de `semanaUnaVezDesde`.
+export function estaEnSemanaActual(fecha) {
+  if (!fecha) return false;
+  return inicioDeSemana(new Date(fecha)).getTime() === inicioDeSemana().getTime();
+}
+
 export const MESES = [
   "enero",
   "febrero",

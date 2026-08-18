@@ -34,6 +34,13 @@ export function rangoSemanal(fechaStr) {
   return { inicio, fin };
 }
 
+// True si `fecha` cae dentro de la semana (lunes a lunes) que contiene hoy.
+export function estaEnSemanaActual(fecha) {
+  if (!fecha) return false;
+  const { inicio, fin } = rangoSemanal();
+  return fecha >= inicio && fecha < fin;
+}
+
 // Mes calendario (1° al 1° del mes siguiente, exclusivo) que contiene fechaStr.
 export function rangoMensual(fechaStr) {
   const base = parsearFecha(fechaStr);

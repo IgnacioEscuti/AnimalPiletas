@@ -24,8 +24,12 @@ const clienteSchema = new Schema(
     },
     semana: {
       type: String,
-      enum: ["1", "2", "todas"],
+      enum: ["1", "2", "todas", "unaVez"],
       default: "todas",
+    },
+    semanaUnaVezDesde: {
+      type: Date,
+      default: null,
     },
     status: {
       type: String,

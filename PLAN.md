@@ -12,11 +12,14 @@ nombre: string
 direccion: string (opcional)
 telefono: string (opcional)
 tarifaLimpieza: ObjectId → ref TarifaLimpieza (tarifa asignada por defecto)
-semana: "1" | "2" | "todas" (con qué frecuencia se atiende)
+semana: "1" | "2" | "todas" | "unaVez" (con qué frecuencia se atiende)
+semanaUnaVezDesde: Date (opcional — solo se usa cuando semana = "unaVez", fecha en la que se marcó)
 status: "activo" | "cancelado" (default "activo")
 barrio: ObjectId → ref Barrio (opcional)
 ordenEnBarrio: number (posición dentro de su barrio, para el orden manual por arrastre)
 ```
+
+**Cliente "una vez" (visita puntual, sin repetir):** para clientes que llaman por una sola visita y no vuelven a necesitar servicio regular. Al elegir "unaVez" en el selector de semana, se guarda la fecha de ese momento en `semanaUnaVezDesde`. El filtro de la pantalla de Cliente muestra a ese cliente solo mientras la fecha de hoy caiga dentro de la misma semana que `semanaUnaVezDesde` (mismo cálculo de semana ISO que ya se usa para 1/2) — al cruzar a la semana siguiente, desaparece del filtro normal sin que nadie tenga que cancelarlo a mano. Sigue visible con el toggle "Ver todos", por si hay que reactivarlo eligiendo "unaVez" de nuevo (lo que actualiza `semanaUnaVezDesde` a la fecha actual). Editar al cliente por otro motivo mientras ya tiene "unaVez" seleccionado NO debe resetear esa fecha — solo se actualiza cuando se vuelve a elegir esa opción explícitamente. El resumen no se ve afectado: sigue consultando eventos por fecha, sin mirar el campo `semana` del cliente.
 
 ### Barrio (catálogo abierto — a diferencia de TarifaLimpieza, se pueden seguir agregando con el tiempo)
 ```
@@ -181,7 +184,7 @@ Completamente separado de `barrio` (que sigue siendo solo agrupación visual) �
 4. ✅ Resumen (semanal y mensual, por cliente, con cantidad al lado del precio y totales al pie) — hecho en Función 4
 5. ✅ Campo semana en Cliente + filtro automático en la pantalla + toggle "ver todos" — hecho en Función 5
 6. Responsive (mobile) — pendiente, dejado para el final. Incluye: layout mobile de las tablas anchas (Cliente, Resumen), manifest.json + apple-touch-icon para PWA en iOS, y un service worker básico para que Chrome/Android ofrezca instalar la PWA de forma proactiva
-7. ✅ Login (email + PIN de 4 dígitos, sin roles todavía) — hecho en Función 7
-8. ✅ Roles (admin ve/modifica todo, encargado solo sus propios clientes vía campo Cliente.encargado) — hecho en Función 8
+7. Login (email + PIN de 4 dígitos, sin roles todavía)✅
+8. Roles (admin ve/modifica todo, encargado solo sus propios clientes vía campo Cliente.encargado)✅
 
 App ya deployada: frontend en Vercel, backend en Render, base en MongoDB Atlas. Instalada como PWA en iPhone.

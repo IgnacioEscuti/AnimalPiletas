@@ -15,7 +15,7 @@ import { getUsosPastillasDeHoy, registrarUsoPastillas } from "../services/usoPas
 import { getUsosExtraDeHoy, registrarUsoExtra } from "../services/usoExtraService.js";
 import { getUsuarios } from "../services/usuarioService.js";
 import { useAuth } from "../context/AuthContext.jsx";
-import { semanaActual } from "../utils/fecha.js";
+import { semanaActual, estaEnSemanaActual } from "../utils/fecha.js";
 
 const SEMANA_ACTUAL = semanaActual();
 const SIN_BARRIO = "sin-barrio";
@@ -182,7 +182,11 @@ export function ClientesPage() {
   const clientesFiltrados = clientes
     .filter((cliente) => cliente.nombre.toLowerCase().includes(busqueda.toLowerCase()))
     .filter(
-      (cliente) => verTodos || cliente.semana === "todas" || cliente.semana === SEMANA_ACTUAL
+      (cliente) =>
+        verTodos ||
+        cliente.semana === "todas" ||
+        cliente.semana === SEMANA_ACTUAL ||
+        (cliente.semana === "unaVez" && estaEnSemanaActual(cliente.semanaUnaVezDesde))
     );
 
   const porBarrio = new Map();

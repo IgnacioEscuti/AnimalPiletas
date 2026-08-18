@@ -3,6 +3,7 @@ import { tarifaLimpiezaRepository } from "../repositories/tarifaLimpieza.reposit
 import { barrioRepository } from "../repositories/barrio.repository.js";
 import { usuarioRepository } from "../repositories/usuario.repository.js";
 import { handleMongooseError } from "../utils/mongooseError.utils.js";
+import { estaEnSemanaActual } from "../utils/fecha.utils.js";
 
 function escaparRegExp(texto) {
   return texto.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -127,6 +128,21 @@ export class ClienteService {
     return null;
   }
 
+  // "unaVez" guarda la fecha en que se eligió para que el filtro de la
+  // pantalla de Cliente sepa si ya expiró (cambió de semana desde
+  // entonces). Solo se resetea a hoy cuando es una elección nueva: la
+  // primera vez, o cuando se vuelve a elegir "unaVez" después de que la
+  // anterior ya expiró. Si ya tenía "unaVez" vigente (dentro de la
+  // semana actual) y el cliente se guarda por otro motivo, no se toca.
+  resolverSemanaUnaVezDesde(data, clienteAntes) {
+    if (data.semana !== "unaVez") return undefined;
+
+    const yaTeniaUnaVezVigente =
+      clienteAntes?.semana === "unaVez" && estaEnSemanaActual(clienteAntes.semanaUnaVezDesde);
+
+    return yaTeniaUnaVezVigente ? undefined : new Date();
+  }
+
   verificarAcceso(cliente, usuarioActual) {
     if (usuarioActual.rol !== "encargado") return;
 
@@ -161,7 +177,9 @@ export class ClienteService {
     await this.validarBarrioExiste(data.barrio);
     await this.validarNombreDisponible(data.nombre);
     const encargado = await this.resolverEncargadoParaCreacion(data, usuarioActual);
+    const semanaUnaVezDesde = this.resolverSemanaUnaVezDesde(data, null);
     const datos = { ...data, encargado };
+    if (semanaUnaVezDesde !== undefined) datos.semanaUnaVezDesde = semanaUnaVezDesde;
 
     let cancelado;
     try {
@@ -198,7 +216,7 @@ export class ClienteService {
   }
 
   async updateCliente(id, data, usuarioActual) {
-    await this.obtenerClienteConAcceso(id, usuarioActual);
+    const clienteAntes = await this.obtenerClienteConAcceso(id, usuarioActual);
 
     if (data.tarifaLimpieza) {
       await this.validarTarifaExiste(data.tarifaLimpieza);
@@ -209,7 +227,10 @@ export class ClienteService {
     }
 
     const encargado = await this.resolverEncargadoParaEdicion(data, usuarioActual);
-    const datos = encargado === undefined ? { ...data } : { ...data, encargado };
+    const semanaUnaVezDesde = this.resolverSemanaUnaVezDesde(data, clienteAntes);
+    const datos = { ...data };
+    if (encargado !== undefined) datos.encargado = encargado;
+    if (semanaUnaVezDesde !== undefined) datos.semanaUnaVezDesde = semanaUnaVezDesde;
 
     let cliente;
     try {
