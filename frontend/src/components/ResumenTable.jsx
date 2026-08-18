@@ -85,23 +85,23 @@ export function ResumenTable({ filas, totales, periodo, tab, inicioISO }) {
       <tbody>
         {filas.map((fila) => (
           <tr key={fila.clienteId}>
-            <td>{fila.clienteNombre}</td>
-            <td>
+            <td className="td-titulo">{fila.clienteNombre}</td>
+            <td data-label="Limpieza">
               <div>{fila.limpieza.cantidad}</div>
               <div className="row-price">${fila.limpieza.precio}</div>
             </td>
-            <td>
+            <td data-label="Pastillas">
               <div>{fila.pastillas.cantidad}</div>
               <div className="row-price">${fila.pastillas.precio}</div>
             </td>
-            <td>
+            <td data-label="Extra">
               <div>{listaExtras(fila.extra.extras)}</div>
               <div className="row-price">${fila.extra.precio}</div>
             </td>
-            <td>
+            <td data-label="Total">
               <strong>${fila.totalGeneral}</strong>
             </td>
-            <td>
+            <td className="td-accion">
               <button className="secondary" onClick={() => handleCopiar(fila)}>
                 {copiadoId === fila.clienteId ? "¡Copiado!" : "Copiar"}
               </button>
@@ -114,9 +114,9 @@ export function ResumenTable({ filas, totales, periodo, tab, inicioISO }) {
           <td>
             <strong>Total</strong>
           </td>
-          <td>{totales.totalLimpiezas}</td>
-          <td>{totales.totalPastillas}</td>
-          <td>{listaExtras(totales.totalExtras)}</td>
+          <td data-label="Limpiezas">{totales.totalLimpiezas}</td>
+          <td data-label="Pastillas">{totales.totalPastillas}</td>
+          <td data-label="Extras">{listaExtras(totales.totalExtras)}</td>
           <td>—</td>
           <td></td>
         </tr>

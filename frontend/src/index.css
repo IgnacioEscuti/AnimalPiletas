@@ -606,3 +606,426 @@ input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
+
+/* ==========================================================================
+   Mobile (≤700px) — tarjetas oscuras estilo iOS.
+   Solo afecta este breakpoint; el layout de escritorio (tablas) no cambia.
+   ========================================================================== */
+
+.btn-nuevo-cliente-icon,
+.btn-logout-icon,
+.nav-icon {
+  display: none;
+}
+
+.pastillas-stepper {
+  display: contents;
+}
+
+.stepper-btn {
+  display: none;
+}
+
+@media (max-width: 700px) {
+  :root {
+    --bg: #14151f;
+    --surface: #1c1e2c;
+    --text: #e9e9ed;
+    --text-muted: rgba(233, 233, 237, 0.55);
+    --border: rgba(233, 233, 237, 0.1);
+    --accent: #9184d9;
+    --accent-hover: #7c6fc4;
+    --accent-bg: rgba(145, 132, 217, 0.14);
+    --danger: #f05064;
+    --danger-hover: #ff7d8f;
+    --radius: 20px;
+    --shadow: none;
+  }
+
+  body {
+    background: radial-gradient(120% 90% at 50% 0%, #1c1e2c 0%, #14151f 62%) fixed;
+  }
+
+  #root {
+    max-width: 100%;
+    padding: 24px 16px 108px;
+  }
+
+  h1 {
+    font-size: 22px;
+  }
+
+  h2 {
+    font-size: 19px;
+  }
+
+  p.subtitle {
+    font-size: 13px;
+    margin-bottom: 14px;
+  }
+
+  section {
+    background: transparent;
+    box-shadow: none;
+    padding: 0;
+  }
+
+  .page-header {
+    margin-bottom: 16px;
+  }
+
+  /* Botón "+ Nuevo cliente" -> icono circular */
+  .btn-nuevo-cliente-full,
+  .btn-logout-full {
+    display: none;
+  }
+
+  .btn-nuevo-cliente-icon,
+  .btn-logout-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .btn-nuevo-cliente,
+  .btn-logout {
+    width: 42px;
+    height: 42px;
+    padding: 0;
+    border-radius: 50%;
+    font-size: 22px;
+    line-height: 1;
+  }
+
+  /* Buscador + toggle "ver todos" */
+  .filtros-clientes {
+    flex-wrap: wrap;
+  }
+
+  .search-input {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='rgba(233,233,237,0.45)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='7'%3E%3C/circle%3E%3Cpath d='M21 21l-4.3-4.3'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: 14px center;
+    background-size: 15px 15px;
+    padding-left: 40px;
+    border-radius: 13px;
+  }
+
+  .toggle-ver-todos {
+    position: relative;
+    padding: 10px 16px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: rgba(233, 233, 237, 0.04);
+  }
+
+  .toggle-ver-todos:has(input:checked) {
+    border-color: var(--accent);
+    background: var(--accent-bg);
+    color: var(--accent);
+  }
+
+  form {
+    flex-direction: column;
+  }
+
+  /* Barrio: header de sección */
+  .barrio-header {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+  }
+
+  /* ---- Tablas -> tarjetas ---- */
+  .table-wrapper {
+    overflow-x: visible;
+  }
+
+  table {
+    border-spacing: 0;
+  }
+
+  thead {
+    display: none;
+  }
+
+  tbody,
+  tfoot {
+    display: block;
+  }
+
+  tr {
+    display: block;
+  }
+
+  td {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  tbody tr:not(.barrio-header-row):not(.fila-expandida) {
+    background: rgba(233, 233, 237, 0.045);
+    border: 1px solid rgba(233, 233, 237, 0.08);
+    border-radius: 18px;
+    margin-bottom: 10px;
+    padding: 2px 14px;
+    overflow: hidden;
+  }
+
+  tbody tr:not(.barrio-header-row):not(.fila-expandida) td {
+    background: transparent;
+    border-radius: 0;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(233, 233, 237, 0.06);
+  }
+
+  tbody tr:not(.barrio-header-row):not(.fila-expandida) td:last-child {
+    border-bottom: none;
+  }
+
+  td[data-label]::before {
+    content: attr(data-label);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    flex: none;
+  }
+
+  .td-titulo {
+    justify-content: flex-start !important;
+    gap: 10px;
+    font-size: 16px;
+    font-weight: 500;
+  }
+
+  .td-titulo .drag-handle {
+    margin-right: 0;
+  }
+
+  .td-accion {
+    padding-top: 12px !important;
+    padding-bottom: 12px !important;
+  }
+
+  .td-accion button {
+    width: 100%;
+  }
+
+  /* Fila expandida (dirección/teléfono) fusionada visualmente con la tarjeta */
+  tr.fila-cliente.expandido {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    border-bottom: none;
+    margin-bottom: 0;
+  }
+
+  tr.fila-expandida {
+    background: rgba(233, 233, 237, 0.045);
+    border: 1px solid rgba(233, 233, 237, 0.08);
+    border-top: none;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    margin-bottom: 10px;
+    margin-top: -1px;
+  }
+
+  tr.fila-expandida td {
+    display: block;
+    padding: 0;
+  }
+
+  .detalle-cliente {
+    background: transparent;
+    flex-direction: column;
+    gap: 8px;
+    padding: 8px 0 14px;
+  }
+
+  /* Limpieza: botones más grandes, circulares */
+  .icon-button {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    font-size: 17px;
+  }
+
+  /* Pastillas: stepper +/- alrededor del input existente */
+  .pastillas-stepper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(233, 233, 237, 0.04);
+    border-radius: 12px;
+    padding: 4px 6px;
+  }
+
+  .stepper-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-size: 16px;
+    padding: 0;
+  }
+
+  .pastillas-input {
+    width: 32px;
+    text-align: center;
+    background: transparent;
+    border: none;
+    padding: 0;
+  }
+
+  /* Extra: apilado en vez de lado a lado */
+  .extra-inputs {
+    flex-direction: column;
+    width: 100%;
+    border-radius: 12px;
+  }
+
+  .extra-inputs input[type="text"] {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .extra-inputs input[type="number"] {
+    width: 100%;
+  }
+
+  .empleado-input {
+    width: 100%;
+  }
+
+  /* Resumen: tabs tipo segmented control */
+  .tabs {
+    background: rgba(233, 233, 237, 0.06);
+    border-radius: 999px;
+    padding: 4px;
+    gap: 4px;
+  }
+
+  .tabs button {
+    flex: 1;
+    border-radius: 999px;
+  }
+
+  .tabs button:not(.secondary) {
+    background: var(--accent-bg);
+    color: var(--accent);
+  }
+
+  .tabs button.secondary {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+  }
+
+  .periodo-nav button {
+    border-radius: 50%;
+  }
+
+  /* Resumen: fila de totales como tarjeta destacada */
+  tfoot tr {
+    background: rgba(145, 132, 217, 0.12);
+    border: 1px solid rgba(145, 132, 217, 0.25);
+    border-radius: 18px;
+    padding: 4px 14px;
+    margin-top: 4px;
+  }
+
+  tfoot td {
+    background: transparent !important;
+    border-radius: 0 !important;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(233, 233, 237, 0.08);
+  }
+
+  tfoot td:last-child {
+    border-bottom: none;
+  }
+
+  tfoot td:nth-child(5),
+  tfoot td:nth-child(6) {
+    display: none;
+  }
+
+  /* Modal -> hoja inferior */
+  .modal-overlay {
+    align-items: flex-end;
+    padding: 0;
+    background: rgba(10, 10, 16, 0.6);
+  }
+
+  .modal {
+    width: 100%;
+    max-width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+    border-radius: 24px 24px 0 0;
+    background: #1c1e2c;
+    animation: sheet-up 0.25s ease;
+  }
+
+  @keyframes sheet-up {
+    from {
+      transform: translateY(30px);
+      opacity: 0.5;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  /* Nav inferior fija, estilo tab bar */
+  .nav-icon {
+    display: block;
+  }
+
+  .main-nav {
+    position: fixed;
+    left: 14px;
+    right: 14px;
+    bottom: 14px;
+    z-index: 20;
+    margin-bottom: 0;
+    background: rgba(28, 30, 42, 0.92);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(233, 233, 237, 0.08);
+    border-radius: 22px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
+    padding: 8px 6px calc(6px + env(safe-area-inset-bottom));
+    gap: 0;
+  }
+
+  .main-nav button {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: rgba(233, 233, 237, 0.45);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 0;
+    font-size: 10px;
+    font-weight: 600;
+    border-radius: 14px;
+  }
+
+  .main-nav button:not(.secondary) {
+    color: #9184d9;
+  }
+}

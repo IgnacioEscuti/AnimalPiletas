@@ -216,7 +216,12 @@ export function ClientesPage() {
     <section>
       <div className="page-header">
         <h2>Clientes</h2>
-        <button onClick={abrirNuevo}>+ Nuevo cliente</button>
+        <button onClick={abrirNuevo} className="btn-nuevo-cliente">
+          <span className="btn-nuevo-cliente-full">+ Nuevo cliente</span>
+          <span className="btn-nuevo-cliente-icon" aria-hidden="true">
+            +
+          </span>
+        </button>
       </div>
 
       <div className="filtros-clientes">

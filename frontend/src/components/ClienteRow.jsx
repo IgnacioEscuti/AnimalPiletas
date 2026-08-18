@@ -32,10 +32,20 @@ export function ClienteRow({
     setPrecioExtra("");
   };
 
+  const ajustarPastillas = (delta) => {
+    const nuevo = Math.max(0, (Number(cantidadPastillas) || 0) + delta);
+    setCantidadPastillas(String(nuevo));
+    onPastillas(cliente.id, nuevo, empleado);
+  };
+
   return (
     <>
-      <tr onDragOver={onDragOver} onDrop={onDrop}>
-        <td>
+      <tr
+        className={`fila-cliente ${expandido ? "expandido" : ""}`}
+        onDragOver={onDragOver}
+        onDrop={onDrop}
+      >
+        <td className="td-titulo">
           <span
             className="drag-handle"
             draggable
@@ -52,9 +62,9 @@ export function ClienteRow({
           >
             <span className={`chevron ${expandido ? "chevron-abierto" : ""}`}>▸</span>
           </button>
-          {cliente.nombre}
+          <span className="cliente-nombre">{cliente.nombre}</span>
         </td>
-        <td>
+        <td data-label="Limpieza">
           <div className="limpieza-buttons">
             <button
               className={`icon-button ${limpiezaHoy?.realizada === true ? "active-tick" : ""}`}
@@ -72,18 +82,26 @@ export function ClienteRow({
             </button>
           </div>
         </td>
-        <td>
-          <input
-            type="number"
-            min="0"
-            placeholder="0"
-            className="pastillas-input"
-            value={cantidadPastillas}
-            onChange={(event) => setCantidadPastillas(event.target.value)}
-            onBlur={() => onPastillas(cliente.id, Number(cantidadPastillas) || 0, empleado)}
-          />
+        <td data-label="Pastillas">
+          <div className="pastillas-stepper">
+            <button type="button" className="stepper-btn" onClick={() => ajustarPastillas(-1)}>
+              −
+            </button>
+            <input
+              type="number"
+              min="0"
+              placeholder="0"
+              className="pastillas-input"
+              value={cantidadPastillas}
+              onChange={(event) => setCantidadPastillas(event.target.value)}
+              onBlur={() => onPastillas(cliente.id, Number(cantidadPastillas) || 0, empleado)}
+            />
+            <button type="button" className="stepper-btn" onClick={() => ajustarPastillas(1)}>
+              +
+            </button>
+          </div>
         </td>
-        <td>
+        <td data-label="Extra">
           <div className="extra-inputs">
             <input
               type="text"
@@ -107,7 +125,7 @@ export function ClienteRow({
             </p>
           )}
         </td>
-        <td>
+        <td data-label="Empleado">
           <input
             type="text"
             placeholder="Empleado"
@@ -116,7 +134,7 @@ export function ClienteRow({
             onChange={(event) => setEmpleado(event.target.value)}
           />
         </td>
-        <td>
+        <td className="td-accion">
           <button className="secondary" onClick={() => onEditar(cliente)}>
             Editar
           </button>
