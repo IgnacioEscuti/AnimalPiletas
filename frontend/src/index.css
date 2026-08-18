@@ -33,12 +33,18 @@
   box-sizing: border-box;
 }
 
+html {
+  background: var(--bg);
+  overscroll-behavior-x: none;
+}
+
 body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
+  overscroll-behavior-x: none;
 }
 
 #root {
@@ -208,6 +214,7 @@ li.row {
     opacity: 0;
     transform: translateY(4px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -326,6 +333,18 @@ tfoot tr td:last-child {
 .limpieza-buttons {
   display: flex;
   gap: 3px;
+}
+
+.estado-punto {
+  display: none;
+}
+
+.badge-pastillas {
+  display: none;
+}
+
+.td-titulo-derecha {
+  display: contents;
 }
 
 .icon-button {
@@ -493,6 +512,21 @@ tbody:first-of-type .barrio-header-row td {
   font-weight: 500;
 }
 
+.detalle-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.detalle-icono {
+  flex: none;
+  opacity: 0.7;
+}
+
+.btn-editar-mobile {
+  display: none;
+}
+
 /* Modal */
 
 .modal-overlay {
@@ -504,7 +538,7 @@ tbody:first-of-type .barrio-header-row td {
   justify-content: center;
   padding: 24px;
   animation: fade-in 0.15s ease;
-  z-index: 10;
+  z-index: 30;
 }
 
 .modal {
@@ -608,8 +642,8 @@ input[type="number"]::-webkit-inner-spin-button {
 }
 
 /* ==========================================================================
-   Mobile (≤700px) — tarjetas oscuras estilo iOS.
-   Solo afecta este breakpoint; el layout de escritorio (tablas) no cambia.
+  Mobile (≤700px) — tarjetas oscuras estilo iOS.
+  Solo afecta este breakpoint; el layout de escritorio (tablas) no cambia.
    ========================================================================== */
 
 .btn-nuevo-cliente-icon,
@@ -807,13 +841,60 @@ input[type="number"]::-webkit-inner-spin-button {
     margin-right: 0;
   }
 
-  .td-accion {
-    padding-top: 12px !important;
-    padding-bottom: 12px !important;
+  /* Ícono de estado (tick / cruz / pendiente) a la izquierda del nombre */
+  .estado-punto {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    font-size: 11px;
+    font-weight: 700;
   }
 
-  .td-accion button {
-    width: 100%;
+  .estado-punto.estado-tick {
+    background: rgba(52, 199, 89, 0.16);
+    color: #34c759;
+  }
+
+  .estado-punto.estado-cross {
+    background: rgba(240, 80, 100, 0.16);
+    color: var(--danger);
+  }
+
+  .estado-punto.estado-pendiente {
+    background: rgba(233, 233, 237, 0.08);
+    color: var(--text-muted);
+  }
+
+  /* Badge de pastillas + chevron, alineados a la derecha de la fila */
+  .td-titulo-derecha {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+  }
+
+  .badge-pastillas {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 999px;
+    background: var(--accent-bg);
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  /* Tarjeta colapsada por defecto: solo título visible hasta expandir */
+  tr.fila-cliente:not(.expandido) td:not(.td-titulo) {
+    display: none;
+  }
+
+  /* El botón Editar original queda oculto: se duplica al final del detalle expandido */
+  .td-accion {
+    display: none;
   }
 
   /* Fila expandida (dirección/teléfono) fusionada visualmente con la tarjeta */
@@ -854,6 +935,25 @@ input[type="number"]::-webkit-inner-spin-button {
     font-size: 17px;
   }
 
+  /* Confirmar destacado en verde lleno; "No se pudo" queda como acción secundaria */
+  .limpieza-buttons .icon-button:first-child {
+    background: #34c759;
+    border-color: #34c759;
+    color: #fff;
+  }
+
+  .limpieza-buttons .icon-button:last-child {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+  }
+
+  .limpieza-buttons:has(.icon-button.active-cross) .icon-button:first-child {
+    background: transparent;
+    border-color: var(--border);
+    color: var(--text-muted);
+  }
+
   /* Pastillas: stepper +/- alrededor del input existente */
   .pastillas-stepper {
     display: flex;
@@ -886,25 +986,31 @@ input[type="number"]::-webkit-inner-spin-button {
     padding: 0;
   }
 
-  /* Extra: apilado en vez de lado a lado */
+  /* Extra: nombre y precio unificados en una sola fila (nombre izquierda, precio derecha) */
   .extra-inputs {
-    flex-direction: column;
     width: 100%;
     border-radius: 12px;
   }
 
   .extra-inputs input[type="text"] {
-    width: 100%;
-    border-right: none;
-    border-bottom: 1px solid var(--border);
+    flex: 1;
+    width: auto;
   }
 
   .extra-inputs input[type="number"] {
-    width: 100%;
+    width: 80px;
+    text-align: right;
   }
 
   .empleado-input {
     width: 100%;
+  }
+
+  /* Editar: duplicado al final del detalle expandido (el original se oculta) */
+  .btn-editar-mobile {
+    display: block;
+    width: 100%;
+    margin-top: 4px;
   }
 
   /* Resumen: tabs tipo segmented control */
@@ -982,6 +1088,7 @@ input[type="number"]::-webkit-inner-spin-button {
       transform: translateY(30px);
       opacity: 0.5;
     }
+
     to {
       transform: translateY(0);
       opacity: 1;

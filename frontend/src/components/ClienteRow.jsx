@@ -38,6 +38,10 @@ export function ClienteRow({
     onPastillas(cliente.id, nuevo, empleado);
   };
 
+  const estadoLimpieza =
+    limpiezaHoy?.realizada === true ? "tick" : limpiezaHoy?.realizada === false ? "cross" : "pendiente";
+  const simboloEstado = estadoLimpieza === "tick" ? "✓" : estadoLimpieza === "cross" ? "✕" : "–";
+
   return (
     <>
       <tr
@@ -54,15 +58,23 @@ export function ClienteRow({
           >
             ⠿
           </span>
-          <button
-            type="button"
-            className="chevron-button"
-            onClick={() => setExpandido((valor) => !valor)}
-            title={expandido ? "Ocultar dirección y teléfono" : "Ver dirección y teléfono"}
-          >
-            <span className={`chevron ${expandido ? "chevron-abierto" : ""}`}>▸</span>
-          </button>
+          <span className={`estado-punto estado-${estadoLimpieza}`} aria-hidden="true">
+            {simboloEstado}
+          </span>
           <span className="cliente-nombre">{cliente.nombre}</span>
+          <span className="td-titulo-derecha">
+            {pastillasHoy?.cantidad > 0 && (
+              <span className="badge-pastillas">{pastillasHoy.cantidad}</span>
+            )}
+            <button
+              type="button"
+              className="chevron-button"
+              onClick={() => setExpandido((valor) => !valor)}
+              title={expandido ? "Colapsar" : "Expandir"}
+            >
+              <span className={`chevron ${expandido ? "chevron-abierto" : ""}`}>▸</span>
+            </button>
+          </span>
         </td>
         <td data-label="Limpieza">
           <div className="limpieza-buttons">
@@ -148,13 +160,36 @@ export function ClienteRow({
                 <strong>Tarifa:</strong>{" "}
                 <span className="badge">{cliente.tarifaLimpieza?.nombre}</span>
               </span>
-              <span>
-                <strong>Dirección:</strong> {cliente.direccion || "—"}
+              <span className="detalle-item">
+                <svg
+                  className="detalle-icono"
+                  width="14"
+                  height="14"
+                  viewBox="0 0 256 256"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <path d="M128,16a88.1,88.1,0,0,0-88,88c0,75.3,80,132,83.41,134.36a8,8,0,0,0,9.18,0C136,236,216,179.3,216,104A88.1,88.1,0,0,0,128,16Zm0,120a32,32,0,1,1,32-32A32,32,0,0,1,128,136Z" />
+                </svg>
+                {cliente.direccion || "—"}
               </span>
-              <span>
-                <strong>Teléfono:</strong> {cliente.telefono || "—"}
+              <span className="detalle-item">
+                <svg
+                  className="detalle-icono"
+                  width="14"
+                  height="14"
+                  viewBox="0 0 256 256"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <path d="M222.37,158.46l-47.11-21.11-.13-.06a16,16,0,0,0-15.17,1.4,8.12,8.12,0,0,0-.75.56L134.87,160c-15.42-7.49-31.34-23.29-38.83-38.51l20.78-24.71c.2-.25.39-.5.57-.77a16,16,0,0,0,1.32-15.06l0-.12L97.54,33.63a16,16,0,0,0-16.62-9.52A56.26,56.26,0,0,0,32,80c0,79.4,64.6,144,144,144a56.26,56.26,0,0,0,55.89-48.92A16,16,0,0,0,222.37,158.46Z" />
+                </svg>
+                {cliente.telefono || "—"}
               </span>
             </div>
+            <button type="button" className="secondary btn-editar-mobile" onClick={() => onEditar(cliente)}>
+              Editar
+            </button>
           </td>
         </tr>
       )}

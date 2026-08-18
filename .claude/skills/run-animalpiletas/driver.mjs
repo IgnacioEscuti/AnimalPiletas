@@ -14,6 +14,7 @@ fs.mkdirSync(screenshotDir, { recursive: true });
 
 const browser = await chromium.launch();
 const page = await browser.newPage();
+page.on("dialog", (dialog) => dialog.accept());
 const consoleMessages = [];
 page.on("console", (msg) => consoleMessages.push({ type: msg.type(), text: msg.text() }));
 page.on("pageerror", (err) => consoleMessages.push({ type: "error", text: err.message }));
@@ -38,6 +39,13 @@ async function handle(line) {
       case "nav": {
         await page.goto(arg, { waitUntil: "domcontentloaded" });
         console.log(`OK nav ${arg}`);
+        break;
+      }
+      case "viewport": {
+        // "viewport <width>x<height>"
+        const [w, h] = arg.split("x").map(Number);
+        await page.setViewportSize({ width: w, height: h });
+        console.log(`OK viewport ${arg}`);
         break;
       }
       case "wait-for": {
@@ -111,6 +119,11 @@ async function handle(line) {
       }
       case "text": {
         console.log(await page.textContent("body"));
+        break;
+      }
+      case "eval": {
+        const result = await page.evaluate(arg);
+        console.log(JSON.stringify(result));
         break;
       }
       case "console": {
