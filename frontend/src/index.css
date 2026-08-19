@@ -661,6 +661,8 @@ button.modal-cancelar-cliente:hover {
   display: flex;
   gap: 8px;
   margin-bottom: 24px;
+  position: fixed;
+  bottom: 0;
 }
 
 .tabs {
@@ -753,38 +755,38 @@ input[type="number"]::-webkit-inner-spin-button {
 
   /* Header de marca (AnimalPiletas + subtítulo + Cerrar sesión) se achica a
      una tira angosta: solo queda el botón de logout, como ícono. */
-  #root > .page-header {
+  #root>.page-header {
     margin-bottom: 12px;
   }
 
-  #root > .page-header h1,
-  #root > .page-header .subtitle {
+  #root>.page-header h1,
+  #root>.page-header .subtitle {
     display: none;
   }
 
-  #root > .page-header .btn-logout {
+  #root>.page-header .btn-logout {
     background: transparent;
     border: none;
     padding: 6px;
   }
 
-  #root > .page-header .btn-logout-full {
+  #root>.page-header .btn-logout-full {
     display: none;
   }
 
-  #root > .page-header .btn-logout-icon {
+  #root>.page-header .btn-logout-icon {
     display: inline-flex;
     color: var(--text-muted);
   }
 
   /* Header de la pantalla de Clientes: título grande + botón "+" circular */
-  section > .page-header {
+  section>.page-header {
     align-items: center;
     margin-bottom: 16px;
     padding-top: env(safe-area-inset-top);
   }
 
-  section > .page-header h2 {
+  section>.page-header h2 {
     font-size: 34px;
     font-weight: 600;
     letter-spacing: -0.02em;
