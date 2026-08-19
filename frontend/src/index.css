@@ -45,6 +45,7 @@ html {
   background-color: var(--bg);
   background: radial-gradient(120% 90% at 50% 0%, var(--surface) 0%, var(--bg) 62%) fixed;
   overscroll-behavior-x: none;
+  overscroll-behavior-y: none;
   color: var(--surface);
 }
 
@@ -63,6 +64,7 @@ body {
   max-width: 1040px;
   margin: 0 auto;
   padding: 48px 24px 96px;
+  background-color: var(--bg);
 }
 
 h1 {
