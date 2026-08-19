@@ -19,6 +19,27 @@
   box-sizing: border-box;
 }
 
+/* Safari iOS 26: en vez de leer el background del body, prioriza el color
+   de elementos position:fixed pegados a los bordes del viewport. Estos dos
+   divs le dan un elemento fixed inequívoco para evitar el flash blanco. */
+.safari-bg-fix {
+  position: fixed;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background-color: var(--bg);
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.safari-bg-fix-top {
+  top: 0;
+}
+
+.safari-bg-fix-bottom {
+  bottom: 0;
+}
+
 html {
   min-height: 100%;
   background-color: var(--bg);
@@ -29,7 +50,7 @@ html {
 
 body {
   margin: 0;
-  min-height: 150%;
+  min-height: 100%;
   background-color: var(--bg);
   background: radial-gradient(120% 90% at 50% 0%, var(--surface) 0%, var(--bg) 62%) fixed;
   color: var(--text);

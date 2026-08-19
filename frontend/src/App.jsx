@@ -67,6 +67,15 @@ const PANTALLAS = {
   tarifas: { label: "Tarifas", Componente: TarifasPage },
 };
 
+function SafariBgFix() {
+  return (
+    <>
+      <div className="safari-bg-fix safari-bg-fix-top" aria-hidden="true"></div>
+      <div className="safari-bg-fix safari-bg-fix-bottom" aria-hidden="true"></div>
+    </>
+  );
+}
+
 function App() {
   const { usuario, cargando, logout } = useAuth();
   const [pantalla, setPantalla] = useState("clientes");
@@ -77,6 +86,7 @@ function App() {
   if (!usuario) {
     return (
       <>
+        <SafariBgFix />
         <h1>AnimalPiletas</h1>
         <p className="subtitle">Gestión de clientes, tarifas y resumen de cobros</p>
 
@@ -93,6 +103,7 @@ function App() {
 
   return (
     <>
+      <SafariBgFix />
       <div className="page-header">
         <div>
           <h1>AnimalPiletas</h1>
