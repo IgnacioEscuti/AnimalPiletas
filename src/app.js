@@ -23,10 +23,13 @@ const origenesPermitidos = env.FRONTEND_URLS
   ? env.FRONTEND_URLS.split(",").map((url) => url.trim())
   : [];
 
+const esLocalhostDev = (origin) =>
+  env.NODE_ENV !== "production" && /^http:\/\/localhost:\d+$/.test(origin);
+
 app.use(
   cors({
     origin(origin, callback) {
-      if (!origin || origenesPermitidos.includes(origin)) {
+      if (!origin || origenesPermitidos.includes(origin) || esLocalhostDev(origin)) {
         callback(null, true);
       } else {
         callback(new Error("Origen no permitido por CORS"));

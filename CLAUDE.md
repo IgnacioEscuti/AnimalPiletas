@@ -12,6 +12,7 @@
 Seguir la misma arquitectura en capas que el proyecto "Gestión de Eventos": Model → DAO → Repository → Service → Controller → Routes → DTO → Middlewares. Replicar esa estructura de carpetas y ese estilo de separación de responsabilidades desde el primer feature.
 
 # Workflow
+- Devolver en el output solo lo importante, no escribir de mas.
 - No diseñar pensando en funciones futuras que todavía no se pidieron explícitamente. Resolver solo lo pedido en cada paso.
 - Preferir soluciones simples. Si hay una forma más simple de lograr lo mismo, usarla.
 - Si algo no queda claro antes de codear una función, preguntar antes de asumir.

@@ -39,7 +39,12 @@ export function ClientesPage() {
   const [dragCliente, setDragCliente] = useState(null);
   const [touchDragId, setTouchDragId] = useState(null);
   const [touchOverId, setTouchOverId] = useState(null);
+  const [clienteExpandidoId, setClienteExpandidoId] = useState(null);
   const touchDragRef = useRef(null);
+
+  const handleToggleExpandido = (clienteId) => {
+    setClienteExpandidoId((actual) => (actual === clienteId ? null : clienteId));
+  };
 
   useEffect(() => {
     cargarTodo();
@@ -96,29 +101,40 @@ export function ClientesPage() {
     await cargarTodo();
   };
 
+  const actualizarPorCliente = (lista, clienteId, cambios) =>
+    lista.some((item) => item.cliente === clienteId)
+      ? lista.map((item) => (item.cliente === clienteId ? { ...item, ...cambios } : item))
+      : [...lista, { cliente: clienteId, ...cambios }];
+
   const handleLimpieza = async (clienteId, realizada, empleado) => {
+    const anterior = limpiezas;
+    setLimpiezas(actualizarPorCliente(anterior, clienteId, { realizada, empleado }));
     try {
       await registrarLimpieza(clienteId, realizada, empleado);
-      setLimpiezas(await getLimpiezasDeHoy());
     } catch {
+      setLimpiezas(anterior);
       setError("No se pudo registrar la limpieza.");
     }
   };
 
   const handlePastillas = async (clienteId, cantidad, empleado) => {
+    const anterior = pastillas;
+    setPastillas(actualizarPorCliente(anterior, clienteId, { cantidad, empleado }));
     try {
       await registrarUsoPastillas(clienteId, cantidad, empleado);
-      setPastillas(await getUsosPastillasDeHoy());
     } catch {
+      setPastillas(anterior);
       setError("No se pudo registrar la carga de pastillas.");
     }
   };
 
   const handleExtra = async (clienteId, nombreExtra, precioUnitario, empleado) => {
+    const anterior = extras;
+    setExtras(actualizarPorCliente(anterior, clienteId, { nombreExtra, precioUnitario, empleado }));
     try {
       await registrarUsoExtra(clienteId, nombreExtra, precioUnitario, empleado);
-      setExtras(await getUsosExtraDeHoy());
     } catch {
+      setExtras(anterior);
       setError("No se pudo registrar la carga de extra.");
     }
   };
@@ -376,6 +392,8 @@ export function ClientesPage() {
                   onPointerDownDrag={handlePointerDownDrag}
                   arrastrando={touchDragId === cliente.id}
                   dragOver={touchOverId === cliente.id}
+                  expandido={clienteExpandidoId === cliente.id}
+                  onToggleExpandido={() => handleToggleExpandido(cliente.id)}
                 />
               ))}
             </Fragment>

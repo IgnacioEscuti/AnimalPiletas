@@ -16,6 +16,8 @@ export function ClienteRow({
   onPointerDownDrag,
   arrastrando,
   dragOver,
+  expandido,
+  onToggleExpandido,
 }) {
   const [cantidadPastillas, setCantidadPastillas] = useState(
     pastillasHoy?.cantidad ? String(pastillasHoy.cantidad) : ""
@@ -23,15 +25,14 @@ export function ClienteRow({
   const [nombreExtra, setNombreExtra] = useState("");
   const [precioExtra, setPrecioExtra] = useState("");
   const [empleado, setEmpleado] = useState("");
-  const [expandido, setExpandido] = useState(false);
 
   useEffect(() => {
     setCantidadPastillas(pastillasHoy?.cantidad ? String(pastillasHoy.cantidad) : "");
   }, [pastillasHoy?.cantidad]);
 
-  const handleBlurExtra = async () => {
+  const handleBlurExtra = () => {
     if (!nombreExtra || !precioExtra) return;
-    await onExtra(cliente.id, nombreExtra, Number(precioExtra), empleado);
+    onExtra(cliente.id, nombreExtra, Number(precioExtra), empleado);
     setNombreExtra("");
     setPrecioExtra("");
   };
@@ -59,7 +60,7 @@ export function ClienteRow({
       >
         <td
           className="td-titulo"
-          onClick={() => setExpandido((valor) => !valor)}
+          onClick={onToggleExpandido}
           title={expandido ? "Colapsar" : "Expandir"}
         >
           <span
@@ -157,13 +158,15 @@ export function ClienteRow({
           </div>
         </td>
         <td data-label="Empleado">
-          <input
-            type="text"
-            placeholder="Empleado"
-            className="empleado-input"
-            value={empleado}
-            onChange={(event) => setEmpleado(event.target.value)}
-          />
+          <div className="empleado-columna">
+            <input
+              type="text"
+              placeholder="Empleado"
+              className="empleado-input"
+              value={empleado}
+              onChange={(event) => setEmpleado(event.target.value)}
+            />
+          </div>
         </td>
         <td className="td-accion">
           <button className="btn-outline-accent" onClick={() => onEditar(cliente)}>

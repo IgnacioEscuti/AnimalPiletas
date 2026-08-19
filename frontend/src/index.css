@@ -20,8 +20,14 @@
 }
 
 html {
-  background: var(--bg);
+  background: radial-gradient(120% 90% at 50% 0%, var(--surface) 0%, var(--bg) 62%) fixed;
   overscroll-behavior-x: none;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+html::-webkit-scrollbar {
+  display: none;
 }
 
 body {
@@ -31,6 +37,12 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   overscroll-behavior-x: none;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+body::-webkit-scrollbar {
+  display: none;
 }
 
 #root {
@@ -267,6 +279,7 @@ li.row {
   width: auto;
   min-width: 0;
   cursor: pointer;
+  accent-color: #6b6b76;
 }
 
 .table-wrapper {
@@ -403,7 +416,8 @@ tfoot tr td:last-child {
   display: contents;
 }
 
-.extra-columna {
+.extra-columna,
+.empleado-columna {
   display: contents;
 }
 
@@ -1063,13 +1077,22 @@ input[type="number"]::-webkit-inner-spin-button {
     font-weight: 600;
   }
 
-  /* Empleado: se ve como texto simple, sin marco de input */
+  /* Empleado: mismo tratamiento de tarjeta/pill que Extra de hoy */
+  .empleado-columna {
+    display: flex !important;
+    width: 100%;
+    padding: 14px 16px;
+    background: var(--bg);
+    border-radius: 14px;
+  }
+
   .empleado-input {
     width: 100%;
     background: transparent;
     border: none;
     padding: 0;
-    font-size: 16px;
+    font-size: 15px;
+    color: var(--text);
   }
 
   /* Botón de editar: se oculta el de la fila título (desktop),
