@@ -125,7 +125,7 @@ Agrupando por cliente y sumando los totales de cada colección se arma el total 
 
 **Período por defecto al entrar:** tanto semanal como mensual arrancan siempre mostrando el período que contiene la fecha de hoy (la semana en curso, o el mes en curso) — sin ninguna excepción para el día 1° del mes. Se eliminó la regla anterior (que el día 1° mostraba el mes anterior por defecto) porque generaba una lógica condicional extra y terminó siendo la fuente de un bug. Si al 1° del mes hace falta ver el mes que se acaba de cerrar, se navega con la flecha "anterior" o el selector de fecha — un solo click.
 
-## Login (Función 7 — sin roles todavía, eso es la Función 8)
+## Login (Función 7) y Roles (Función 8)
 
 ### Usuario
 ```
@@ -183,8 +183,8 @@ Completamente separado de `barrio` (que sigue siendo solo agrupación visual) �
 3. ✅ Pantalla de Cliente: lista con buscador, alta/edición vía modal, y en cada fila: marcar limpieza del día (tick/cruz), cantidad de pastillas, y nombre+precio de extra (carga manual, antes llamado "producto") — hecho en Función 3
 4. ✅ Resumen (semanal y mensual, por cliente, con cantidad al lado del precio y totales al pie) — hecho en Función 4
 5. ✅ Campo semana en Cliente + filtro automático en la pantalla + toggle "ver todos" — hecho en Función 5
-6. Responsive (mobile) — pendiente, dejado para el final. Incluye: layout mobile de las tablas anchas (Cliente, Resumen), manifest.json + apple-touch-icon para PWA en iOS, y un service worker básico para que Chrome/Android ofrezca instalar la PWA de forma proactiva
-7. Login (email + PIN de 4 dígitos, sin roles todavía)✅
-8. Roles (admin ve/modifica todo, encargado solo sus propios clientes vía campo Cliente.encargado)✅
+6. ✅ Responsive (mobile): layout mobile de tarjetas colapsables por cliente, manifest.json + apple-touch-icon para PWA en iOS, meta theme-color y safe-area para el status bar — hecho en Función 6
+7. ✅ Login (email + PIN de 4 dígitos, cookie httpOnly de 8hs, bloqueo por intentos) — hecho en Función 7
+8. ✅ Roles (admin ve/modifica todo, encargado solo sus propios clientes vía campo Cliente.encargado) — hecho en Función 8
 
-App ya deployada: frontend en Vercel, backend en Render, base en MongoDB Atlas. Instalada como PWA en iPhone.
+App deployada y en uso: frontend en Vercel, backend en Render, base en MongoDB Atlas. Instalada como PWA en iPhone. Login y roles ya activos — todos los endpoints requieren sesión.
