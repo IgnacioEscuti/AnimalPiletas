@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { motion } from "framer-motion";
 
 export function TarifaList({ tarifas, onActualizar }) {
   const [editandoId, setEditandoId] = useState(null);
@@ -16,8 +17,14 @@ export function TarifaList({ tarifas, onActualizar }) {
     setEditandoId(null);
   };
 
-  return tarifas.map((tarifa) => (
-    <li className="row" key={tarifa.id}>
+  return tarifas.map((tarifa, index) => (
+    <motion.li
+      className="row"
+      key={tarifa.id}
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.2, delay: index * 0.04 }}
+    >
       {editandoId === tarifa.id ? (
         <>
           <span className="row-name">{tarifa.nombre}</span>
@@ -48,6 +55,6 @@ export function TarifaList({ tarifas, onActualizar }) {
           </div>
         </>
       )}
-    </li>
+    </motion.li>
   ));
 }

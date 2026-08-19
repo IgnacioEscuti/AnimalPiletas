@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { useAuth } from "./context/AuthContext.jsx";
 import { LoginPage } from "./pages/LoginPage.jsx";
 import { RegistroPage } from "./pages/RegistroPage.jsx";
@@ -90,11 +91,29 @@ function App() {
         <h1>AnimalPiletas</h1>
         <p className="subtitle">Gestión de clientes, tarifas y resumen de cobros</p>
 
-        {vistaAuth === "login" ? (
-          <LoginPage onIrARegistro={() => setVistaAuth("registro")} />
-        ) : (
-          <RegistroPage onIrALogin={() => setVistaAuth("login")} />
-        )}
+        <AnimatePresence mode="wait">
+          {vistaAuth === "login" ? (
+            <motion.div
+              key="login"
+              initial={{ opacity: 0, x: -16 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 16 }}
+              transition={{ duration: 0.2 }}
+            >
+              <LoginPage onIrARegistro={() => setVistaAuth("registro")} />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="registro"
+              initial={{ opacity: 0, x: 16 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -16 }}
+              transition={{ duration: 0.2 }}
+            >
+              <RegistroPage onIrALogin={() => setVistaAuth("login")} />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </>
     );
   }
@@ -132,18 +151,35 @@ function App() {
 
       <nav className="main-nav">
         {Object.entries(PANTALLAS).map(([clave, { label }]) => (
-          <button
+          <motion.button
             key={clave}
             className={pantalla === clave ? "" : "secondary"}
             onClick={() => setPantalla(clave)}
           >
+            {pantalla === clave && (
+              <motion.span
+                layoutId="nav-indicador"
+                className="nav-indicador"
+                transition={{ type: "spring", stiffness: 500, damping: 35 }}
+              />
+            )}
             {ICONOS[clave]}
             {label}
-          </button>
+          </motion.button>
         ))}
       </nav>
 
-      <Componente />
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={pantalla}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.18 }}
+        >
+          <Componente />
+        </motion.div>
+      </AnimatePresence>
     </>
   );
 }

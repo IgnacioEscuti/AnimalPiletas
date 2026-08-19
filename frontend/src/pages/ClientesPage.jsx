@@ -1,6 +1,7 @@
 import { Fragment, useEffect, useRef, useState } from "react";
 import { ClienteModal } from "../components/ClienteModal.jsx";
 import { ClienteRow } from "../components/ClienteRow.jsx";
+import { Skeleton } from "../components/Skeleton.jsx";
 import {
   getClientes,
   crearCliente,
@@ -40,6 +41,7 @@ export function ClientesPage() {
   const [touchDragId, setTouchDragId] = useState(null);
   const [touchOverId, setTouchOverId] = useState(null);
   const [clienteExpandidoId, setClienteExpandidoId] = useState(null);
+  const [cargando, setCargando] = useState(true);
   const touchDragRef = useRef(null);
 
   const handleToggleExpandido = (clienteId) => {
@@ -78,6 +80,8 @@ export function ClientesPage() {
       setUsuarios(usuariosData);
     } catch {
       setError("No se pudieron cargar los datos.");
+    } finally {
+      setCargando(false);
     }
   };
 
@@ -337,6 +341,9 @@ export function ClientesPage() {
 
       {error && <p className="error-message">{error}</p>}
 
+      {cargando ? (
+        <Skeleton filas={6} />
+      ) : (
       <div className="table-wrapper">
         <table>
           <thead>
@@ -374,10 +381,11 @@ export function ClientesPage() {
                   </td>
                 </tr>
               </tbody>
-              {grupo.clientes.map((cliente) => (
+              {grupo.clientes.map((cliente, index) => (
                 <ClienteRow
                   key={cliente.id}
                   cliente={cliente}
+                  index={index}
                   grupoKey={grupo.key}
                   limpiezaHoy={limpiezas.find((limpieza) => limpieza.cliente === cliente.id)}
                   pastillasHoy={pastillas.find((uso) => uso.cliente === cliente.id)}
@@ -401,6 +409,7 @@ export function ClientesPage() {
         </table>
         {grupos.length === 0 && <p className="empty-state">No hay clientes para mostrar.</p>}
       </div>
+      )}
 
       {modalAbierto && (
         <ClienteModal

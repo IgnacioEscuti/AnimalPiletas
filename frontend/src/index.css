@@ -53,7 +53,6 @@ body {
   margin: 0;
   min-height: 100%;
   background-color: var(--bg);
-  background: radial-gradient(120% 90% at 50% 0%, var(--surface) 0%, var(--bg) 62%) fixed;
   color: var(--text);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -149,13 +148,14 @@ button:disabled {
 }
 
 button.secondary {
-  background: var(--bg);
+  background: var(--surface);
   color: var(--text);
   border: 1px solid var(--border);
 }
 
+
 button.secondary:hover {
-  background: var(--border);
+  background: var(--accent);
 }
 
 button.danger {
@@ -173,6 +173,8 @@ button.btn-outline-accent {
   align-items: center;
   justify-content: center;
   gap: 8px;
+  padding: 10px 10px;
+  font-size: 14px;
   background: transparent;
   border: 1px solid var(--accent);
   color: var(--accent);
@@ -227,6 +229,19 @@ li.row {
   font-size: 14px;
 }
 
+.skeleton-grupo {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 4px 0;
+}
+
+.skeleton-fila {
+  height: 44px;
+  border-radius: 14px;
+  background: var(--border);
+}
+
 .empty-state {
   color: var(--text-muted);
   font-size: 15px;
@@ -267,6 +282,7 @@ li.row {
 .search-input {
   width: 100%;
   margin-bottom: 20px;
+  background: var(--bg);
 }
 
 .filtros-clientes {
@@ -549,6 +565,7 @@ tbody:first-of-type .barrio-header-row td {
 
 .chevron {
   display: inline-block;
+  margin-right: 5px;
   font-size: 15px;
   font-weight: 600;
   color: var(--text-muted);
@@ -592,7 +609,7 @@ tbody:first-of-type .barrio-header-row td {
   opacity: 0.7;
 }
 
-.btn-editar-mobile {
+button.btn-editar-mobile {
   display: none;
 }
 
@@ -659,10 +676,8 @@ button.modal-cancelar-cliente:hover {
 
 .main-nav {
   display: flex;
-  gap: 8px;
+  gap: 30px;
   margin-bottom: 24px;
-  position: fixed;
-  bottom: 0;
 }
 
 .tabs {
@@ -674,10 +689,20 @@ button.modal-cancelar-cliente:hover {
 .tabs button,
 .main-nav button {
   padding: 10px 18px;
+  position: relative;
+}
+
+.nav-indicador {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
 }
 
 .periodo-nav {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
   gap: 16px;
@@ -792,6 +817,20 @@ input[type="number"]::-webkit-inner-spin-button {
     letter-spacing: -0.02em;
   }
 
+  .periodo-nav {
+    gap: 12px;
+  }
+
+  .periodo-label {
+    min-width: 0;
+    font-size: 15px;
+  }
+
+  .periodo-fecha {
+    flex-basis: 100%;
+    order: 1;
+  }
+
   .btn-nuevo-cliente {
     width: 44px;
     height: 44px;
@@ -821,8 +860,8 @@ input[type="number"]::-webkit-inner-spin-button {
   }
 
   .search-input {
-    margin-bottom: 0;
-    background: var(--surface);
+    margin-bottom: 1vh;
+    background: var(--bg);
     border-color: transparent;
     border-radius: 999px;
     padding: 13px 16px 13px 42px;
@@ -1156,7 +1195,6 @@ input[type="number"]::-webkit-inner-spin-button {
     margin: 0;
     gap: 0;
     background: var(--surface);
-    border-top: 1px solid var(--border);
     padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
     justify-content: space-around;
   }
@@ -1175,13 +1213,122 @@ input[type="number"]::-webkit-inner-spin-button {
     border-radius: 14px;
   }
 
-  .main-nav button:not(.secondary) {
+  .main-nav button,
+  .main-nav button.secondary {
     color: var(--accent);
+  }
+
+  .main-nav button.secondary {
+    border: none;
   }
 
   .main-nav .nav-icon {
     display: block;
     width: 22px;
     height: 22px;
+  }
+
+  /* Tarjeta mobile genérica (Resumen, Tarifas, Login/Registro) — mismo
+     lenguaje de tarjeta que Clientes (superficie + radio card-mobile),
+     ya que el reset de <section> de arriba está pensado para la tabla
+     propia de Clientes. */
+  .card-mobile {
+    background: var(--surface);
+    border-radius: 18px;
+    padding: 20px 16px;
+    margin-bottom: 16px;
+  }
+
+  .card-mobile:last-child {
+    margin-bottom: 0;
+  }
+
+  .card-mobile h2 {
+    font-size: 19px;
+  }
+
+  /* Tabs de Resumen: pill como el resto de los chips/badges en mobile */
+  .tabs button {
+    border-radius: 999px;
+  }
+
+  /* Tabla de Resumen -> tarjetas apiladas, mismo patrón que Clientes
+     (label en mayúscula vía data-label), sin scroll horizontal. */
+  .resumen-table thead {
+    display: none;
+  }
+
+  .resumen-table,
+  .resumen-table tbody,
+  .resumen-table tfoot {
+    display: block;
+  }
+
+  .resumen-table tbody {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .resumen-table tr {
+    display: block;
+    background: var(--bg);
+    border-radius: 14px;
+    animation: fade-in 0.2s ease;
+  }
+
+  .resumen-table td {
+    display: block;
+    background: transparent;
+    padding: 0;
+    border-radius: 0 !important;
+  }
+
+  .resumen-table td.td-titulo {
+    font-weight: 700;
+    font-size: 17px;
+    padding: 14px 16px 4px !important;
+    text-align: center;
+  }
+
+  .resumen-table td[data-label] {
+    padding: 0 16px 14px !important;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px;
+  }
+
+  .resumen-table td[data-label]::before {
+    margin-bottom: 0;
+  }
+
+  .resumen-table td.td-accion {
+    display: block !important;
+    padding: 0 16px 16px !important;
+  }
+
+  .resumen-table td.td-accion button {
+    width: 100%;
+    border-radius: 999px;
+  }
+
+  .resumen-table td.td-accion button.copiar-btn {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+  }
+
+  .resumen-table tfoot tr {
+    background: var(--accent-bg);
+    margin-top: 4px;
+  }
+
+  .resumen-table tfoot td:first-child {
+    padding: 14px 16px 4px !important;
+  }
+
+  .resumen-table tfoot td[data-label] {
+    color: var(--text);
   }
 }

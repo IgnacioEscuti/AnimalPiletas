@@ -32,7 +32,7 @@ export function RegistroPage({ onIrALogin }) {
 
   if (exito) {
     return (
-      <section>
+      <section className="card-mobile">
         <h2>Cuenta creada</h2>
         <p>Ya podés iniciar sesión con tu email y PIN.</p>
         <button onClick={onIrALogin}>Ir a iniciar sesión</button>
@@ -41,7 +41,7 @@ export function RegistroPage({ onIrALogin }) {
   }
 
   return (
-    <section>
+    <section className="card-mobile">
       <h2>Crear cuenta</h2>
       <form onSubmit={handleSubmit}>
         <input

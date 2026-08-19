@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { ResumenTable } from "../components/ResumenTable.jsx";
+import { Skeleton } from "../components/Skeleton.jsx";
 import { getResumen } from "../services/resumenService.js";
 import { fechaISO, formatoPeriodo, parsearFechaISO } from "../utils/fecha.js";
 
@@ -73,7 +74,7 @@ export function ResumenPage() {
     : [];
 
   return (
-    <section>
+    <section className="card-mobile">
       <h2>Resumen</h2>
 
       <div className="tabs">
@@ -117,7 +118,7 @@ export function ResumenPage() {
 
       {error && <p className="error-message">{error}</p>}
 
-      {resumen && (
+      {resumen ? (
         <ResumenTable
           filas={filasFiltradas}
           totales={resumen.totales}
@@ -125,6 +126,8 @@ export function ResumenPage() {
           tab={tab}
           inicioISO={resumen.inicio}
         />
+      ) : (
+        !error && <Skeleton filas={5} />
       )}
     </section>
   );

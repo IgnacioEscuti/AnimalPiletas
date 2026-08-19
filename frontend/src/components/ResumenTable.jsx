@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { MESES } from "../utils/fecha.js";
 
 function listaExtras(extras) {
@@ -71,7 +72,7 @@ export function ResumenTable({ filas, totales, periodo, tab, inicioISO }) {
   }
 
   return (
-    <table>
+    <table className="resumen-table">
       <thead>
         <tr>
           <th>Cliente</th>
@@ -83,8 +84,13 @@ export function ResumenTable({ filas, totales, periodo, tab, inicioISO }) {
         </tr>
       </thead>
       <tbody>
-        {filas.map((fila) => (
-          <tr key={fila.clienteId}>
+        {filas.map((fila, index) => (
+          <motion.tr
+            key={fila.clienteId}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.2, delay: index * 0.03 }}
+          >
             <td className="td-titulo">{fila.clienteNombre}</td>
             <td data-label="Limpieza">
               <div>{fila.limpieza.cantidad}</div>
@@ -102,11 +108,11 @@ export function ResumenTable({ filas, totales, periodo, tab, inicioISO }) {
               <strong>${fila.totalGeneral}</strong>
             </td>
             <td className="td-accion">
-              <button className="secondary" onClick={() => handleCopiar(fila)}>
+              <button className="secondary copiar-btn" onClick={() => handleCopiar(fila)}>
                 {copiadoId === fila.clienteId ? "¡Copiado!" : "Copiar"}
               </button>
             </td>
-          </tr>
+          </motion.tr>
         ))}
       </tbody>
       <tfoot>

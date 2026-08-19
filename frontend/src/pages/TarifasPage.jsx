@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { TarifaList } from "../components/TarifaList.jsx";
 import { PrecioPastillasRow } from "../components/PrecioPastillasRow.jsx";
 import { BarrioList } from "../components/BarrioList.jsx";
+import { Skeleton } from "../components/Skeleton.jsx";
 import { getTarifas, actualizarTarifa } from "../services/tarifaService.js";
 import { getPrecioPastillas, actualizarPrecioPastillas } from "../services/precioPastillasService.js";
 import { getBarrios, crearBarrio } from "../services/barrioService.js";
@@ -12,6 +13,7 @@ export function TarifasPage() {
   const [barrios, setBarrios] = useState([]);
   const [nombreBarrio, setNombreBarrio] = useState("");
   const [error, setError] = useState("");
+  const [cargando, setCargando] = useState(true);
 
   useEffect(() => {
     cargarTodo();
@@ -29,6 +31,8 @@ export function TarifasPage() {
       setBarrios(barriosData);
     } catch {
       setError("No se pudieron cargar las tarifas.");
+    } finally {
+      setCargando(false);
     }
   };
 
@@ -67,21 +71,25 @@ export function TarifasPage() {
 
   return (
     <>
-      <section>
+      <section className="card-mobile">
         <h2>Tarifas de limpieza</h2>
         {error && <p className="error-message">{error}</p>}
-        <ul>
-          <TarifaList tarifas={tarifas} onActualizar={handleActualizarTarifa} />
-          {precioPastillas && (
-            <PrecioPastillasRow
-              precioPastillas={precioPastillas}
-              onActualizar={handleActualizarPastillas}
-            />
-          )}
-        </ul>
+        {cargando ? (
+          <Skeleton filas={3} />
+        ) : (
+          <ul>
+            <TarifaList tarifas={tarifas} onActualizar={handleActualizarTarifa} />
+            {precioPastillas && (
+              <PrecioPastillasRow
+                precioPastillas={precioPastillas}
+                onActualizar={handleActualizarPastillas}
+              />
+            )}
+          </ul>
+        )}
       </section>
 
-      <section>
+      <section className="card-mobile">
         <h2>Barrios</h2>
         <form onSubmit={handleAgregarBarrio}>
           <input
@@ -92,10 +100,16 @@ export function TarifasPage() {
           />
           <button type="submit">Agregar</button>
         </form>
-        <ul>
-          <BarrioList barrios={barrios} />
-        </ul>
-        {barrios.length === 0 && <p className="empty-state">Todavía no hay barrios cargados.</p>}
+        {cargando ? (
+          <Skeleton filas={2} />
+        ) : (
+          <ul>
+            <BarrioList barrios={barrios} />
+          </ul>
+        )}
+        {!cargando && barrios.length === 0 && (
+          <p className="empty-state">Todavía no hay barrios cargados.</p>
+        )}
       </section>
     </>
   );

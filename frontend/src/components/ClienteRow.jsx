@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 
 export function ClienteRow({
   cliente,
   grupoKey,
+  index,
   limpiezaHoy,
   pastillasHoy,
   extraHoy,
@@ -49,7 +51,7 @@ export function ClienteRow({
 
   return (
     <tbody className="fila-cliente-grupo">
-      <tr
+      <motion.tr
         className={`fila-cliente ${expandido ? "expandido" : ""} ${arrastrando ? "arrastrando" : ""} ${
           dragOver ? "drag-over" : ""
         }`}
@@ -57,6 +59,9 @@ export function ClienteRow({
         data-grupo={grupoKey}
         onDragOver={onDragOver}
         onDrop={onDrop}
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.2, delay: Math.min(index ?? 0, 10) * 0.03 }}
       >
         <td
           className="td-titulo"
@@ -76,14 +81,14 @@ export function ClienteRow({
           <span className={`estado-punto estado-${estadoLimpieza}`} aria-hidden="true">
             {simboloEstado}
           </span>
+          <span className={`chevron ${expandido ? "chevron-abierto" : ""}`} aria-hidden="true">
+            ▸
+          </span>
           <span className="cliente-nombre">{cliente.nombre}</span>
           <span className="td-titulo-derecha">
             {pastillasHoy?.cantidad > 0 && (
               <span className="badge-pastillas">{pastillasHoy.cantidad} past.</span>
             )}
-            <span className={`chevron ${expandido ? "chevron-abierto" : ""}`} aria-hidden="true">
-              ▸
-            </span>
           </span>
         </td>
         <td data-label="Limpieza de hoy">
@@ -176,7 +181,7 @@ export function ClienteRow({
             Editar cliente
           </button>
         </td>
-      </tr>
+      </motion.tr>
       {expandido && (
         <tr className="fila-expandida">
           <td colSpan="100%">

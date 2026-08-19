@@ -31,7 +31,7 @@ export function LoginPage({ onIrARegistro }) {
   };
 
   return (
-    <section>
+    <section className="card-mobile">
       <h2>Iniciar sesión</h2>
       <form onSubmit={handleSubmit}>
         {emailRecordado ? (
