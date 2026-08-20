@@ -532,9 +532,8 @@ tr.fila-cliente.arrastrando {
   opacity: 0.5;
 }
 
-tr.fila-cliente.drag-over {
-  outline: 2px solid var(--accent);
-  outline-offset: -2px;
+tbody.fila-cliente-grupo:has(tr.fila-cliente.drag-over) {
+  box-shadow: inset 0 0 0 2px var(--accent);
 }
 
 .barrio-header-row td {
