@@ -29,6 +29,12 @@
         ],
         "createdAt": "2026-08-18T20:30:55.105Z",
         "reason": "radio del stepper +/- de pastillas (28x28px), documentado en DESIGN.md como rounded.control-compact"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "rgba(0, 0, 0, 0.35)",
+        "createdAt": "2026-08-20T19:10:41.783Z",
+        "reason": "matches existing shadow precedent at index.css:649 (rgba(0,0,0,0.3)); --shadow token is set to none so it can't provide elevation for the drag ghost"
       }
     ]
   }

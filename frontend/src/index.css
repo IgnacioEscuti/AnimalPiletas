@@ -563,6 +563,22 @@ tbody:first-of-type .barrio-header-row td {
   cursor: pointer;
 }
 
+.cliente-drag-ghost {
+  position: fixed;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  background: var(--surface);
+  border-radius: 14px;
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.35);
+  transform: translate(-50%, -50%) scale(1.04);
+  pointer-events: none;
+  z-index: 1000;
+  font-size: 15px;
+  font-weight: 600;
+}
+
 .chevron {
   display: inline-block;
   margin-right: 5px;

@@ -40,7 +40,7 @@ export function ClientesPage() {
   const [dragCliente, setDragCliente] = useState(null);
   const [touchDragId, setTouchDragId] = useState(null);
   const [touchOverId, setTouchOverId] = useState(null);
-  const [dragOffsetY, setDragOffsetY] = useState(0);
+  const [dragPointerPos, setDragPointerPos] = useState({ x: 0, y: 0 });
   const [clienteExpandidoId, setClienteExpandidoId] = useState(null);
   const [cargando, setCargando] = useState(true);
   const touchDragRef = useRef(null);
@@ -242,7 +242,7 @@ export function ClientesPage() {
         return;
       }
       moveEvent.preventDefault();
-      setDragOffsetY(moveEvent.clientY - startY);
+      setDragPointerPos({ x: moveEvent.clientX, y: moveEvent.clientY });
       const target = document.elementFromPoint(moveEvent.clientX, moveEvent.clientY);
       const fila = target?.closest("tr[data-cliente-id]");
       if (fila && fila.dataset.grupo === grupoKey && fila.dataset.clienteId !== clienteId) {
@@ -260,7 +260,6 @@ export function ClientesPage() {
       cleanup();
       setTouchDragId(null);
       setTouchOverId(null);
-      setDragOffsetY(0);
       if (wasDragging) {
         ignorarClickRef.current = true;
       }
@@ -273,12 +272,12 @@ export function ClientesPage() {
       cleanup();
       setTouchDragId(null);
       setTouchOverId(null);
-      setDragOffsetY(0);
     };
 
     state.timer = setTimeout(() => {
       state.dragging = true;
       el.setPointerCapture(event.pointerId);
+      setDragPointerPos({ x: startX, y: startY });
       setTouchDragId(clienteId);
       if (navigator.vibrate) navigator.vibrate(10);
     }, 350);
@@ -320,6 +319,18 @@ export function ClientesPage() {
       clientes: porBarrio.get(SIN_BARRIO).sort((a, b) => a.ordenEnBarrio - b.ordenEnBarrio),
     });
   }
+
+  const clienteArrastrado = touchDragId ? clientes.find((cliente) => cliente.id === touchDragId) : null;
+  const limpiezaArrastrado = clienteArrastrado
+    ? limpiezas.find((limpieza) => limpieza.cliente === clienteArrastrado.id)
+    : null;
+  const estadoArrastrado =
+    limpiezaArrastrado?.realizada === true
+      ? "tick"
+      : limpiezaArrastrado?.realizada === false
+      ? "cross"
+      : "pendiente";
+  const simboloArrastrado = estadoArrastrado === "tick" ? "✓" : estadoArrastrado === "cross" ? "✕" : "–";
 
   return (
     <section>
@@ -412,7 +423,6 @@ export function ClientesPage() {
                   onPointerDownDrag={handlePointerDownDrag}
                   arrastrando={touchDragId === cliente.id}
                   dragOver={touchOverId === cliente.id}
-                  dragOffsetY={touchDragId === cliente.id ? dragOffsetY : 0}
                   expandido={clienteExpandidoId === cliente.id}
                   onToggleExpandido={() => handleToggleExpandido(cliente.id)}
                 />
@@ -422,6 +432,18 @@ export function ClientesPage() {
         </table>
         {grupos.length === 0 && <p className="empty-state">No hay clientes para mostrar.</p>}
       </div>
+      )}
+
+      {touchDragId && clienteArrastrado && (
+        <div
+          className="cliente-drag-ghost"
+          style={{ left: dragPointerPos.x, top: dragPointerPos.y }}
+        >
+          <span className={`estado-punto estado-${estadoArrastrado}`} aria-hidden="true">
+            {simboloArrastrado}
+          </span>
+          <span className="cliente-nombre">{clienteArrastrado.nombre}</span>
+        </div>
       )}
 
       {modalAbierto && (

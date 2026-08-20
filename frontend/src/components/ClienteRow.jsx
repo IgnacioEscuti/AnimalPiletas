@@ -18,7 +18,6 @@ export function ClienteRow({
   onPointerDownDrag,
   arrastrando,
   dragOver,
-  dragOffsetY = 0,
   expandido,
   onToggleExpandido,
 }) {
@@ -61,23 +60,8 @@ export function ClienteRow({
         onDragOver={onDragOver}
         onDrop={onDrop}
         initial={{ opacity: 0, y: 8 }}
-        animate={
-          arrastrando
-            ? {
-                opacity: 1,
-                y: dragOffsetY,
-                scale: 1.03,
-                boxShadow: "0 12px 24px rgba(0, 0, 0, 0.25)",
-                zIndex: 10,
-              }
-            : { opacity: 1, y: 0, scale: 1, boxShadow: "none", zIndex: "auto" }
-        }
-        transition={
-          arrastrando
-            ? { duration: 0 }
-            : { duration: 0.2, delay: Math.min(index ?? 0, 10) * 0.03 }
-        }
-        style={{ position: "relative" }}
+        animate={{ opacity: arrastrando ? 0.4 : 1, y: 0 }}
+        transition={{ duration: 0.2, delay: Math.min(index ?? 0, 10) * 0.03 }}
       >
         <td
           className="td-titulo"
