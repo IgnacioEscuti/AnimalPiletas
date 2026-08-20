@@ -53,7 +53,7 @@ export class ClienteDAO {
 
   async findByIdAndUpdate(id, data) {
     return clienteModel
-      .findByIdAndUpdate(id, data, { new: true, runValidators: true })
+      .findByIdAndUpdate(id, data, { returnDocument: 'after', runValidators: true })
       .populate("tarifaLimpieza", "nombre precio")
       .populate("barrio", "nombre orden")
       .populate("encargado", "nombre email");

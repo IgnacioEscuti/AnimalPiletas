@@ -7,7 +7,7 @@ export class LimpiezaDAO {
 
   async upsertPorClienteYFecha(cliente, fecha, data) {
     return limpiezaModel.findOneAndUpdate({ cliente, fecha }, data, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
       upsert: true,
     });

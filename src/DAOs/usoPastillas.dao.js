@@ -7,7 +7,7 @@ export class UsoPastillasDAO {
 
   async upsertPorClienteYFecha(cliente, fecha, data) {
     return usoPastillasModel.findOneAndUpdate({ cliente, fecha }, data, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
       upsert: true,
     });

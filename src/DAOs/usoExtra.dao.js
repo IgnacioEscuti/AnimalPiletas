@@ -7,7 +7,7 @@ export class UsoExtraDAO {
 
   async upsertPorClienteYFecha(cliente, fecha, data) {
     return usoExtraModel.findOneAndUpdate({ cliente, fecha }, data, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
       upsert: true,
     });

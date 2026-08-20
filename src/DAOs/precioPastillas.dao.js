@@ -7,7 +7,7 @@ export class PrecioPastillasDAO {
 
   async findOneAndUpdate(data) {
     return precioPastillasModel.findOneAndUpdate({}, data, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
       upsert: true,
     });

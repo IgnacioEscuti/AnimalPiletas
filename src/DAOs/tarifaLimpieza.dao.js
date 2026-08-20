@@ -10,6 +10,6 @@ export class TarifaLimpiezaDAO {
   }
 
   async findByIdAndUpdate(id, data) {
-    return tarifaLimpiezaModel.findByIdAndUpdate(id, data, { new: true, runValidators: true });
+    return tarifaLimpiezaModel.findByIdAndUpdate(id, data, { returnDocument: 'after', runValidators: true });
   }
 }
