@@ -228,6 +228,7 @@ export function ClientesPage() {
 
     const cleanup = () => {
       clearTimeout(state.timer);
+      el.style.touchAction = "";
       el.removeEventListener("pointermove", onMove);
       el.removeEventListener("pointerup", onUp);
       el.removeEventListener("pointercancel", onCancel);
@@ -276,6 +277,7 @@ export function ClientesPage() {
 
     state.timer = setTimeout(() => {
       state.dragging = true;
+      el.style.touchAction = "none";
       el.setPointerCapture(event.pointerId);
       setDragPointerPos({ x: startX, y: startY });
       setTouchDragId(clienteId);
