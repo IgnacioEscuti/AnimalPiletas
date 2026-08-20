@@ -40,6 +40,7 @@ export function ClientesPage() {
   const [dragCliente, setDragCliente] = useState(null);
   const [touchDragId, setTouchDragId] = useState(null);
   const [touchOverId, setTouchOverId] = useState(null);
+  const [dragOffsetY, setDragOffsetY] = useState(0);
   const [clienteExpandidoId, setClienteExpandidoId] = useState(null);
   const [cargando, setCargando] = useState(true);
   const touchDragRef = useRef(null);
@@ -241,6 +242,7 @@ export function ClientesPage() {
         return;
       }
       moveEvent.preventDefault();
+      setDragOffsetY(moveEvent.clientY - startY);
       const target = document.elementFromPoint(moveEvent.clientX, moveEvent.clientY);
       const fila = target?.closest("tr[data-cliente-id]");
       if (fila && fila.dataset.grupo === grupoKey && fila.dataset.clienteId !== clienteId) {
@@ -258,6 +260,7 @@ export function ClientesPage() {
       cleanup();
       setTouchDragId(null);
       setTouchOverId(null);
+      setDragOffsetY(0);
       if (wasDragging) {
         ignorarClickRef.current = true;
       }
@@ -270,6 +273,7 @@ export function ClientesPage() {
       cleanup();
       setTouchDragId(null);
       setTouchOverId(null);
+      setDragOffsetY(0);
     };
 
     state.timer = setTimeout(() => {
@@ -408,6 +412,7 @@ export function ClientesPage() {
                   onPointerDownDrag={handlePointerDownDrag}
                   arrastrando={touchDragId === cliente.id}
                   dragOver={touchOverId === cliente.id}
+                  dragOffsetY={touchDragId === cliente.id ? dragOffsetY : 0}
                   expandido={clienteExpandidoId === cliente.id}
                   onToggleExpandido={() => handleToggleExpandido(cliente.id)}
                 />

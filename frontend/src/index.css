@@ -957,6 +957,13 @@ input[type="number"]::-webkit-inner-spin-button {
     touch-action: pan-y;
   }
 
+  .td-titulo,
+  .td-titulo * {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+
   .td-titulo .drag-handle {
     display: none;
   }
