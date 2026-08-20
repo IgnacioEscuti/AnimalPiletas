@@ -221,14 +221,13 @@ export function ClientesPage() {
   const handlePointerDownDrag = (event, clienteId, grupoKey) => {
     if (event.pointerType !== "touch") return;
     const el = event.currentTarget;
-    const startX = event.clientX;
-    const startY = event.clientY;
+    let startX = event.clientX;
+    let startY = event.clientY;
     const state = { dragging: false, clienteId, grupoKey };
     touchDragRef.current = state;
 
     const cleanup = () => {
       clearTimeout(state.timer);
-      el.style.touchAction = "";
       el.removeEventListener("pointermove", onMove);
       el.removeEventListener("pointerup", onUp);
       el.removeEventListener("pointercancel", onCancel);
@@ -237,7 +236,16 @@ export function ClientesPage() {
 
     const onMove = (moveEvent) => {
       if (!state.dragging) {
-        if (Math.abs(moveEvent.clientX - startX) > 10 || Math.abs(moveEvent.clientY - startY) > 10) {
+        const deltaX = moveEvent.clientX - startX;
+        const deltaY = moveEvent.clientY - startY;
+        if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > 10) {
+          clearTimeout(state.timer);
+          window.scrollBy({ top: -deltaY, behavior: "auto" });
+          startX = moveEvent.clientX;
+          startY = moveEvent.clientY;
+          return;
+        }
+        if (Math.abs(deltaX) > 10) {
           cleanup();
         }
         return;
@@ -277,7 +285,6 @@ export function ClientesPage() {
 
     state.timer = setTimeout(() => {
       state.dragging = true;
-      el.style.touchAction = "none";
       el.setPointerCapture(event.pointerId);
       setDragPointerPos({ x: startX, y: startY });
       setTouchDragId(clienteId);

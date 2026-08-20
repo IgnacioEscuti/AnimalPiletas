@@ -970,7 +970,7 @@ input[type="number"]::-webkit-inner-spin-button {
     align-items: center;
     gap: 10px;
     padding: 16px !important;
-    touch-action: pan-y;
+    touch-action: none;
   }
 
   .td-titulo,
