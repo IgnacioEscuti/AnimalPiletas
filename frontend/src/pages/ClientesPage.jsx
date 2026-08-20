@@ -199,10 +199,18 @@ export function ClientesPage() {
     ids.splice(fromIndex, 1);
     ids.splice(toIndex, 0, origenId);
 
+    const clientesAnteriores = clientes;
+    setClientes(
+      clientes.map((cliente) => {
+        const nuevoOrden = ids.indexOf(cliente.id);
+        return nuevoOrden === -1 ? cliente : { ...cliente, ordenEnBarrio: nuevoOrden };
+      })
+    );
+
     try {
       await reordenarClientesEnBarrio(ids);
-      setClientes(await getClientes());
     } catch {
+      setClientes(clientesAnteriores);
       setError("No se pudo reordenar los clientes.");
     }
   };
