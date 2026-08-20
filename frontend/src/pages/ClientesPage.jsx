@@ -43,8 +43,13 @@ export function ClientesPage() {
   const [clienteExpandidoId, setClienteExpandidoId] = useState(null);
   const [cargando, setCargando] = useState(true);
   const touchDragRef = useRef(null);
+  const ignorarClickRef = useRef(false);
 
   const handleToggleExpandido = (clienteId) => {
+    if (ignorarClickRef.current) {
+      ignorarClickRef.current = false;
+      return;
+    }
     setClienteExpandidoId((actual) => (actual === clienteId ? null : clienteId));
   };
 
@@ -253,6 +258,9 @@ export function ClientesPage() {
       cleanup();
       setTouchDragId(null);
       setTouchOverId(null);
+      if (wasDragging) {
+        ignorarClickRef.current = true;
+      }
       if (wasDragging && targetId && targetId !== clienteId) {
         await reordenarCliente(clienteId, targetId, grupoKey);
       }
