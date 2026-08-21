@@ -181,6 +181,10 @@ export function ClientesPage() {
   };
 
   const handleClienteDragStart = (event, clienteId, grupoKey) => {
+    if (touchDragRef.current) {
+      event.preventDefault();
+      return;
+    }
     event.dataTransfer.effectAllowed = "move";
     event.dataTransfer.setData("text/plain", clienteId);
     setDragCliente({ id: clienteId, grupoKey });

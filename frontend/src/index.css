@@ -981,8 +981,8 @@ input[type="number"]::-webkit-inner-spin-button {
 
   .td-titulo .drag-handle {
     font-size: 24px;
-    padding: 10px;
-    margin-right: 0;
+    padding: 8px;
+    margin-right: -4px;
   }
 
   .estado-punto {
@@ -1044,6 +1044,7 @@ input[type="number"]::-webkit-inner-spin-button {
   .chevron {
     color: var(--text-muted);
     font-size: 14px;
+    display: none;
   }
 
   /* Celdas con label generado desde data-label (Limpieza / Extra / Empleado) */
