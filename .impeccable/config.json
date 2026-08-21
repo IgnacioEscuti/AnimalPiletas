@@ -35,6 +35,12 @@
         "value": "rgba(0, 0, 0, 0.35)",
         "createdAt": "2026-08-20T19:10:41.783Z",
         "reason": "matches existing shadow precedent at index.css:649 (rgba(0,0,0,0.3)); --shadow token is set to none so it can't provide elevation for the drag ghost"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "24px",
+        "createdAt": "2026-08-21T23:09:16.763Z",
+        "reason": "drag-handle mobile touch target, tamaño pedido explícitamente por el usuario (22-24px) para área táctil cómoda, no es texto de UI"
       }
     ]
   }

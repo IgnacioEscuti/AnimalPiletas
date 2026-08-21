@@ -66,13 +66,13 @@ export function ClienteRow({
         <td
           className="td-titulo"
           onClick={onToggleExpandido}
-          onPointerDown={(event) => onPointerDownDrag?.(event, cliente.id, grupoKey)}
           title={expandido ? "Colapsar" : "Expandir"}
         >
           <span
             className="drag-handle"
             draggable
             onDragStart={onDragStart}
+            onPointerDown={(event) => onPointerDownDrag?.(event, cliente.id, grupoKey)}
             title="Mantené presionado para reordenar"
           >
             ⠿

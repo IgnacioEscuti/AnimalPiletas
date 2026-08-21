@@ -246,14 +246,7 @@ export function ClientesPage() {
       if (!state.dragging) {
         const deltaX = moveEvent.clientX - startX;
         const deltaY = moveEvent.clientY - startY;
-        if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > 10) {
-          clearTimeout(state.timer);
-          window.scrollBy({ top: -deltaY, behavior: "auto" });
-          startX = moveEvent.clientX;
-          startY = moveEvent.clientY;
-          return;
-        }
-        if (Math.abs(deltaX) > 10) {
+        if (Math.abs(deltaX) > 10 || Math.abs(deltaY) > 10) {
           cleanup();
         }
         return;
