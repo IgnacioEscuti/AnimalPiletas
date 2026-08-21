@@ -537,6 +537,10 @@ tbody.fila-cliente-grupo:has(tr.fila-cliente.drag-over) {
   box-shadow: inset 0 0 0 2px var(--accent);
 }
 
+tr.barrio-header-row.drag-over {
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+
 .barrio-header-row td {
   background: transparent;
   padding: 22px 8px 8px;
@@ -980,6 +984,12 @@ input[type="number"]::-webkit-inner-spin-button {
   }
 
   .td-titulo .drag-handle {
+    font-size: 24px;
+    padding: 8px;
+    margin-right: -4px;
+  }
+
+  .barrio-header .drag-handle {
     font-size: 24px;
     padding: 8px;
     margin-right: -4px;

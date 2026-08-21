@@ -40,6 +40,8 @@ export function ClientesPage() {
   const [dragCliente, setDragCliente] = useState(null);
   const [touchDragId, setTouchDragId] = useState(null);
   const [touchOverId, setTouchOverId] = useState(null);
+  const [touchDragBarrioId, setTouchDragBarrioId] = useState(null);
+  const [touchOverBarrioId, setTouchOverBarrioId] = useState(null);
   const [dragPointerPos, setDragPointerPos] = useState({ x: 0, y: 0 });
   const [clienteExpandidoId, setClienteExpandidoId] = useState(null);
   const [cargando, setCargando] = useState(true);
@@ -156,14 +158,16 @@ export function ClientesPage() {
   };
 
   const handleBarrioDragStart = (event, barrioId) => {
+    if (touchDragRef.current) {
+      event.preventDefault();
+      return;
+    }
     event.dataTransfer.effectAllowed = "move";
     event.dataTransfer.setData("text/plain", barrioId);
     setDragBarrioId(barrioId);
   };
 
-  const handleBarrioDrop = async (targetBarrioId) => {
-    const origenId = dragBarrioId;
-    setDragBarrioId(null);
+  const reordenarBarrio = async (origenId, targetBarrioId) => {
     if (!origenId || origenId === targetBarrioId || targetBarrioId === SIN_BARRIO) return;
 
     const ids = barrios.map((barrio) => barrio.id);
@@ -178,6 +182,12 @@ export function ClientesPage() {
     } catch {
       setError("No se pudo reordenar los barrios.");
     }
+  };
+
+  const handleBarrioDrop = async (targetBarrioId) => {
+    const origenId = dragBarrioId;
+    setDragBarrioId(null);
+    await reordenarBarrio(origenId, targetBarrioId);
   };
 
   const handleClienteDragStart = (event, clienteId, grupoKey) => {
@@ -301,6 +311,77 @@ export function ClientesPage() {
     el.addEventListener("pointercancel", onCancel, { once: true });
   };
 
+  const handlePointerDownDragBarrio = (event, barrioId) => {
+    if (event.pointerType !== "touch") return;
+    const el = event.currentTarget;
+    let startX = event.clientX;
+    let startY = event.clientY;
+    const state = { dragging: false, barrioId };
+    touchDragRef.current = state;
+
+    const cleanup = () => {
+      clearTimeout(state.timer);
+      el.removeEventListener("pointermove", onMove);
+      el.removeEventListener("pointerup", onUp);
+      el.removeEventListener("pointercancel", onCancel);
+      touchDragRef.current = null;
+    };
+
+    const onMove = (moveEvent) => {
+      if (!state.dragging) {
+        const deltaX = moveEvent.clientX - startX;
+        const deltaY = moveEvent.clientY - startY;
+        if (Math.abs(deltaX) > 10 || Math.abs(deltaY) > 10) {
+          cleanup();
+        }
+        return;
+      }
+      moveEvent.preventDefault();
+      setDragPointerPos({ x: moveEvent.clientX, y: moveEvent.clientY });
+      const target = document.elementFromPoint(moveEvent.clientX, moveEvent.clientY);
+      const fila = target?.closest("tr[data-barrio-id]");
+      if (fila && fila.dataset.barrioId !== barrioId && fila.dataset.barrioId !== SIN_BARRIO) {
+        setTouchOverBarrioId(fila.dataset.barrioId);
+      } else {
+        setTouchOverBarrioId(null);
+      }
+    };
+
+    const onUp = async (upEvent) => {
+      const wasDragging = state.dragging;
+      const target = document.elementFromPoint(upEvent.clientX, upEvent.clientY);
+      const fila = target?.closest("tr[data-barrio-id]");
+      const targetId = fila && fila.dataset.barrioId !== SIN_BARRIO ? fila.dataset.barrioId : null;
+      cleanup();
+      setTouchDragBarrioId(null);
+      setTouchOverBarrioId(null);
+      if (wasDragging) {
+        ignorarClickRef.current = true;
+      }
+      if (wasDragging && targetId && targetId !== barrioId) {
+        await reordenarBarrio(barrioId, targetId);
+      }
+    };
+
+    const onCancel = () => {
+      cleanup();
+      setTouchDragBarrioId(null);
+      setTouchOverBarrioId(null);
+    };
+
+    state.timer = setTimeout(() => {
+      state.dragging = true;
+      el.setPointerCapture(event.pointerId);
+      setDragPointerPos({ x: startX, y: startY });
+      setTouchDragBarrioId(barrioId);
+      if (navigator.vibrate) navigator.vibrate(10);
+    }, 350);
+
+    el.addEventListener("pointermove", onMove);
+    el.addEventListener("pointerup", onUp, { once: true });
+    el.addEventListener("pointercancel", onCancel, { once: true });
+  };
+
   const clientesFiltrados = clientes
     .filter((cliente) => cliente.nombre.toLowerCase().includes(busqueda.toLowerCase()))
     .filter(
@@ -345,6 +426,9 @@ export function ClientesPage() {
       ? "cross"
       : "pendiente";
   const simboloArrastrado = estadoArrastrado === "tick" ? "✓" : estadoArrastrado === "cross" ? "✕" : "–";
+  const barrioArrastrado = touchDragBarrioId
+    ? barrios.find((barrio) => barrio.id === touchDragBarrioId)
+    : null;
 
   return (
     <section>
@@ -397,7 +481,8 @@ export function ClientesPage() {
             <Fragment key={grupo.key}>
               <tbody>
                 <tr
-                  className="barrio-header-row"
+                  className={`barrio-header-row ${touchOverBarrioId === grupo.key ? "drag-over" : ""}`}
+                  data-barrio-id={grupo.key}
                   onDragOver={(event) => event.preventDefault()}
                   onDrop={() => handleBarrioDrop(grupo.key)}
                 >
@@ -408,6 +493,7 @@ export function ClientesPage() {
                           className="drag-handle"
                           draggable
                           onDragStart={(event) => handleBarrioDragStart(event, grupo.key)}
+                          onPointerDown={(event) => handlePointerDownDragBarrio(event, grupo.key)}
                           title="Arrastrar para reordenar el barrio"
                         >
                           ⠿
@@ -457,6 +543,15 @@ export function ClientesPage() {
             {simboloArrastrado}
           </span>
           <span className="cliente-nombre">{clienteArrastrado.nombre}</span>
+        </div>
+      )}
+
+      {touchDragBarrioId && barrioArrastrado && (
+        <div
+          className="cliente-drag-ghost"
+          style={{ left: dragPointerPos.x, top: dragPointerPos.y }}
+        >
+          <span className="cliente-nombre">{barrioArrastrado.nombre}</span>
         </div>
       )}
 
