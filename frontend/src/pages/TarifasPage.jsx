@@ -72,7 +72,9 @@ export function TarifasPage() {
   return (
     <>
       <section className="card-mobile">
-        <h2>Tarifas de limpieza</h2>
+        <div className="page-header">
+          <h2>Tarifas de limpieza</h2>
+        </div>
         {error && <p className="error-message">{error}</p>}
         {cargando ? (
           <Skeleton filas={3} />

@@ -75,7 +75,9 @@ export function ResumenPage() {
 
   return (
     <section className="card-mobile">
-      <h2>Resumen</h2>
+      <div className="page-header">
+        <h2>Resumen</h2>
+      </div>
 
       <div className="tabs">
         <button
