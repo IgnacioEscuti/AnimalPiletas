@@ -60,7 +60,7 @@ body {
 }
 
 #root {
-  min-height: 100svh;
+  min-height: 100dvh;
   max-width: 1040px;
   margin: 0 auto;
   padding: 48px 24px 96px;
