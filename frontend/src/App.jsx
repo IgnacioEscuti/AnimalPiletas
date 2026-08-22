@@ -82,7 +82,7 @@ function App() {
   const [pantalla, setPantalla] = useState("clientes");
   const [vistaAuth, setVistaAuth] = useState("login");
 
-  if (cargando) return null;
+  if (cargando) return <SafariBgFix />;
 
   if (!usuario) {
     return (

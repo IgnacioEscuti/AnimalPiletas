@@ -41,6 +41,18 @@
         "value": "24px",
         "createdAt": "2026-08-21T23:09:16.763Z",
         "reason": "drag-handle mobile touch target, tamaño pedido explícitamente por el usuario (22-24px) para área táctil cómoda, no es texto de UI"
+      },
+      {
+        "rule": "design-system-radius",
+        "value": "20px",
+        "createdAt": "2026-08-22T14:25:35.973Z",
+        "reason": "user confirmed: border-radius del bottom sheet del modal de cliente, pedido explícitamente (20px 20px 0 0)"
+      },
+      {
+        "rule": "design-system-radius",
+        "value": "2px",
+        "createdAt": "2026-08-22T14:25:36.180Z",
+        "reason": "user confirmed: border-radius de la barrita indicadora de arrastre del bottom sheet, pedido explícitamente"
       }
     ]
   }
