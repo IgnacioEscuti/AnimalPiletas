@@ -6,6 +6,7 @@ import { RegistroPage } from "./pages/RegistroPage.jsx";
 import { ClientesPage } from "./pages/ClientesPage.jsx";
 import { TarifasPage } from "./pages/TarifasPage.jsx";
 import { ResumenPage } from "./pages/ResumenPage.jsx";
+import { SplashScreen } from "./components/SplashScreen.jsx";
 
 const ICONOS = {
   clientes: (
@@ -81,8 +82,9 @@ function App() {
   const { usuario, cargando, logout } = useAuth();
   const [pantalla, setPantalla] = useState("clientes");
   const [vistaAuth, setVistaAuth] = useState("login");
+  const [listo, setListo] = useState(false);
 
-  if (cargando) return <SafariBgFix />;
+  if (cargando) return <SplashScreen />;
 
   if (!usuario) {
     return (
@@ -122,6 +124,18 @@ function App() {
 
   return (
     <>
+      <AnimatePresence>
+        {!listo && (
+          <motion.div
+            key="splash"
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            style={{ position: "fixed", inset: 0, zIndex: 10000 }}
+          >
+            <SplashScreen />
+          </motion.div>
+        )}
+      </AnimatePresence>
       <SafariBgFix />
       <div className="page-header">
         <div>
@@ -177,7 +191,7 @@ function App() {
           exit={{ opacity: 0, y: -8 }}
           transition={{ duration: 0.18 }}
         >
-          <Componente />
+          <Componente onPrimeraCarga={() => setListo(true)} />
         </motion.div>
       </AnimatePresence>
     </>

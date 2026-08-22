@@ -21,7 +21,7 @@ import { semanaActual, estaEnSemanaActual } from "../utils/fecha.js";
 const SEMANA_ACTUAL = semanaActual();
 const SIN_BARRIO = "sin-barrio";
 
-export function ClientesPage() {
+export function ClientesPage({ onPrimeraCarga }) {
   const { usuario } = useAuth();
   const esAdmin = usuario?.rol === "admin";
   const [clientes, setClientes] = useState([]);
@@ -90,6 +90,7 @@ export function ClientesPage() {
       setError("No se pudieron cargar los datos.");
     } finally {
       setCargando(false);
+      onPrimeraCarga?.();
     }
   };
 

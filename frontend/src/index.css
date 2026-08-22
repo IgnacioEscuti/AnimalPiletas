@@ -67,6 +67,21 @@ body {
   background-color: var(--bg);
 }
 
+.splash-screen {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+}
+
+.splash-logo {
+  width: 140px;
+  height: auto;
+}
+
 h1 {
   font-size: 34px;
   font-weight: 600;
