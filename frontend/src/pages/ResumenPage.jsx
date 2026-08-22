@@ -74,63 +74,65 @@ export function ResumenPage() {
     : [];
 
   return (
-    <section className="card-mobile">
-      <div className="page-header">
+    <>
+      <div className="page-title">
         <h2>Resumen</h2>
       </div>
 
-      <div className="tabs">
-        <button
-          className={tab === "semanal" ? "" : "secondary"}
-          onClick={() => setTab("semanal")}
-        >
-          Semanal
-        </button>
-        <button
-          className={tab === "mensual" ? "" : "secondary"}
-          onClick={() => setTab("mensual")}
-        >
-          Mensual
-        </button>
-      </div>
+      <section className="card-mobile">
+        <div className="tabs">
+          <button
+            className={tab === "semanal" ? "" : "secondary"}
+            onClick={() => setTab("semanal")}
+          >
+            Semanal
+          </button>
+          <button
+            className={tab === "mensual" ? "" : "secondary"}
+            onClick={() => setTab("mensual")}
+          >
+            Mensual
+          </button>
+        </div>
 
-      <div className="periodo-nav">
-        <button className="secondary" onClick={irAnterior} title="Período anterior">
-          ←
-        </button>
-        <span className="periodo-label">{periodo}</span>
-        <button className="secondary" onClick={irSiguiente} title="Período siguiente">
-          →
-        </button>
+        <div className="periodo-nav">
+          <button className="secondary" onClick={irAnterior} title="Período anterior">
+            ←
+          </button>
+          <span className="periodo-label">{periodo}</span>
+          <button className="secondary" onClick={irSiguiente} title="Período siguiente">
+            →
+          </button>
+          <input
+            type="date"
+            className="periodo-fecha"
+            value={fechaISO(fechaActiva)}
+            onChange={handleFechaManual}
+          />
+        </div>
+
         <input
-          type="date"
-          className="periodo-fecha"
-          value={fechaISO(fechaActiva)}
-          onChange={handleFechaManual}
+          type="text"
+          placeholder="Buscar por nombre..."
+          value={busqueda}
+          onChange={(event) => setBusqueda(event.target.value)}
+          className="search-input"
         />
-      </div>
 
-      <input
-        type="text"
-        placeholder="Buscar por nombre..."
-        value={busqueda}
-        onChange={(event) => setBusqueda(event.target.value)}
-        className="search-input"
-      />
+        {error && <p className="error-message">{error}</p>}
 
-      {error && <p className="error-message">{error}</p>}
-
-      {resumen ? (
-        <ResumenTable
-          filas={filasFiltradas}
-          totales={resumen.totales}
-          periodo={periodo}
-          tab={tab}
-          inicioISO={resumen.inicio}
-        />
-      ) : (
-        !error && <Skeleton filas={5} />
-      )}
-    </section>
+        {resumen ? (
+          <ResumenTable
+            filas={filasFiltradas}
+            totales={resumen.totales}
+            periodo={periodo}
+            tab={tab}
+            inicioISO={resumen.inicio}
+          />
+        ) : (
+          !error && <Skeleton filas={5} />
+        )}
+      </section>
+    </>
   );
 }

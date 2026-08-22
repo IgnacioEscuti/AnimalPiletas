@@ -295,6 +295,17 @@ li.row {
   margin: 0;
 }
 
+.page-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.page-title h2 {
+  margin: 0;
+}
+
 .search-input {
   width: 100%;
   margin-bottom: 20px;
@@ -836,14 +847,14 @@ input[type="number"]::-webkit-inner-spin-button {
     display: none;
   }
 
-  /* Header de la pantalla de Clientes: título grande + botón "+" circular */
-  section>.page-header {
+  /* Título de pantalla (Clientes / Resumen / Tarifas): flota afuera de la tarjeta */
+  .page-title {
     align-items: center;
     margin-bottom: 16px;
     padding-top: env(safe-area-inset-top);
   }
 
-  section>.page-header h2 {
+  .page-title h2 {
     font-size: 34px;
     font-weight: 600;
     letter-spacing: -0.02em;

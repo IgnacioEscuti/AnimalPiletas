@@ -433,7 +433,7 @@ export function ClientesPage({ onPrimeraCarga }) {
 
   return (
     <section>
-      <div className="page-header">
+      <div className="page-title">
         <h2>Clientes</h2>
         <button onClick={abrirNuevo} className="btn-nuevo-cliente">
           <span className="btn-nuevo-cliente-full">+ Nuevo cliente</span>
