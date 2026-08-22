@@ -801,7 +801,7 @@ input[type="number"]::-webkit-inner-spin-button {
   /* Header de marca (AnimalPiletas + subtítulo + Cerrar sesión) se achica a
      una tira angosta: solo queda el botón de logout, como ícono. */
   #root>.page-header {
-    margin-bottom: 12px;
+    margin-bottom: 0;
   }
 
   #root>.page-header h1,
@@ -810,9 +810,7 @@ input[type="number"]::-webkit-inner-spin-button {
   }
 
   #root>.page-header .btn-logout {
-    background: transparent;
-    border: none;
-    padding: 6px;
+    display: none;
   }
 
   #root>.page-header .btn-logout-full {
@@ -820,8 +818,7 @@ input[type="number"]::-webkit-inner-spin-button {
   }
 
   #root>.page-header .btn-logout-icon {
-    display: inline-flex;
-    color: var(--text-muted);
+    display: none;
   }
 
   /* Header de la pantalla de Clientes: título grande + botón "+" circular */
@@ -881,7 +878,7 @@ input[type="number"]::-webkit-inner-spin-button {
 
   .search-input {
     margin-bottom: 1vh;
-    background: var(--bg);
+    background: var(--surface);
     border-color: transparent;
     border-radius: 999px;
     padding: 13px 16px 13px 42px;
@@ -973,7 +970,7 @@ input[type="number"]::-webkit-inner-spin-button {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 16px !important;
+    padding: 11px 16px !important;
   }
 
   .td-titulo,
@@ -1366,5 +1363,50 @@ input[type="number"]::-webkit-inner-spin-button {
 
   .resumen-table tfoot td[data-label] {
     color: var(--text);
+  }
+
+  /* Modal de cliente -> bottom sheet */
+  .modal-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .modal {
+    width: 100%;
+    max-width: none;
+    border-radius: 20px 20px 0 0;
+    padding: 10px 20px calc(20px + env(safe-area-inset-bottom));
+    max-height: 88dvh;
+    overflow-y: auto;
+    box-sizing: border-box;
+    animation: sheet-slide-in 0.2s ease;
+  }
+
+  .modal::before {
+    content: "";
+    display: block;
+    width: 36px;
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(233, 233, 237, 0.25);
+    margin: 0 auto 16px;
+  }
+
+  .modal-actions {
+    justify-content: stretch;
+  }
+
+  .modal-actions button {
+    flex: 1;
+  }
+}
+
+@keyframes sheet-slide-in {
+  from {
+    transform: translateY(100%);
+  }
+
+  to {
+    transform: translateY(0);
   }
 }
