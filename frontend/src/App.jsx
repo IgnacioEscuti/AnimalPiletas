@@ -90,32 +90,34 @@ function App() {
     return (
       <>
         <SafariBgFix />
-        <h1>AnimalPiletas</h1>
-        <p className="subtitle">Gestión de clientes, tarifas y resumen de cobros</p>
+        <div className="auth-screen">
+          <h1>AnimalPiletas</h1>
+          <p className="subtitle">Gestión de clientes, tarifas y resumen de cobros</p>
 
-        <AnimatePresence mode="wait">
-          {vistaAuth === "login" ? (
-            <motion.div
-              key="login"
-              initial={{ opacity: 0, x: -16 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 16 }}
-              transition={{ duration: 0.2 }}
-            >
-              <LoginPage onIrARegistro={() => setVistaAuth("registro")} />
-            </motion.div>
-          ) : (
-            <motion.div
-              key="registro"
-              initial={{ opacity: 0, x: 16 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -16 }}
-              transition={{ duration: 0.2 }}
-            >
-              <RegistroPage onIrALogin={() => setVistaAuth("login")} />
-            </motion.div>
-          )}
-        </AnimatePresence>
+          <AnimatePresence mode="wait">
+            {vistaAuth === "login" ? (
+              <motion.div
+                key="login"
+                initial={{ opacity: 0, x: -16 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 16 }}
+                transition={{ duration: 0.2 }}
+              >
+                <LoginPage onIrARegistro={() => setVistaAuth("registro")} />
+              </motion.div>
+            ) : (
+              <motion.div
+                key="registro"
+                initial={{ opacity: 0, x: 16 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -16 }}
+                transition={{ duration: 0.2 }}
+              >
+                <RegistroPage onIrALogin={() => setVistaAuth("login")} />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </>
     );
   }
