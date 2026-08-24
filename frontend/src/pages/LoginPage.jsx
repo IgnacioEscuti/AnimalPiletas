@@ -37,23 +37,29 @@ export function LoginPage({ onIrARegistro }) {
         {emailRecordado ? (
           <p className="row-name">{emailRecordado}</p>
         ) : (
+          <div className="campo-auth">
+            <label>Email</label>
+            <input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              required
+            />
+          </div>
+        )}
+        <div className="campo-auth">
+          <label>PIN</label>
           <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
+            type="password"
+            inputMode="numeric"
+            maxLength={4}
+            placeholder="PIN de 4 dígitos"
+            value={pin}
+            onChange={(event) => setPin(event.target.value.replace(/\D/g, "").slice(0, 4))}
             required
           />
-        )}
-        <input
-          type="password"
-          inputMode="numeric"
-          maxLength={4}
-          placeholder="PIN de 4 dígitos"
-          value={pin}
-          onChange={(event) => setPin(event.target.value.replace(/\D/g, "").slice(0, 4))}
-          required
-        />
+        </div>
         <button type="submit" disabled={enviando}>
           {enviando ? "Ingresando..." : "Ingresar"}
         </button>

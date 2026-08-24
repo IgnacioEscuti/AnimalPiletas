@@ -91,6 +91,7 @@ function App() {
       <>
         <SafariBgFix />
         <div className="auth-screen">
+          <img src="/logo-animalpiletas.png" alt="AnimalPiletas" className="auth-logo-mobile" />
           <h1>AnimalPiletas</h1>
           <p className="subtitle">Gestión de clientes, tarifas y resumen de cobros</p>
 

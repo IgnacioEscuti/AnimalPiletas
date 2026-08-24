@@ -82,6 +82,14 @@ body {
   height: auto;
 }
 
+.auth-logo-mobile {
+  display: none;
+}
+
+.campo-auth label {
+  display: none;
+}
+
 h1 {
   font-size: 34px;
   font-weight: 600;
@@ -809,10 +817,59 @@ input[type="number"]::-webkit-inner-spin-button {
     inset: 0;
     display: flex;
     flex-direction: column;
-    justify-content: center;
     padding: 24px 24px calc(24px + env(safe-area-inset-bottom));
     padding-top: max(24px, env(safe-area-inset-top));
     overflow-y: auto;
+  }
+
+  .auth-logo-mobile {
+    display: block;
+    width: 64px;
+    height: auto;
+    margin-bottom: 24px;
+  }
+
+  #root .auth-screen h1,
+  #root .auth-screen .subtitle {
+    display: none;
+  }
+
+  .auth-screen .card-mobile {
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+
+  .auth-screen .card-mobile h2 {
+    font-size: 30px;
+    font-weight: 600;
+  }
+
+  .auth-screen .card-mobile input {
+    background: var(--surface);
+  }
+
+  .auth-screen .card-mobile form {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+
+  .auth-screen .card-mobile form button[type="submit"] {
+    margin-top: auto;
+  }
+
+  .campo-auth label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 8px;
   }
 
   html {

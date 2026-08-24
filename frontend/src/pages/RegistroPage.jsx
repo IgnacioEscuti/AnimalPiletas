@@ -44,31 +44,40 @@ export function RegistroPage({ onIrALogin }) {
     <section className="card-mobile">
       <h2>Crear cuenta</h2>
       <form onSubmit={handleSubmit}>
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(event) => setEmail(event.target.value)}
-          required
-        />
-        <input
-          type="password"
-          inputMode="numeric"
-          maxLength={4}
-          placeholder="PIN de 4 dígitos"
-          value={pin}
-          onChange={(event) => setPin(event.target.value.replace(/\D/g, "").slice(0, 4))}
-          required
-        />
-        <input
-          type="password"
-          inputMode="numeric"
-          maxLength={4}
-          placeholder="Confirmar PIN"
-          value={confirmarPin}
-          onChange={(event) => setConfirmarPin(event.target.value.replace(/\D/g, "").slice(0, 4))}
-          required
-        />
+        <div className="campo-auth">
+          <label>Email</label>
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            required
+          />
+        </div>
+        <div className="campo-auth">
+          <label>PIN</label>
+          <input
+            type="password"
+            inputMode="numeric"
+            maxLength={4}
+            placeholder="PIN de 4 dígitos"
+            value={pin}
+            onChange={(event) => setPin(event.target.value.replace(/\D/g, "").slice(0, 4))}
+            required
+          />
+        </div>
+        <div className="campo-auth">
+          <label>Confirmar PIN</label>
+          <input
+            type="password"
+            inputMode="numeric"
+            maxLength={4}
+            placeholder="Confirmar PIN"
+            value={confirmarPin}
+            onChange={(event) => setConfirmarPin(event.target.value.replace(/\D/g, "").slice(0, 4))}
+            required
+          />
+        </div>
         <button type="submit" disabled={enviando}>
           {enviando ? "Creando..." : "Crear cuenta"}
         </button>
