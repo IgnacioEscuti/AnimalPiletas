@@ -53,6 +53,12 @@
         "value": "2px",
         "createdAt": "2026-08-22T14:25:36.180Z",
         "reason": "user confirmed: border-radius de la barrita indicadora de arrastre del bottom sheet, pedido explícitamente"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "30px",
+        "createdAt": "2026-08-24T14:47:56.011Z",
+        "reason": "user confirmed: headline grande del auth-screen (login/registro) sin caja, pedido explícitamente"
       }
     ]
   }

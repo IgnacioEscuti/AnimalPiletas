@@ -33,6 +33,7 @@ export function LoginPage({ onIrARegistro }) {
   return (
     <section className="card-mobile">
       <h2>Iniciar sesión</h2>
+      <p className="subtitle-auth">Ingresá con tu email y PIN.</p>
       <form onSubmit={handleSubmit}>
         {emailRecordado ? (
           <p className="row-name">{emailRecordado}</p>
@@ -60,6 +61,11 @@ export function LoginPage({ onIrARegistro }) {
             required
           />
         </div>
+
+        <p className="empty-state auth-link-mobile">
+          ¿No tenés cuenta? <button type="button" className="secondary" onClick={onIrARegistro}>Registrate</button>
+        </p>
+
         <button type="submit" disabled={enviando}>
           {enviando ? "Ingresando..." : "Ingresar"}
         </button>
@@ -73,7 +79,7 @@ export function LoginPage({ onIrARegistro }) {
         </button>
       )}
 
-      <p className="empty-state">
+      <p className="empty-state auth-link-desktop">
         ¿No tenés cuenta? <button className="secondary" onClick={onIrARegistro}>Registrate</button>
       </p>
     </section>

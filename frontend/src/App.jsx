@@ -91,7 +91,6 @@ function App() {
       <>
         <SafariBgFix />
         <div className="auth-screen">
-          <img src="/logo-animalpiletas.png" alt="AnimalPiletas" className="auth-logo-mobile" />
           <h1>AnimalPiletas</h1>
           <p className="subtitle">Gestión de clientes, tarifas y resumen de cobros</p>
 
@@ -99,6 +98,7 @@ function App() {
             {vistaAuth === "login" ? (
               <motion.div
                 key="login"
+                className="auth-screen-anim"
                 initial={{ opacity: 0, x: -16 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 16 }}
@@ -109,6 +109,7 @@ function App() {
             ) : (
               <motion.div
                 key="registro"
+                className="auth-screen-anim"
                 initial={{ opacity: 0, x: 16 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -16 }}

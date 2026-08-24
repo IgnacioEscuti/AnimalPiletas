@@ -43,6 +43,7 @@ export function RegistroPage({ onIrALogin }) {
   return (
     <section className="card-mobile">
       <h2>Crear cuenta</h2>
+      <p className="subtitle-auth">Registrate con tu email y PIN.</p>
       <form onSubmit={handleSubmit}>
         <div className="campo-auth">
           <label>Email</label>
@@ -78,6 +79,11 @@ export function RegistroPage({ onIrALogin }) {
             required
           />
         </div>
+
+        <button type="button" className="secondary auth-link-mobile" onClick={onIrALogin}>
+          Ya tengo cuenta
+        </button>
+
         <button type="submit" disabled={enviando}>
           {enviando ? "Creando..." : "Crear cuenta"}
         </button>
@@ -85,7 +91,7 @@ export function RegistroPage({ onIrALogin }) {
 
       {error && <p className="error-message">{error}</p>}
 
-      <button className="secondary" onClick={onIrALogin}>
+      <button className="secondary auth-link-desktop" onClick={onIrALogin}>
         Ya tengo cuenta
       </button>
     </section>

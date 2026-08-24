@@ -82,7 +82,11 @@ body {
   height: auto;
 }
 
-.auth-logo-mobile {
+.subtitle-auth {
+  display: none;
+}
+
+.auth-link-mobile {
   display: none;
 }
 
@@ -818,20 +822,35 @@ input[type="number"]::-webkit-inner-spin-button {
     display: flex;
     flex-direction: column;
     padding: 24px 24px calc(24px + env(safe-area-inset-bottom));
-    padding-top: max(24px, env(safe-area-inset-top));
+    padding-top: max(56px, env(safe-area-inset-top));
     overflow-y: auto;
   }
 
-  .auth-logo-mobile {
+  .subtitle-auth {
     display: block;
-    width: 64px;
-    height: auto;
-    margin-bottom: 24px;
+    color: var(--text-muted);
+    font-size: 15px;
+    margin: 4px 0 28px;
+  }
+
+  .auth-link-desktop {
+    display: none;
+  }
+
+  .auth-link-mobile {
+    display: block;
+    margin-top: auto;
   }
 
   #root .auth-screen h1,
   #root .auth-screen .subtitle {
     display: none;
+  }
+
+  .auth-screen-anim {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
   }
 
   .auth-screen .card-mobile {
@@ -856,10 +875,6 @@ input[type="number"]::-webkit-inner-spin-button {
     display: flex;
     flex-direction: column;
     flex: 1;
-  }
-
-  .auth-screen .card-mobile form button[type="submit"] {
-    margin-top: auto;
   }
 
   .campo-auth label {
