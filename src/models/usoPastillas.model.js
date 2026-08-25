@@ -33,4 +33,7 @@ const usoPastillasSchema = new Schema(
   { timestamps: true }
 );
 
+usoPastillasSchema.index({ cliente: 1, weekStart: 1 });
+usoPastillasSchema.index({ fecha: 1 });
+
 export const usoPastillasModel = model("usoPastillas", usoPastillasSchema);

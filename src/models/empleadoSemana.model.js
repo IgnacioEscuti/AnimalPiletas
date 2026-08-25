@@ -20,4 +20,6 @@ const empleadoSemanaSchema = new Schema(
   { timestamps: true }
 );
 
+empleadoSemanaSchema.index({ weekStart: 1, cliente: 1 });
+
 export const empleadoSemanaModel = model("empleadoSemana", empleadoSemanaSchema);

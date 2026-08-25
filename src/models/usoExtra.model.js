@@ -30,4 +30,6 @@ const usoExtraSchema = new Schema(
   { timestamps: true }
 );
 
+usoExtraSchema.index({ fecha: 1 });
+
 export const usoExtraModel = model("usoExtra", usoExtraSchema);

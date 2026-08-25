@@ -54,4 +54,6 @@ const clienteSchema = new Schema(
   { timestamps: true }
 );
 
+clienteSchema.index({ encargado: 1 });
+
 export const clienteModel = model("cliente", clienteSchema);

@@ -42,4 +42,7 @@ const limpiezaSchema = new Schema(
   { timestamps: true }
 );
 
+limpiezaSchema.index({ cliente: 1, weekStart: 1 });
+limpiezaSchema.index({ fecha: 1 });
+
 export const limpiezaModel = model("limpieza", limpiezaSchema);
