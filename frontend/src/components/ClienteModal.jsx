@@ -115,11 +115,13 @@ export function ClienteModal({
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" ref={modalRef} onClick={(event) => event.stopPropagation()}>
         <div
-          className="modal-handle"
+          className="modal-handle-area"
           onPointerDown={handleHandleDown}
           onPointerMove={handleHandleMove}
           onPointerUp={handleHandleUp}
-        />
+        >
+          <div className="modal-handle" />
+        </div>
         <h2>{cliente ? "Editar cliente" : "Nuevo cliente"}</h2>
         <form onSubmit={handleSubmit}>
           <input

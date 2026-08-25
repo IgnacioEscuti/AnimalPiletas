@@ -780,7 +780,7 @@ button.modal-cancelar-cliente:hover {
   color: #fff;
 }
 
-.modal-handle {
+.modal-handle-area {
   display: none;
 }
 
@@ -1575,14 +1575,19 @@ input[type="number"]::-webkit-inner-spin-button {
     animation: sheet-slide-in 0.2s ease;
   }
 
+  .modal-handle-area {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px 40px;
+    touch-action: none;
+  }
+
   .modal-handle {
-    display: block;
     width: 36px;
     height: 4px;
     border-radius: 2px;
     background: rgba(233, 233, 237, 0.25);
-    margin: 0 auto 16px;
-    touch-action: none;
   }
 
   .modal-actions {
