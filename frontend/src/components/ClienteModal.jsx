@@ -31,6 +31,24 @@ export function ClienteModal({
     }
   }, [tarifas, tarifaLimpieza]);
 
+  useEffect(() => {
+    const scrollY = window.scrollY;
+    const { overflow, position, width, top } = document.body.style;
+
+    document.body.style.overflow = "hidden";
+    document.body.style.position = "fixed";
+    document.body.style.width = "100%";
+    document.body.style.top = `-${scrollY}px`;
+
+    return () => {
+      document.body.style.overflow = overflow;
+      document.body.style.position = position;
+      document.body.style.width = width;
+      document.body.style.top = top;
+      window.scrollTo(0, scrollY);
+    };
+  }, []);
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     setEnviando(true);
