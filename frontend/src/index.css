@@ -7,9 +7,9 @@
   --accent: #9184d9;
   --accent-hover: #7c6fc4;
   --accent-bg: rgba(145, 132, 217, 0.14);
-  --success: #34c759;
+  --success: #33b954;
   --success-hover: #28a745;
-  --danger: #f05064;
+  --danger: #f1344a;
   --danger-hover: #ff7d8f;
   --radius: 22px;
   --shadow: none;
@@ -1179,13 +1179,13 @@ input[type="number"]::-webkit-inner-spin-button {
   }
 
   .estado-tick {
-    background: rgba(52, 199, 89, 0.18);
-    color: var(--success);
+    background: var(--success);
+    color: #fff;
   }
 
   .estado-cross {
-    background: rgba(240, 80, 100, 0.18);
-    color: var(--danger);
+    background: var(--danger);
+    color: #fff;
   }
 
   .estado-pendiente {
