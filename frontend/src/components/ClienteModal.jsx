@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 export function ClienteModal({
   cliente,
@@ -19,6 +19,8 @@ export function ClienteModal({
   const [encargado, setEncargado] = useState(cliente?.encargado?.id ?? "");
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState("");
+  const modalRef = useRef(null);
+  const dragRef = useRef({ startY: 0, arrastrando: false });
 
   // Si el modal se abre para crear un cliente antes de que las tarifas
   // terminen de cargar (tarifas=[] al montar), no hay nada que
@@ -65,6 +67,34 @@ export function ClienteModal({
     }
   };
 
+  const handleHandleDown = (event) => {
+    dragRef.current = { startY: event.clientY, arrastrando: true };
+    event.currentTarget.setPointerCapture(event.pointerId);
+    if (modalRef.current) {
+      modalRef.current.style.transition = "none";
+    }
+  };
+
+  const handleHandleMove = (event) => {
+    if (!dragRef.current.arrastrando || !modalRef.current) return;
+    const deltaY = Math.max(0, event.clientY - dragRef.current.startY);
+    modalRef.current.style.transform = `translateY(${deltaY}px)`;
+  };
+
+  const handleHandleUp = (event) => {
+    if (!dragRef.current.arrastrando) return;
+    const deltaY = Math.max(0, event.clientY - dragRef.current.startY);
+    dragRef.current.arrastrando = false;
+    if (deltaY > 100) {
+      onClose();
+      return;
+    }
+    if (modalRef.current) {
+      modalRef.current.style.transition = "transform 0.2s ease";
+      modalRef.current.style.transform = "translateY(0)";
+    }
+  };
+
   const handleCancelarCliente = async () => {
     const confirmado = window.confirm(
       `¿Cancelar a ${cliente.nombre}? Va a dejar de aparecer en la lista.`
@@ -83,7 +113,13 @@ export function ClienteModal({
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal" onClick={(event) => event.stopPropagation()}>
+      <div className="modal" ref={modalRef} onClick={(event) => event.stopPropagation()}>
+        <div
+          className="modal-handle"
+          onPointerDown={handleHandleDown}
+          onPointerMove={handleHandleMove}
+          onPointerUp={handleHandleUp}
+        />
         <h2>{cliente ? "Editar cliente" : "Nuevo cliente"}</h2>
         <form onSubmit={handleSubmit}>
           <input

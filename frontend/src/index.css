@@ -780,6 +780,10 @@ button.modal-cancelar-cliente:hover {
   color: #fff;
 }
 
+.modal-handle {
+  display: none;
+}
+
 /* Navegación principal y Resumen */
 
 .main-nav {
@@ -1571,14 +1575,14 @@ input[type="number"]::-webkit-inner-spin-button {
     animation: sheet-slide-in 0.2s ease;
   }
 
-  .modal::before {
-    content: "";
+  .modal-handle {
     display: block;
     width: 36px;
     height: 4px;
     border-radius: 2px;
     background: rgba(233, 233, 237, 0.25);
     margin: 0 auto 16px;
+    touch-action: none;
   }
 
   .modal-actions {
