@@ -125,8 +125,8 @@ export function ResumenTable({ filas, totales, periodo, tab, inicioISO }) {
           <td data-label="Limpiezas">{totales.totalLimpiezas}</td>
           <td data-label="Pastillas">{totales.totalPastillas}</td>
           <td data-label="Extras">{listaExtras(totales.totalExtras)}</td>
-          <td>—</td>
-          <td>—</td>
+          <td></td>
+          <td></td>
           <td></td>
         </tr>
       </tfoot>
