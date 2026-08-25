@@ -1128,6 +1128,14 @@ input[type="number"]::-webkit-inner-spin-button {
     display: none;
   }
 
+  /* Altura real de .main-nav (icono + label + padding + safe-area) más aire,
+     para que scrollIntoView no deje el final de la tarjeta tapado detrás
+     de la tab bar fija. scroll-margin solo aplica al elemento que recibe
+     scrollIntoView() -por eso va en tr.fila-cliente, no en .fila-expandida-. */
+  tr.fila-cliente.expandido {
+    scroll-margin-bottom: 200px;
+  }
+
   .fila-expandida {
     display: block;
     background: transparent;
