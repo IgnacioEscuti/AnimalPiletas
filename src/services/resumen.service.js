@@ -2,6 +2,7 @@ import { clienteRepository } from "../repositories/cliente.repository.js";
 import { limpiezaRepository } from "../repositories/limpieza.repository.js";
 import { usoPastillasRepository } from "../repositories/usoPastillas.repository.js";
 import { usoExtraRepository } from "../repositories/usoExtra.repository.js";
+import { empleadoSemanaRepository } from "../repositories/empleadoSemana.repository.js";
 import { rangoSemanal, rangoMensual } from "../utils/fecha.utils.js";
 
 function datosVacios() {
@@ -18,11 +19,18 @@ function datosVacios() {
 }
 
 export class ResumenService {
-  constructor(clienteRepository, limpiezaRepository, usoPastillasRepository, usoExtraRepository) {
+  constructor(
+    clienteRepository,
+    limpiezaRepository,
+    usoPastillasRepository,
+    usoExtraRepository,
+    empleadoSemanaRepository
+  ) {
     this.clienteRepository = clienteRepository;
     this.limpiezaRepository = limpiezaRepository;
     this.usoPastillasRepository = usoPastillasRepository;
     this.usoExtraRepository = usoExtraRepository;
+    this.empleadoSemanaRepository = empleadoSemanaRepository;
   }
 
   async getResumen(tipo, fecha, usuarioActual) {
@@ -34,6 +42,7 @@ export class ResumenService {
 
     const { inicio, fin } = tipo === "semanal" ? rangoSemanal(fecha) : rangoMensual(fecha);
     const filtroFecha = { fecha: { $gte: inicio, $lt: fin } };
+    const filtroWeekStart = { weekStart: { $gte: inicio, $lt: fin } };
     // Igual que en la pantalla de Cliente: un "encargado" solo ve sus propios
     // clientes, un "admin" ve todos. Alcanza con filtrar la lista de clientes
     // acá — como las filas del resumen se arman iterando esa lista, los
@@ -41,11 +50,12 @@ export class ResumenService {
     const filtroClientes =
       usuarioActual.rol === "encargado" ? { encargado: usuarioActual.id ?? usuarioActual._id } : {};
 
-    const [clientes, limpiezas, usosPastillas, usosExtra] = await Promise.all([
+    const [clientes, limpiezas, usosPastillas, usosExtra, empleadosSemana] = await Promise.all([
       this.clienteRepository.find(filtroClientes),
       this.limpiezaRepository.find(filtroFecha),
       this.usoPastillasRepository.find(filtroFecha),
       this.usoExtraRepository.find(filtroFecha),
+      this.empleadoSemanaRepository.find(filtroWeekStart),
     ]);
 
     const porCliente = new Map();
@@ -63,21 +73,22 @@ export class ResumenService {
         datos.limpiezaPrecio += limpieza.precioUnitarioUsado + limpieza.extra;
         datos.limpiezaFechas.push(limpieza.fecha);
       }
-      if (limpieza.empleado) datosDe(limpieza.cliente).empleados.add(limpieza.empleado);
     }
 
     for (const uso of usosPastillas) {
       const datos = datosDe(uso.cliente);
       datos.pastillasCantidad += uso.cantidad;
       datos.pastillasPrecio += uso.cantidad * uso.precioUnitarioUsado;
-      if (uso.empleado) datos.empleados.add(uso.empleado);
     }
 
     for (const uso of usosExtra) {
       const datos = datosDe(uso.cliente);
       datos.extras.set(uso.nombreExtra, (datos.extras.get(uso.nombreExtra) ?? 0) + 1);
       datos.extraPrecio += uso.precioUnitario;
-      if (uso.empleado) datos.empleados.add(uso.empleado);
+    }
+
+    for (const empleadoSemana of empleadosSemana) {
+      if (empleadoSemana.nombre) datosDe(empleadoSemana.cliente).empleados.add(empleadoSemana.nombre);
     }
 
     const filas = clientes.map((cliente) => {
@@ -128,5 +139,6 @@ export const resumenService = new ResumenService(
   clienteRepository,
   limpiezaRepository,
   usoPastillasRepository,
-  usoExtraRepository
+  usoExtraRepository,
+  empleadoSemanaRepository
 );

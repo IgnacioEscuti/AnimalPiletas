@@ -1,10 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 
-function empleadoGuardado(empleadoLimpieza, empleadoPastillas, empleadoExtra) {
-  return empleadoLimpieza || empleadoPastillas || empleadoExtra || "";
-}
-
 export function ClienteRow({
   cliente,
   grupoKey,
@@ -12,11 +8,13 @@ export function ClienteRow({
   limpiezaHoy,
   pastillasHoy,
   extras = [],
+  empleadoSemanaHoy,
   onEditar,
   onLimpieza,
   onPastillas,
   onExtra,
   onEliminarExtra,
+  onEmpleado,
   onDragStart,
   onDragOver,
   onDrop,
@@ -31,18 +29,15 @@ export function ClienteRow({
   );
   const [nombreExtra, setNombreExtra] = useState("");
   const [precioExtra, setPrecioExtra] = useState("");
-  const empleadoDeExtras = extras.find((extra) => extra.empleado)?.empleado ?? "";
-  const [empleado, setEmpleado] = useState(() =>
-    empleadoGuardado(limpiezaHoy?.empleado, pastillasHoy?.empleado, empleadoDeExtras)
-  );
+  const [empleado, setEmpleado] = useState(empleadoSemanaHoy?.nombre ?? "");
 
   useEffect(() => {
     setCantidadPastillas(pastillasHoy?.cantidad ? String(pastillasHoy.cantidad) : "");
   }, [pastillasHoy?.cantidad]);
 
   useEffect(() => {
-    setEmpleado(empleadoGuardado(limpiezaHoy?.empleado, pastillasHoy?.empleado, empleadoDeExtras));
-  }, [limpiezaHoy?.empleado, pastillasHoy?.empleado, empleadoDeExtras]);
+    setEmpleado(empleadoSemanaHoy?.nombre ?? "");
+  }, [empleadoSemanaHoy?.nombre]);
 
   const handleBlurExtra = () => {
     if (!nombreExtra || !precioExtra) return;
@@ -194,6 +189,7 @@ export function ClienteRow({
               className="empleado-input"
               value={empleado}
               onChange={(event) => setEmpleado(event.target.value)}
+              onBlur={() => onEmpleado(cliente.id, empleado)}
             />
           </div>
         </td>

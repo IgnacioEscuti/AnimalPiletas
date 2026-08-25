@@ -14,6 +14,7 @@ import { getBarrios, reordenarBarrios } from "../services/barrioService.js";
 import { getLimpiezasDeHoy, registrarLimpieza } from "../services/limpiezaService.js";
 import { getUsosPastillasDeHoy, registrarUsoPastillas } from "../services/usoPastillasService.js";
 import { getUsosExtraDeHoy, registrarUsoExtra, eliminarUsoExtra } from "../services/usoExtraService.js";
+import { getEmpleadoSemana, guardarEmpleadoSemana } from "../services/empleadoSemanaService.js";
 import { getUsuarios } from "../services/usuarioService.js";
 import { useAuth } from "../context/AuthContext.jsx";
 import { semanaActual, estaEnSemanaActual } from "../utils/fecha.js";
@@ -31,6 +32,7 @@ export function ClientesPage({ onPrimeraCarga }) {
   const [limpiezas, setLimpiezas] = useState([]);
   const [pastillas, setPastillas] = useState([]);
   const [extras, setExtras] = useState([]);
+  const [empleadosSemana, setEmpleadosSemana] = useState([]);
   const [busqueda, setBusqueda] = useState("");
   const [verTodos, setVerTodos] = useState(false);
   const [clienteEnEdicion, setClienteEnEdicion] = useState(null);
@@ -69,6 +71,7 @@ export function ClientesPage({ onPrimeraCarga }) {
         limpiezasData,
         pastillasData,
         extrasData,
+        empleadosSemanaData,
         usuariosData,
       ] = await Promise.all([
         getClientes(),
@@ -77,6 +80,7 @@ export function ClientesPage({ onPrimeraCarga }) {
         getLimpiezasDeHoy(),
         getUsosPastillasDeHoy(),
         getUsosExtraDeHoy(),
+        getEmpleadoSemana(),
         esAdmin ? getUsuarios() : Promise.resolve([]),
       ]);
       setClientes(clientesData);
@@ -85,6 +89,7 @@ export function ClientesPage({ onPrimeraCarga }) {
       setLimpiezas(limpiezasData);
       setPastillas(pastillasData);
       setExtras(extrasData);
+      setEmpleadosSemana(empleadosSemanaData);
       setUsuarios(usuariosData);
     } catch {
       setError("No se pudieron cargar los datos.");
@@ -162,6 +167,17 @@ export function ClientesPage({ onPrimeraCarga }) {
     } catch {
       setExtras(anterior);
       setError("No se pudo eliminar el extra.");
+    }
+  };
+
+  const handleEmpleado = async (clienteId, nombre) => {
+    const anterior = empleadosSemana;
+    setEmpleadosSemana(actualizarPorCliente(anterior, clienteId, { nombre }));
+    try {
+      await guardarEmpleadoSemana(clienteId, nombre);
+    } catch {
+      setEmpleadosSemana(anterior);
+      setError("No se pudo guardar el empleado.");
     }
   };
 
@@ -527,11 +543,13 @@ export function ClientesPage({ onPrimeraCarga }) {
                   limpiezaHoy={limpiezas.find((limpieza) => limpieza.cliente === cliente.id)}
                   pastillasHoy={pastillas.find((uso) => uso.cliente === cliente.id)}
                   extras={extras.filter((uso) => uso.cliente === cliente.id)}
+                  empleadoSemanaHoy={empleadosSemana.find((e) => e.cliente === cliente.id)}
                   onEditar={abrirEdicion}
                   onLimpieza={handleLimpieza}
                   onPastillas={handlePastillas}
                   onExtra={handleExtra}
                   onEliminarExtra={handleEliminarExtra}
+                  onEmpleado={handleEmpleado}
                   onDragStart={(event) => handleClienteDragStart(event, cliente.id, grupo.key)}
                   onDragOver={(event) => event.preventDefault()}
                   onDrop={() => handleClienteDrop(cliente.id, grupo.key)}
