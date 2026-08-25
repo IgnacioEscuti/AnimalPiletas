@@ -541,17 +541,57 @@ tfoot tr td:last-child {
   width: 60px;
 }
 
-.extra-hoy {
+.extra-chips {
   display: flex;
-  align-items: center;
+  flex-wrap: wrap;
   gap: 6px;
   margin: 6px 0 0;
-  font-size: 12px;
-  color: var(--text-muted);
 }
 
-.extra-hoy-precio {
+.extra-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 6px 3px 10px;
+  border-radius: 999px;
+  background: rgba(233, 233, 237, 0.08);
+  font-size: 12px;
   color: var(--text-muted);
+  max-width: 100%;
+}
+
+.extra-chip-nombre {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 90px;
+}
+
+.extra-chip-precio {
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.extra-chip-cerrar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 10px;
+  line-height: 1;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.extra-chip-cerrar:hover {
+  background: var(--danger);
+  color: #fff;
 }
 
 .empleado-input {
@@ -1292,22 +1332,23 @@ input[type="number"]::-webkit-inner-spin-button {
     color: var(--accent);
   }
 
-  .extra-hoy {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  .extra-chips {
     width: 100%;
-    margin: 0;
-    padding: 14px 16px;
-    background: var(--bg);
-    border-radius: 14px;
-    font-size: 15px;
-    color: var(--text);
   }
 
-  .extra-hoy-precio {
-    color: var(--accent);
-    font-weight: 600;
+  .extra-chip {
+    font-size: 13px;
+    padding: 4px 8px 4px 12px;
+  }
+
+  .extra-chip-nombre {
+    max-width: 120px;
+  }
+
+  .extra-chip-cerrar {
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
   }
 
   /* Empleado: mismo tratamiento de tarjeta/pill que Extra de hoy */

@@ -7,11 +7,12 @@ export function ClienteRow({
   index,
   limpiezaHoy,
   pastillasHoy,
-  extraHoy,
+  extras = [],
   onEditar,
   onLimpieza,
   onPastillas,
   onExtra,
+  onEliminarExtra,
   onDragStart,
   onDragOver,
   onDrop,
@@ -153,10 +154,23 @@ export function ClienteRow({
                 onBlur={handleBlurExtra}
               />
             </div>
-            {extraHoy && (
-              <div className="extra-hoy">
-                <span>{extraHoy.nombreExtra}</span>
-                <span className="extra-hoy-precio">${extraHoy.precioUnitario}</span>
+            {extras.length > 0 && (
+              <div className="extra-chips">
+                {extras.map((extra) => (
+                  <span key={extra.id} className="extra-chip">
+                    <span className="extra-chip-nombre">{extra.nombreExtra}</span>
+                    <span className="extra-chip-precio">${extra.precioUnitario}</span>
+                    <button
+                      type="button"
+                      className="extra-chip-cerrar"
+                      onClick={() => onEliminarExtra(extra.id)}
+                      aria-label={`Eliminar ${extra.nombreExtra}`}
+                      title="Eliminar"
+                    >
+                      ✕
+                    </button>
+                  </span>
+                ))}
               </div>
             )}
           </div>

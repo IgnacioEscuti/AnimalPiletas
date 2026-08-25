@@ -13,7 +13,7 @@ import { getTarifas } from "../services/tarifaService.js";
 import { getBarrios, reordenarBarrios } from "../services/barrioService.js";
 import { getLimpiezasDeHoy, registrarLimpieza } from "../services/limpiezaService.js";
 import { getUsosPastillasDeHoy, registrarUsoPastillas } from "../services/usoPastillasService.js";
-import { getUsosExtraDeHoy, registrarUsoExtra } from "../services/usoExtraService.js";
+import { getUsosExtraDeHoy, registrarUsoExtra, eliminarUsoExtra } from "../services/usoExtraService.js";
 import { getUsuarios } from "../services/usuarioService.js";
 import { useAuth } from "../context/AuthContext.jsx";
 import { semanaActual, estaEnSemanaActual } from "../utils/fecha.js";
@@ -143,12 +143,25 @@ export function ClientesPage({ onPrimeraCarga }) {
 
   const handleExtra = async (clienteId, nombreExtra, precioUnitario, empleado) => {
     const anterior = extras;
-    setExtras(actualizarPorCliente(anterior, clienteId, { nombreExtra, precioUnitario, empleado }));
+    const idTemporal = `temp-${Date.now()}`;
+    setExtras([...anterior, { id: idTemporal, cliente: clienteId, nombreExtra, precioUnitario, empleado }]);
     try {
-      await registrarUsoExtra(clienteId, nombreExtra, precioUnitario, empleado);
+      const creado = await registrarUsoExtra(clienteId, nombreExtra, precioUnitario, empleado);
+      setExtras((actuales) => actuales.map((extra) => (extra.id === idTemporal ? creado : extra)));
     } catch {
       setExtras(anterior);
       setError("No se pudo registrar la carga de extra.");
+    }
+  };
+
+  const handleEliminarExtra = async (id) => {
+    const anterior = extras;
+    setExtras(anterior.filter((extra) => extra.id !== id));
+    try {
+      await eliminarUsoExtra(id);
+    } catch {
+      setExtras(anterior);
+      setError("No se pudo eliminar el extra.");
     }
   };
 
@@ -513,11 +526,12 @@ export function ClientesPage({ onPrimeraCarga }) {
                   grupoKey={grupo.key}
                   limpiezaHoy={limpiezas.find((limpieza) => limpieza.cliente === cliente.id)}
                   pastillasHoy={pastillas.find((uso) => uso.cliente === cliente.id)}
-                  extraHoy={extras.find((uso) => uso.cliente === cliente.id)}
+                  extras={extras.filter((uso) => uso.cliente === cliente.id)}
                   onEditar={abrirEdicion}
                   onLimpieza={handleLimpieza}
                   onPastillas={handlePastillas}
                   onExtra={handleExtra}
+                  onEliminarExtra={handleEliminarExtra}
                   onDragStart={(event) => handleClienteDragStart(event, cliente.id, grupo.key)}
                   onDragOver={(event) => event.preventDefault()}
                   onDrop={() => handleClienteDrop(cliente.id, grupo.key)}

@@ -15,3 +15,7 @@ export const registrarUsoExtra = async (clienteId, nombreExtra, precioUnitario, 
   });
   return data.usoExtra;
 };
+
+export const eliminarUsoExtra = async (id) => {
+  await api.delete(`/usos-extra/${id}`);
+};
