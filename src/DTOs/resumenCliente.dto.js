@@ -5,6 +5,7 @@ export class ResumenClienteDTO {
     this.limpieza = fila.limpieza;
     this.pastillas = fila.pastillas;
     this.extra = fila.extra;
+    this.empleados = fila.empleados;
     this.totalGeneral = fila.totalGeneral;
   }
 }

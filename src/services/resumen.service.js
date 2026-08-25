@@ -13,6 +13,7 @@ function datosVacios() {
     pastillasPrecio: 0,
     extras: new Map(),
     extraPrecio: 0,
+    empleados: new Set(),
   };
 }
 
@@ -62,18 +63,21 @@ export class ResumenService {
         datos.limpiezaPrecio += limpieza.precioUnitarioUsado + limpieza.extra;
         datos.limpiezaFechas.push(limpieza.fecha);
       }
+      if (limpieza.empleado) datosDe(limpieza.cliente).empleados.add(limpieza.empleado);
     }
 
     for (const uso of usosPastillas) {
       const datos = datosDe(uso.cliente);
       datos.pastillasCantidad += uso.cantidad;
       datos.pastillasPrecio += uso.cantidad * uso.precioUnitarioUsado;
+      if (uso.empleado) datos.empleados.add(uso.empleado);
     }
 
     for (const uso of usosExtra) {
       const datos = datosDe(uso.cliente);
       datos.extras.set(uso.nombreExtra, (datos.extras.get(uso.nombreExtra) ?? 0) + 1);
       datos.extraPrecio += uso.precioUnitario;
+      if (uso.empleado) datos.empleados.add(uso.empleado);
     }
 
     const filas = clientes.map((cliente) => {
@@ -94,6 +98,7 @@ export class ResumenService {
         },
         pastillas: { cantidad: datos.pastillasCantidad, precio: datos.pastillasPrecio },
         extra,
+        empleados: Array.from(datos.empleados).join(", "),
         totalGeneral,
       };
     });

@@ -1,6 +1,10 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 
+function empleadoGuardado(empleadoLimpieza, empleadoPastillas, empleadoExtra) {
+  return empleadoLimpieza || empleadoPastillas || empleadoExtra || "";
+}
+
 export function ClienteRow({
   cliente,
   grupoKey,
@@ -27,11 +31,18 @@ export function ClienteRow({
   );
   const [nombreExtra, setNombreExtra] = useState("");
   const [precioExtra, setPrecioExtra] = useState("");
-  const [empleado, setEmpleado] = useState("");
+  const empleadoDeExtras = extras.find((extra) => extra.empleado)?.empleado ?? "";
+  const [empleado, setEmpleado] = useState(() =>
+    empleadoGuardado(limpiezaHoy?.empleado, pastillasHoy?.empleado, empleadoDeExtras)
+  );
 
   useEffect(() => {
     setCantidadPastillas(pastillasHoy?.cantidad ? String(pastillasHoy.cantidad) : "");
   }, [pastillasHoy?.cantidad]);
+
+  useEffect(() => {
+    setEmpleado(empleadoGuardado(limpiezaHoy?.empleado, pastillasHoy?.empleado, empleadoDeExtras));
+  }, [limpiezaHoy?.empleado, pastillasHoy?.empleado, empleadoDeExtras]);
 
   const handleBlurExtra = () => {
     if (!nombreExtra || !precioExtra) return;

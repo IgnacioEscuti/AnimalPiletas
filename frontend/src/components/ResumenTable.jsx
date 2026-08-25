@@ -79,6 +79,7 @@ export function ResumenTable({ filas, totales, periodo, tab, inicioISO }) {
           <th>Limpieza</th>
           <th>Pastillas</th>
           <th>Extra</th>
+          <th>Empleado</th>
           <th>Total</th>
           <th></th>
         </tr>
@@ -104,6 +105,7 @@ export function ResumenTable({ filas, totales, periodo, tab, inicioISO }) {
               <div>{listaExtras(fila.extra.extras)}</div>
               <div className="row-price">${fila.extra.precio}</div>
             </td>
+            <td data-label="Empleado">{fila.empleados || "—"}</td>
             <td data-label="Total">
               <strong>${fila.totalGeneral}</strong>
             </td>
@@ -123,6 +125,7 @@ export function ResumenTable({ filas, totales, periodo, tab, inicioISO }) {
           <td data-label="Limpiezas">{totales.totalLimpiezas}</td>
           <td data-label="Pastillas">{totales.totalPastillas}</td>
           <td data-label="Extras">{listaExtras(totales.totalExtras)}</td>
+          <td>—</td>
           <td>—</td>
           <td></td>
         </tr>
