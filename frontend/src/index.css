@@ -1137,7 +1137,7 @@ input[type="number"]::-webkit-inner-spin-button {
      de la tab bar fija. scroll-margin solo aplica al elemento que recibe
      scrollIntoView() -por eso va en tr.fila-cliente, no en .fila-expandida-. */
   tr.fila-cliente.expandido {
-    scroll-margin-top: 50px;
+    scroll-margin-top: 70px;
   }
 
   .fila-expandida {
@@ -1446,6 +1446,13 @@ input[type="number"]::-webkit-inner-spin-button {
     display: block;
     width: 22px;
     height: 22px;
+  }
+
+  /* .main-nav queda fijo abajo con fondo var(--surface) solo en mobile;
+     el div de Safari tiene que combinar con ese color acá, no con el
+     var(--bg) de la página (heredado de .safari-bg-fix). */
+  .safari-bg-fix-bottom {
+    background-color: var(--surface);
   }
 
   /* Tarjeta mobile genérica (Resumen, Tarifas, Login/Registro) — mismo
