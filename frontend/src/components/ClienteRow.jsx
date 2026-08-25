@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 
 export function ClienteRow({
@@ -30,6 +30,13 @@ export function ClienteRow({
   const [nombreExtra, setNombreExtra] = useState("");
   const [precioExtra, setPrecioExtra] = useState("");
   const [empleado, setEmpleado] = useState(empleadoSemanaHoy?.nombre ?? "");
+  const filaRef = useRef(null);
+
+  useEffect(() => {
+    if (!expandido) return;
+    if (!window.matchMedia("(max-width: 700px)").matches) return;
+    filaRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }, [expandido]);
 
   useEffect(() => {
     setCantidadPastillas(pastillasHoy?.cantidad ? String(pastillasHoy.cantidad) : "");
@@ -59,6 +66,7 @@ export function ClienteRow({
   return (
     <tbody className="fila-cliente-grupo">
       <motion.tr
+        ref={filaRef}
         className={`fila-cliente ${expandido ? "expandido" : ""} ${arrastrando ? "arrastrando" : ""} ${
           dragOver ? "drag-over" : ""
         }`}
