@@ -1455,6 +1455,12 @@ input[type="number"]::-webkit-inner-spin-button {
     font-size: 19px;
   }
 
+  /* El buscador comparte superficie con la tarjeta que lo contiene (Resumen),
+     por eso necesita un fondo más oscuro para no fundirse con ella. */
+  .card-mobile .search-input {
+    background: var(--bg);
+  }
+
   /* Tabs de Resumen: pill como el resto de los chips/badges en mobile */
   .tabs button {
     border-radius: 999px;
