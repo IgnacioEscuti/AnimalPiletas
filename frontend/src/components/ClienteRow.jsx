@@ -35,7 +35,7 @@ export function ClienteRow({
   useEffect(() => {
     if (!expandido) return;
     if (!window.matchMedia("(max-width: 700px)").matches) return;
-    filaRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    filaRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, [expandido]);
 
   useEffect(() => {

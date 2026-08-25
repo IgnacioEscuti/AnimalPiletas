@@ -1133,7 +1133,7 @@ input[type="number"]::-webkit-inner-spin-button {
      de la tab bar fija. scroll-margin solo aplica al elemento que recibe
      scrollIntoView() -por eso va en tr.fila-cliente, no en .fila-expandida-. */
   tr.fila-cliente.expandido {
-    scroll-margin-bottom: 200px;
+    scroll-margin-top: 100px;
   }
 
   .fila-expandida {
