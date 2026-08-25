@@ -2,7 +2,7 @@ import { usoPastillasRepository } from "../repositories/usoPastillas.repository.
 import { clienteRepository } from "../repositories/cliente.repository.js";
 import { precioPastillasService } from "./precioPastillas.service.js";
 import { handleMongooseError } from "../utils/mongooseError.utils.js";
-import { hoyNormalizado, rangoDelDia } from "../utils/fecha.utils.js";
+import { hoyNormalizado, rangoSemanal } from "../utils/fecha.utils.js";
 
 export class UsoPastillasService {
   constructor(repository, clienteRepository) {
@@ -25,9 +25,10 @@ export class UsoPastillasService {
     }
 
     const precioPastillas = await precioPastillasService.getPrecio();
+    const { inicio: weekStart } = rangoSemanal();
 
     try {
-      return await this.repository.upsertPorClienteYFecha(clienteId, hoyNormalizado(), {
+      return await this.repository.upsertPorClienteYFecha(clienteId, weekStart, hoyNormalizado(), {
         cantidad,
         precioUnitarioUsado: precioPastillas.precio,
         empleado,
@@ -38,7 +39,7 @@ export class UsoPastillasService {
   }
 
   async getUsosPorFecha(fecha) {
-    const { inicio, fin } = rangoDelDia(fecha);
+    const { inicio, fin } = rangoSemanal(fecha);
     return this.repository.find({ fecha: { $gte: inicio, $lt: fin } });
   }
 }

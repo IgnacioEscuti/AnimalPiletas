@@ -11,6 +11,9 @@ const limpiezaSchema = new Schema(
       type: Date,
       required: true,
     },
+    weekStart: {
+      type: Date,
+    },
     tarifa: {
       type: Schema.Types.ObjectId,
       ref: "tarifaLimpieza",

@@ -9,7 +9,8 @@
     "dev": "nodemon src/server.js",
     "seed:tarifas": "node src/seeds/tarifaSeed.js",
     "seed:pastillas": "node src/seeds/precioPastillasSeed.js",
-    "seed:eventos-prueba": "node src/seeds/eventosPruebaSeed.js"
+    "seed:eventos-prueba": "node src/seeds/eventosPruebaSeed.js",
+    "migrate:consolidar-semana": "node src/migrations/consolidarSemanaActual.migration.js"
   },
   "keywords": [],
   "author": "",

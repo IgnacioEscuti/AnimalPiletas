@@ -1,7 +1,7 @@
 import { limpiezaRepository } from "../repositories/limpieza.repository.js";
 import { clienteRepository } from "../repositories/cliente.repository.js";
 import { handleMongooseError } from "../utils/mongooseError.utils.js";
-import { hoyNormalizado, rangoDelDia } from "../utils/fecha.utils.js";
+import { hoyNormalizado, rangoSemanal } from "../utils/fecha.utils.js";
 
 export class LimpiezaService {
   constructor(repository, clienteRepository) {
@@ -23,8 +23,10 @@ export class LimpiezaService {
       throw error;
     }
 
+    const { inicio: weekStart } = rangoSemanal();
+
     try {
-      return await this.repository.upsertPorClienteYFecha(clienteId, hoyNormalizado(), {
+      return await this.repository.upsertPorClienteYFecha(clienteId, weekStart, hoyNormalizado(), {
         tarifa: cliente.tarifaLimpieza.id ?? cliente.tarifaLimpieza._id,
         precioUnitarioUsado: cliente.tarifaLimpieza.precio,
         extra,
@@ -37,7 +39,7 @@ export class LimpiezaService {
   }
 
   async getLimpiezasPorFecha(fecha) {
-    const { inicio, fin } = rangoDelDia(fecha);
+    const { inicio, fin } = rangoSemanal(fecha);
     return this.repository.find({ fecha: { $gte: inicio, $lt: fin } });
   }
 }

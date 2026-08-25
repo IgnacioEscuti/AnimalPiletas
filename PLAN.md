@@ -186,5 +186,6 @@ Completamente separado de `barrio` (que sigue siendo solo agrupación visual) �
 6. ✅ Responsive (mobile): layout mobile de tarjetas colapsables por cliente, manifest.json + apple-touch-icon para PWA en iOS, meta theme-color y safe-area para el status bar — hecho en Función 6
 7. ✅ Login (email + PIN de 4 dígitos, cookie httpOnly de 8hs, bloqueo por intentos) — hecho en Función 7
 8. ✅ Roles (admin ve/modifica todo, encargado solo sus propios clientes vía campo Cliente.encargado) — hecho en Función 8
+9. 🔲 Persistencia semanal en pantalla de Cliente (Limpieza y Pastillas pasan a un documento por semana en vez de por día; Extra pasa a lista real con borrado por ítem) — en curso, backend enviado a Claude Code
 
 App deployada y en uso: frontend en Vercel, backend en Render, base en MongoDB Atlas. Instalada como PWA en iPhone. Login y roles ya activos — todos los endpoints requieren sesión.

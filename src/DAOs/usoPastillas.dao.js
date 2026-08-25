@@ -5,11 +5,15 @@ export class UsoPastillasDAO {
     return usoPastillasModel.find(filters);
   }
 
-  async upsertPorClienteYFecha(cliente, fecha, data) {
-    return usoPastillasModel.findOneAndUpdate({ cliente, fecha }, data, {
-      returnDocument: 'after',
-      runValidators: true,
-      upsert: true,
-    });
+  async upsertPorClienteYFecha(cliente, weekStart, fecha, data) {
+    return usoPastillasModel.findOneAndUpdate(
+      { cliente, weekStart },
+      { $set: data, $setOnInsert: { fecha, weekStart } },
+      {
+        returnDocument: 'after',
+        runValidators: true,
+        upsert: true,
+      }
+    );
   }
 }

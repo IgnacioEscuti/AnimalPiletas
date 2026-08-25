@@ -11,8 +11,8 @@ export class LimpiezaRepository {
     return this.dao.find(filters);
   }
 
-  async upsertPorClienteYFecha(cliente, fecha, data) {
-    return this.dao.upsertPorClienteYFecha(cliente, fecha, data);
+  async upsertPorClienteYFecha(cliente, weekStart, fecha, data) {
+    return this.dao.upsertPorClienteYFecha(cliente, weekStart, fecha, data);
   }
 }
 

@@ -1,7 +1,7 @@
 import { usoExtraRepository } from "../repositories/usoExtra.repository.js";
 import { clienteRepository } from "../repositories/cliente.repository.js";
 import { handleMongooseError } from "../utils/mongooseError.utils.js";
-import { hoyNormalizado, rangoDelDia } from "../utils/fecha.utils.js";
+import { hoyNormalizado, rangoSemanal } from "../utils/fecha.utils.js";
 
 // Normaliza "cloro", "CLORO", "  cloro " -> "Cloro", para que el mismo
 // extra agrupe siempre bajo el mismo nombre en el resumen.
@@ -31,7 +31,9 @@ export class UsoExtraService {
     }
 
     try {
-      return await this.repository.upsertPorClienteYFecha(clienteId, hoyNormalizado(), {
+      return await this.repository.crear({
+        cliente: clienteId,
+        fecha: hoyNormalizado(),
         nombreExtra: normalizarNombreExtra(nombreExtra),
         precioUnitario,
         empleado,
@@ -41,8 +43,25 @@ export class UsoExtraService {
     }
   }
 
+  async eliminarUso(id) {
+    let eliminado;
+    try {
+      eliminado = await this.repository.eliminarPorId(id);
+    } catch (error) {
+      handleMongooseError(error);
+    }
+
+    if (!eliminado) {
+      const error = new Error("uso extra no encontrado");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    return eliminado;
+  }
+
   async getUsosPorFecha(fecha) {
-    const { inicio, fin } = rangoDelDia(fecha);
+    const { inicio, fin } = rangoSemanal(fecha);
     return this.repository.find({ fecha: { $gte: inicio, $lt: fin } });
   }
 }

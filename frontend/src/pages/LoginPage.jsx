@@ -36,7 +36,10 @@ export function LoginPage({ onIrARegistro }) {
       <p className="subtitle-auth">Ingresá con tu email y PIN.</p>
       <form onSubmit={handleSubmit}>
         {emailRecordado ? (
-          <p className="row-name">{emailRecordado}</p>
+          <div className="campo-auth">
+            <label>Email</label>
+            <p className="campo-auth-valor">{emailRecordado}</p>
+          </div>
         ) : (
           <div className="campo-auth">
             <label>Email</label>

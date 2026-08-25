@@ -5,11 +5,15 @@ export class LimpiezaDAO {
     return limpiezaModel.find(filters);
   }
 
-  async upsertPorClienteYFecha(cliente, fecha, data) {
-    return limpiezaModel.findOneAndUpdate({ cliente, fecha }, data, {
-      returnDocument: 'after',
-      runValidators: true,
-      upsert: true,
-    });
+  async upsertPorClienteYFecha(cliente, weekStart, fecha, data) {
+    return limpiezaModel.findOneAndUpdate(
+      { cliente, weekStart },
+      { $set: data, $setOnInsert: { fecha, weekStart } },
+      {
+        returnDocument: 'after',
+        runValidators: true,
+        upsert: true,
+      }
+    );
   }
 }

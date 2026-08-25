@@ -5,11 +5,11 @@ export class UsoExtraDAO {
     return usoExtraModel.find(filters);
   }
 
-  async upsertPorClienteYFecha(cliente, fecha, data) {
-    return usoExtraModel.findOneAndUpdate({ cliente, fecha }, data, {
-      returnDocument: 'after',
-      runValidators: true,
-      upsert: true,
-    });
+  async crear(data) {
+    return usoExtraModel.create(data);
+  }
+
+  async eliminarPorId(id) {
+    return usoExtraModel.findByIdAndDelete(id);
   }
 }

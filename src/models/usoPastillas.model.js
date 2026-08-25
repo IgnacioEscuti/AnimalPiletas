@@ -11,6 +11,9 @@ const usoPastillasSchema = new Schema(
       type: Date,
       required: true,
     },
+    weekStart: {
+      type: Date,
+    },
     cantidad: {
       type: Number,
       required: true,

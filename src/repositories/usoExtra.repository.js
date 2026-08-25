@@ -11,8 +11,12 @@ export class UsoExtraRepository {
     return this.dao.find(filters);
   }
 
-  async upsertPorClienteYFecha(cliente, fecha, data) {
-    return this.dao.upsertPorClienteYFecha(cliente, fecha, data);
+  async crear(data) {
+    return this.dao.crear(data);
+  }
+
+  async eliminarPorId(id) {
+    return this.dao.eliminarPorId(id);
   }
 }
 

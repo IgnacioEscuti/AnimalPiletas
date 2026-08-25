@@ -24,3 +24,12 @@ export async function getUsosExtra(req, res, next) {
     next(error);
   }
 }
+
+export async function deleteUsoExtra(req, res, next) {
+  try {
+    await usoExtraService.eliminarUso(req.params.id);
+    res.status(204).send();
+  } catch (error) {
+    next(error);
+  }
+}
