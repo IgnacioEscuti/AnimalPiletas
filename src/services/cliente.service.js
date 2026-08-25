@@ -250,9 +250,7 @@ export class ClienteService {
 
   async reordenarEnBarrio(ids) {
     try {
-      await Promise.all(
-        ids.map((id, index) => this.repository.findByIdAndUpdate(id, { ordenEnBarrio: index }))
-      );
+      await this.repository.actualizarOrdenes(ids.map((id, index) => ({ id, orden: index })));
     } catch (error) {
       handleMongooseError(error);
     }

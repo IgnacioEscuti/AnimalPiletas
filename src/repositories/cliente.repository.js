@@ -11,10 +11,6 @@ export class ClienteRepository {
     return this.dao.create(data);
   }
 
-  async find(filtro) {
-    return this.dao.find(filtro);
-  }
-
   async findActivos(filtro) {
     return this.dao.findActivos(filtro);
   }
@@ -29,6 +25,14 @@ export class ClienteRepository {
 
   async findByIdAndUpdate(id, data) {
     return this.dao.findByIdAndUpdate(id, data);
+  }
+
+  async findSoloNombre(filtro) {
+    return this.dao.findSoloNombre(filtro);
+  }
+
+  async actualizarOrdenes(operaciones) {
+    return this.dao.actualizarOrdenes(operaciones);
   }
 }
 

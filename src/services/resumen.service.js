@@ -51,7 +51,7 @@ export class ResumenService {
       usuarioActual.rol === "encargado" ? { encargado: usuarioActual.id ?? usuarioActual._id } : {};
 
     const [clientes, limpiezas, usosPastillas, usosExtra, empleadosSemana] = await Promise.all([
-      this.clienteRepository.find(filtroClientes),
+      this.clienteRepository.findSoloNombre(filtroClientes),
       this.limpiezaRepository.find(filtroFecha),
       this.usoPastillasRepository.find(filtroFecha),
       this.usoExtraRepository.find(filtroFecha),

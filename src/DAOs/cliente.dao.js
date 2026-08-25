@@ -10,17 +10,6 @@ export class ClienteDAO {
     ]);
   }
 
-  // Sin filtro de status — la usa el Resumen, que tiene que seguir
-  // mostrando eventos históricos de clientes ya cancelados.
-  // `filtro` permite acotar por encargado cuando quien pide la lista es rol "encargado".
-  async find(filtro = {}) {
-    return clienteModel
-      .find(filtro)
-      .populate("tarifaLimpieza", "nombre precio")
-      .populate("barrio", "nombre orden")
-      .populate("encargado", "nombre email");
-  }
-
   // Para la pantalla de Cliente: nunca debe listar cancelados.
   // OJO: filtra con $ne (no con status: "activo") porque los clientes
   // creados antes de que existiera este campo no lo tienen guardado en
@@ -57,5 +46,19 @@ export class ClienteDAO {
       .populate("tarifaLimpieza", "nombre precio")
       .populate("barrio", "nombre orden")
       .populate("encargado", "nombre email");
+  }
+
+  // Sin populate: para el Resumen, que solo necesita id + nombre del
+  // cliente y no tarifa/barrio/encargado.
+  async findSoloNombre(filtro = {}) {
+    return clienteModel.find(filtro).select("nombre");
+  }
+
+  async actualizarOrdenes(operaciones) {
+    return clienteModel.bulkWrite(
+      operaciones.map(({ id, orden }) => ({
+        updateOne: { filter: { _id: id }, update: { ordenEnBarrio: orden } },
+      }))
+    );
   }
 }
