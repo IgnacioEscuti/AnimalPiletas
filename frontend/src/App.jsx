@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useAuth } from "./context/AuthContext.jsx";
 import { LoginPage } from "./pages/LoginPage.jsx";
@@ -83,6 +83,23 @@ function App() {
   const [pantalla, setPantalla] = useState("clientes");
   const [vistaAuth, setVistaAuth] = useState("login");
   const [listo, setListo] = useState(false);
+
+  useEffect(() => {
+    const cerrarTecladoAlScrollear = () => {
+      const activo = document.activeElement;
+      if (
+        activo &&
+        (activo.tagName === "INPUT" ||
+          activo.tagName === "TEXTAREA" ||
+          activo.tagName === "SELECT")
+      ) {
+        activo.blur();
+      }
+    };
+
+    window.addEventListener("scroll", cerrarTecladoAlScrollear, { passive: true });
+    return () => window.removeEventListener("scroll", cerrarTecladoAlScrollear);
+  }, []);
 
   if (cargando) return <SplashScreen />;
 
