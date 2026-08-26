@@ -1409,6 +1409,14 @@ input[type="number"]::-webkit-inner-spin-button {
     color: var(--text);
   }
 
+  .empleado-columna:focus-within {
+    background: var(--surface);
+  }
+
+  .empleado-input:focus {
+    background: transparent;
+  }
+
   /* Botón de editar: se oculta el de la fila título (desktop),
      queda el de la fila expandida */
   td.td-accion {
