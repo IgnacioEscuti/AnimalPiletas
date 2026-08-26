@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 export function BarrioList({ barrios }) {
   return barrios.map((barrio, index) => (
     <motion.li
-      className="row"
+      className="row row-motion"
       key={barrio.id}
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}

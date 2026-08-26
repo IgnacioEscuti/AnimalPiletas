@@ -244,6 +244,10 @@ li.row {
   animation: fade-in 0.2s ease;
 }
 
+.row-motion {
+  animation: none !important;
+}
+
 .row-info {
   display: flex;
   flex-direction: column;
@@ -1128,7 +1132,6 @@ input[type="number"]::-webkit-inner-spin-button {
     margin-bottom: 12px;
     overflow: hidden;
     overflow-anchor: none;
-    animation: fade-in 0.2s ease;
   }
 
   tr.fila-cliente {

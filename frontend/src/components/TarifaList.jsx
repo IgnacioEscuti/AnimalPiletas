@@ -19,7 +19,7 @@ export function TarifaList({ tarifas, onActualizar }) {
 
   return tarifas.map((tarifa, index) => (
     <motion.li
-      className="row"
+      className="row row-motion"
       key={tarifa.id}
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}

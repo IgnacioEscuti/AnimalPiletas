@@ -88,6 +88,7 @@ export function ResumenTable({ filas, totales, periodo, tab, inicioISO }) {
         {filas.map((fila, index) => (
           <motion.tr
             key={fila.clienteId}
+            className="row-motion"
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.2, delay: index * 0.03 }}

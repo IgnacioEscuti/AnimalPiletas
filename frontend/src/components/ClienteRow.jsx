@@ -67,7 +67,7 @@ export function ClienteRow({
     <tbody className="fila-cliente-grupo">
       <motion.tr
         ref={filaRef}
-        className={`fila-cliente ${expandido ? "expandido" : ""} ${arrastrando ? "arrastrando" : ""} ${
+        className={`fila-cliente row-motion ${expandido ? "expandido" : ""} ${arrastrando ? "arrastrando" : ""} ${
           dragOver ? "drag-over" : ""
         }`}
         data-cliente-id={cliente.id}
