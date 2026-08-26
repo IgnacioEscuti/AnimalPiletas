@@ -178,7 +178,7 @@ function App() {
               <motion.span
                 layoutId="nav-indicador"
                 className="nav-indicador"
-                transition={{ type: "spring", stiffness: 500, damping: 35 }}
+                transition={{ type: "spring", stiffness: 500, damping: 50 }}
               />
             )}
             {ICONOS[clave]}
