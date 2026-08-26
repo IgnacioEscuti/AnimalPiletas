@@ -814,14 +814,24 @@ button.modal-cancelar-cliente:hover {
 
 .periodo-nav {
   display: flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
   gap: 16px;
   margin-bottom: 20px;
 }
 
-.periodo-nav button {
+.periodo-nav-grupo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: nowrap;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.periodo-nav-grupo button {
   width: 40px;
   height: 40px;
   padding: 0;
@@ -832,6 +842,7 @@ button.modal-cancelar-cliente:hover {
   font-size: 17px;
   font-weight: 600;
   flex: 1 1 auto;
+  min-width: 0;
   text-align: center;
 }
 

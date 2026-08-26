@@ -96,13 +96,15 @@ export function ResumenPage() {
         </div>
 
         <div className="periodo-nav">
-          <button className="secondary" onClick={irAnterior} title="Período anterior">
-            ←
-          </button>
-          <span className="periodo-label">{periodo}</span>
-          <button className="secondary" onClick={irSiguiente} title="Período siguiente">
-            →
-          </button>
+          <div className="periodo-nav-grupo">
+            <button className="secondary" onClick={irAnterior} title="Período anterior">
+              ←
+            </button>
+            <span className="periodo-label">{periodo}</span>
+            <button className="secondary" onClick={irSiguiente} title="Período siguiente">
+              →
+            </button>
+          </div>
           <input
             type="date"
             className="periodo-fecha"
