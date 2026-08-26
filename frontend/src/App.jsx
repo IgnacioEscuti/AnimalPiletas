@@ -85,20 +85,38 @@ function App() {
   const [listo, setListo] = useState(false);
 
   useEffect(() => {
+    const UMBRAL_SCROLL_PX = 15;
+    let scrollInicio = null;
+
+    const esCampo = (el) =>
+      el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.tagName === "SELECT");
+
     const cerrarTecladoAlScrollear = () => {
       const activo = document.activeElement;
-      if (
-        activo &&
-        (activo.tagName === "INPUT" ||
-          activo.tagName === "TEXTAREA" ||
-          activo.tagName === "SELECT")
-      ) {
+      if (!esCampo(activo)) {
+        scrollInicio = null;
+        return;
+      }
+      if (scrollInicio === null) {
+        scrollInicio = window.scrollY;
+        return;
+      }
+      if (Math.abs(window.scrollY - scrollInicio) > UMBRAL_SCROLL_PX) {
         activo.blur();
+        scrollInicio = null;
       }
     };
 
+    const resetearAlEnfocar = (event) => {
+      if (esCampo(event.target)) scrollInicio = null;
+    };
+
     window.addEventListener("scroll", cerrarTecladoAlScrollear, { passive: true });
-    return () => window.removeEventListener("scroll", cerrarTecladoAlScrollear);
+    window.addEventListener("focus", resetearAlEnfocar, true);
+    return () => {
+      window.removeEventListener("scroll", cerrarTecladoAlScrollear);
+      window.removeEventListener("focus", resetearAlEnfocar, true);
+    };
   }, []);
 
   if (cargando) return <SplashScreen />;
