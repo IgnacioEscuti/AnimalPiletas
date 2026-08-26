@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { MESES } from "../utils/fecha.js";
+import { MESES, parsearFechaISO } from "../utils/fecha.js";
 
 function listaExtras(extras) {
   if (extras.length === 0) return "—";
@@ -27,11 +27,12 @@ function textoParaCopiarSemanal(fila, periodo) {
 // Solo el número de día (el mes ya va arriba, en el saludo), en orden
 // cronológico — las fechas ya llegan ordenadas desde el backend.
 function diasDeLimpieza(fechas) {
-  return fechas.map((fecha) => new Date(fecha).getDate()).join("/");
+  return fechas.map((fecha) => parsearFechaISO(fecha.slice(0, 10)).getDate()).join("/");
 }
 
 function textoParaCopiarMensual(fila, inicioISO) {
-  const nombreMes = capitalizar(MESES[new Date(inicioISO).getMonth()]);
+  const inicio = parsearFechaISO(inicioISO.slice(0, 10));
+  const nombreMes = capitalizar(MESES[inicio.getMonth()]);
   const lineas = ["Buenas!", `En ${nombreMes} fuimos`];
 
   if (fila.limpieza.cantidad > 0) {
