@@ -67,6 +67,16 @@ body {
   margin: 0 auto;
   padding: 48px 24px 96px;
   background-color: var(--bg);
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+input,
+textarea,
+select {
+  -webkit-user-select: text;
+  user-select: text;
 }
 
 .splash-screen {
