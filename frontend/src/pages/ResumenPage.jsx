@@ -1,8 +1,14 @@
 import { useEffect, useState } from "react";
 import { ResumenTable } from "../components/ResumenTable.jsx";
+import { ResumenTotales } from "../components/ResumenTotales.jsx";
+import { ResumenGrupo } from "../components/ResumenGrupo.jsx";
 import { Skeleton } from "../components/Skeleton.jsx";
 import { getResumen } from "../services/resumenService.js";
+import { getUsuarios } from "../services/usuarioService.js";
+import { useAuth } from "../context/AuthContext.jsx";
 import { fechaISO, formatoPeriodo, parsearFechaISO } from "../utils/fecha.js";
+
+const TODOS = "todos";
 
 function sumarSemanas(fecha, cantidad) {
   const nueva = new Date(fecha);
@@ -15,15 +21,26 @@ function sumarMeses(fecha, cantidad) {
 }
 
 export function ResumenPage() {
+  const { usuario } = useAuth();
+  const esAdmin = usuario?.rol === "admin";
   const [tab, setTab] = useState("semanal");
   const [fechaSemanal, setFechaSemanal] = useState(new Date());
   const [fechaMensual, setFechaMensual] = useState(new Date());
   const [resumen, setResumen] = useState(null);
   const [busqueda, setBusqueda] = useState("");
+  const [usuarios, setUsuarios] = useState([]);
+  const [encargadoSeleccionado, setEncargadoSeleccionado] = useState(TODOS);
   const [error, setError] = useState("");
 
   const fechaActiva = tab === "semanal" ? fechaSemanal : fechaMensual;
   const periodo = resumen ? formatoPeriodo(tab, resumen.inicio, resumen.fin) : "";
+
+  useEffect(() => {
+    if (!esAdmin) return;
+    getUsuarios()
+      .then(setUsuarios)
+      .catch(() => {});
+  }, [esAdmin]);
 
   useEffect(() => {
     let cancelado = false;
@@ -34,7 +51,9 @@ export function ResumenPage() {
     // semanal, mostrando un período que nunca se pidió.
     setResumen(null);
 
-    getResumen(tab, fechaISO(fechaActiva))
+    const encargadoId = esAdmin && encargadoSeleccionado !== TODOS ? encargadoSeleccionado : undefined;
+
+    getResumen(tab, fechaISO(fechaActiva), encargadoId)
       .then((data) => {
         if (!cancelado) {
           setError("");
@@ -48,7 +67,7 @@ export function ResumenPage() {
     return () => {
       cancelado = true;
     };
-  }, [tab, fechaActiva]);
+  }, [tab, fechaActiva, esAdmin, encargadoSeleccionado]);
 
   const irAnterior = () => {
     if (tab === "semanal") setFechaSemanal((fecha) => sumarSemanas(fecha, -1));
@@ -67,11 +86,33 @@ export function ResumenPage() {
     else setFechaMensual(nuevaFecha);
   };
 
-  const filasFiltradas = resumen
-    ? resumen.clientes.filter((fila) =>
-        fila.clienteNombre.toLowerCase().includes(busqueda.toLowerCase())
-      )
-    : [];
+  const filtrarClientes = (clientes) =>
+    clientes.filter((fila) => fila.clienteNombre.toLowerCase().includes(busqueda.toLowerCase()));
+
+  let contenido = null;
+  if (resumen) {
+    const grupos = resumen.grupos
+      .map((grupo) => {
+        const filas = filtrarClientes(grupo.clientes);
+        if (filas.length === 0) return null;
+        return (
+          <ResumenGrupo key={grupo.barrioId} titulo={grupo.barrioNombre}>
+            <ResumenTable filas={filas} periodo={periodo} tab={tab} inicioISO={resumen.inicio} />
+          </ResumenGrupo>
+        );
+      })
+      .filter(Boolean);
+
+    contenido =
+      grupos.length === 0 ? (
+        <p className="empty-state">No hay clientes para mostrar.</p>
+      ) : (
+        <>
+          {grupos}
+          <ResumenTotales totales={resumen.totales} tab={tab} />
+        </>
+      );
+  }
 
   return (
     <>
@@ -113,24 +154,35 @@ export function ResumenPage() {
           />
         </div>
 
+        {esAdmin && (
+          <div className="resumen-selector-wrap">
+            <select
+              className="select-encargado"
+              value={encargadoSeleccionado}
+              onChange={(event) => setEncargadoSeleccionado(event.target.value)}
+            >
+              <option value={TODOS}>Todos</option>
+              {usuarios.map((usuarioItem) => (
+                <option key={usuarioItem.id} value={usuarioItem.id}>
+                  {usuarioItem.nombre || usuarioItem.email}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
         <input
           type="text"
           placeholder="Buscar por nombre..."
           value={busqueda}
           onChange={(event) => setBusqueda(event.target.value)}
-          className="search-input"
+          className="search-input resumen-search"
         />
 
         {error && <p className="error-message">{error}</p>}
 
         {resumen ? (
-          <ResumenTable
-            filas={filasFiltradas}
-            totales={resumen.totales}
-            periodo={periodo}
-            tab={tab}
-            inicioISO={resumen.inicio}
-          />
+          contenido
         ) : (
           !error && <Skeleton filas={5} />
         )}

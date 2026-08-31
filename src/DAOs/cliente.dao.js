@@ -49,9 +49,11 @@ export class ClienteDAO {
   }
 
   // Sin populate: para el Resumen, que solo necesita id + nombre del
-  // cliente y no tarifa/barrio/encargado.
+  // cliente, y el id de barrio para agrupar (el filtro por encargado ya
+  // se resuelve en el `filtro` que se le pasa a este find, no hace falta
+  // traer ese campo).
   async findSoloNombre(filtro = {}) {
-    return clienteModel.find(filtro).select("nombre");
+    return clienteModel.find(filtro).select("nombre barrio");
   }
 
   async actualizarOrdenes(operaciones) {

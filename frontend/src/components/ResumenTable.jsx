@@ -1,11 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { MESES, parsearFechaISO } from "../utils/fecha.js";
-
-function listaExtras(extras) {
-  if (extras.length === 0) return "—";
-  return extras.map(({ nombre, cantidad }) => `${nombre} x${cantidad}`).join(", ");
-}
+import { listaExtras } from "../utils/resumen.js";
 
 function capitalizar(palabra) {
   return palabra.charAt(0).toUpperCase() + palabra.slice(1);
@@ -51,7 +47,7 @@ function textoParaCopiarMensual(fila, inicioISO) {
   return lineas.join("\n");
 }
 
-export function ResumenTable({ filas, totales, periodo, tab, inicioISO }) {
+export function ResumenTable({ filas, periodo, tab, inicioISO }) {
   const [copiadoId, setCopiadoId] = useState(null);
 
   const handleCopiar = async (fila) => {
@@ -119,19 +115,6 @@ export function ResumenTable({ filas, totales, periodo, tab, inicioISO }) {
           </motion.tr>
         ))}
       </tbody>
-      <tfoot>
-        <tr>
-          <td>
-            <strong>Total</strong>
-          </td>
-          <td data-label="Limpiezas">{totales.totalLimpiezas}</td>
-          <td data-label="Pastillas">{totales.totalPastillas}</td>
-          <td data-label="Extras">{listaExtras(totales.totalExtras)}</td>
-          {tab !== "mensual" && <td></td>}
-          <td></td>
-          <td></td>
-        </tr>
-      </tfoot>
     </table>
   );
 }

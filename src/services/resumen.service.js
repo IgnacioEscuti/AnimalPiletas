@@ -3,7 +3,42 @@ import { limpiezaRepository } from "../repositories/limpieza.repository.js";
 import { usoPastillasRepository } from "../repositories/usoPastillas.repository.js";
 import { usoExtraRepository } from "../repositories/usoExtra.repository.js";
 import { empleadoSemanaRepository } from "../repositories/empleadoSemana.repository.js";
+import { barrioRepository } from "../repositories/barrio.repository.js";
 import { rangoSemanal, rangoMensual } from "../utils/fecha.utils.js";
+import { handleMongooseError } from "../utils/mongooseError.utils.js";
+
+const SIN_BARRIO = "sin-barrio";
+
+// Mismo criterio de "Sin barrio" (agrupado al final, orden del catálogo
+// para el resto) que ya usa la pantalla de Cliente. Se aplica siempre,
+// sin importar si el admin eligió "Todos" o un encargado puntual — el
+// filtro de encargado ya se resolvió antes, a nivel de consulta.
+function agruparPorBarrio(filas, barrios) {
+  const porBarrio = new Map();
+  for (const fila of filas) {
+    const key = fila._barrioId ?? SIN_BARRIO;
+    if (!porBarrio.has(key)) porBarrio.set(key, []);
+    porBarrio.get(key).push(fila);
+  }
+
+  const grupos = barrios
+    .filter((barrio) => porBarrio.has(barrio.id))
+    .map((barrio) => ({
+      barrioId: barrio.id,
+      barrioNombre: barrio.nombre,
+      clientes: porBarrio.get(barrio.id),
+    }));
+
+  if (porBarrio.has(SIN_BARRIO)) {
+    grupos.push({
+      barrioId: SIN_BARRIO,
+      barrioNombre: "Sin barrio",
+      clientes: porBarrio.get(SIN_BARRIO),
+    });
+  }
+
+  return grupos;
+}
 
 function datosVacios() {
   return {
@@ -24,16 +59,18 @@ export class ResumenService {
     limpiezaRepository,
     usoPastillasRepository,
     usoExtraRepository,
-    empleadoSemanaRepository
+    empleadoSemanaRepository,
+    barrioRepository
   ) {
     this.clienteRepository = clienteRepository;
     this.limpiezaRepository = limpiezaRepository;
     this.usoPastillasRepository = usoPastillasRepository;
     this.usoExtraRepository = usoExtraRepository;
     this.empleadoSemanaRepository = empleadoSemanaRepository;
+    this.barrioRepository = barrioRepository;
   }
 
-  async getResumen(tipo, fecha, usuarioActual) {
+  async getResumen(tipo, fecha, usuarioActual, encargadoId) {
     if (tipo !== "semanal" && tipo !== "mensual") {
       const error = new Error("el tipo debe ser 'semanal' o 'mensual'");
       error.statusCode = 400;
@@ -43,20 +80,32 @@ export class ResumenService {
     const { inicio, fin } = tipo === "semanal" ? rangoSemanal(fecha) : rangoMensual(fecha);
     const filtroFecha = { fecha: { $gte: inicio, $lt: fin } };
     const filtroWeekStart = { weekStart: { $gte: inicio, $lt: fin } };
-    // Igual que en la pantalla de Cliente: un "encargado" solo ve sus propios
-    // clientes, un "admin" ve todos. Alcanza con filtrar la lista de clientes
-    // acá — como las filas del resumen se arman iterando esa lista, los
-    // eventos de clientes ajenos nunca terminan en la respuesta.
-    const filtroClientes =
-      usuarioActual.rol === "encargado" ? { encargado: usuarioActual.id ?? usuarioActual._id } : {};
 
-    const [clientes, limpiezas, usosPastillas, usosExtra, empleadosSemana] = await Promise.all([
-      this.clienteRepository.findSoloNombre(filtroClientes),
-      this.limpiezaRepository.find(filtroFecha),
-      this.usoPastillasRepository.find(filtroFecha),
-      this.usoExtraRepository.find(filtroFecha),
-      this.empleadoSemanaRepository.find(filtroWeekStart),
-    ]);
+    // Igual que en la pantalla de Cliente: un "encargado" solo ve sus propios
+    // clientes, sin importar qué venga en encargadoId. Un admin puede filtrar
+    // a un encargado puntual (cualquiera sea su rol), o dejarlo en "Todos"
+    // para traer los clientes de todos, mezclados en las mismas secciones
+    // de barrio — el resumen nunca agrupa por encargado.
+    let filtroClientes = {};
+    if (usuarioActual.rol === "encargado") {
+      filtroClientes = { encargado: usuarioActual.id ?? usuarioActual._id };
+    } else if (encargadoId) {
+      filtroClientes = { encargado: encargadoId };
+    }
+
+    let clientes, limpiezas, usosPastillas, usosExtra, empleadosSemana, barrios;
+    try {
+      [clientes, limpiezas, usosPastillas, usosExtra, empleadosSemana, barrios] = await Promise.all([
+        this.clienteRepository.findSoloNombre(filtroClientes),
+        this.limpiezaRepository.find(filtroFecha),
+        this.usoPastillasRepository.find(filtroFecha),
+        this.usoExtraRepository.find(filtroFecha),
+        this.empleadoSemanaRepository.find(filtroWeekStart),
+        this.barrioRepository.find(),
+      ]);
+    } catch (error) {
+      handleMongooseError(error);
+    }
 
     const porCliente = new Map();
     const datosDe = (clienteId) => {
@@ -102,6 +151,7 @@ export class ResumenService {
       return {
         clienteId: cliente.id,
         clienteNombre: cliente.nombre,
+        _barrioId: cliente.barrio ? cliente.barrio.toString() : null,
         limpieza: {
           cantidad: datos.limpiezaCantidad,
           precio: datos.limpiezaPrecio,
@@ -129,7 +179,7 @@ export class ResumenService {
     return {
       inicio,
       fin,
-      clientes: filas,
+      grupos: agruparPorBarrio(filas, barrios),
       totales: { totalLimpiezas, totalPastillas, totalExtras },
     };
   }
@@ -140,5 +190,6 @@ export const resumenService = new ResumenService(
   limpiezaRepository,
   usoPastillasRepository,
   usoExtraRepository,
-  empleadoSemanaRepository
+  empleadoSemanaRepository,
+  barrioRepository
 );

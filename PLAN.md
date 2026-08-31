@@ -176,6 +176,14 @@ Completamente separado de `barrio` (que sigue siendo solo agrupación visual) �
 - Admin: ve y modifica todos, sin filtrar por este campo.
 - Clientes sin `encargado` asignado (por ejemplo, los que ya existen en la base de antes de esta función): solo los ve el admin, hasta que se los asigne a alguien.
 
+**Agrupado por barrio en el Resumen (con filtro opcional por encargado):**
+- El resumen agrupa siempre por barrio (mismo orden y criterio de "Sin barrio" que ya usa la pantalla de Cliente) — nunca agrupa por encargado, ni siquiera en modo "Todos".
+- Selector debajo del buscador por nombre (dropdown, alineado a la derecha, ancho chico): "Todos" + todos los usuarios (admin incluido, no solo encargados, porque un cliente puede estar asignado a cualquiera). Por defecto "Todos". Solo visible si el usuario logueado es admin.
+- Admin con "Todos": trae los clientes de todos los usuarios, mezclados en las mismas secciones de barrio.
+- Admin con un usuario elegido: filtra a solo los clientes de ese usuario, agrupado por barrio.
+- Encargado (no admin): sin selector, agrupado directo por sus propios clientes por barrio — igual que ya lo ve hoy, solo que ahora con secciones de barrio en vez de lista plana.
+- Aplica igual a Semanal y Mensual. Secciones de barrio colapsables (mismo patrón responsive que la pantalla de Cliente, en desktop y mobile), con el nombre del barrio y el ícono de colapso en texto grande y blanco.
+
 ## Orden de funciones a implementar
 
 1. ✅ CRUD de Cliente (con tarifa de limpieza asignada) — hecho en Función 1
@@ -187,5 +195,6 @@ Completamente separado de `barrio` (que sigue siendo solo agrupación visual) �
 7. ✅ Login (email + PIN de 4 dígitos, cookie httpOnly de 8hs, bloqueo por intentos) — hecho en Función 7
 8. ✅ Roles (admin ve/modifica todo, encargado solo sus propios clientes vía campo Cliente.encargado) — hecho en Función 8
 9. ✅ Persistencia semanal en pantalla de Cliente (Limpieza y Pastillas pasan a un documento por semana en vez de por día; Extra pasa a lista real con borrado por ítem) — hecho en Función 9
+10. ✅ Resumen agrupado por encargado y barrio, con selector de encargado (solo admin) — hecho en Función 10
 
 App deployada y en uso: frontend en Vercel, backend en Render, base en MongoDB Atlas. Instalada como PWA en iPhone. Login y roles ya activos — todos los endpoints requieren sesión.
