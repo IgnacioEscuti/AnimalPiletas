@@ -247,6 +247,7 @@ li.row {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: 12px;
   padding: 14px 16px;
   background: var(--bg);
@@ -273,9 +274,16 @@ li.row {
   font-size: 14px;
 }
 
+li.row input {
+  flex: 1 1 120px;
+  min-width: 90px;
+}
+
 .row-actions {
   display: flex;
   gap: 8px;
+  flex-shrink: 0;
+  margin-left: auto;
 }
 
 .row-actions button {

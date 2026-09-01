@@ -18,6 +18,8 @@ import { getEmpleadoSemana, guardarEmpleadoSemana } from "../services/empleadoSe
 import { getUsuarios } from "../services/usuarioService.js";
 import { useAuth } from "../context/AuthContext.jsx";
 import { semanaActual, estaEnSemanaActual } from "../utils/fecha.js";
+import { crearMatcher } from "../utils/texto.js";
+import { crearAutoScroll } from "../utils/autoScroll.js";
 
 const SEMANA_ACTUAL = semanaActual();
 const SIN_BARRIO = "sin-barrio";
@@ -275,11 +277,26 @@ export function ClientesPage({ onPrimeraCarga }) {
     const el = event.currentTarget;
     let startX = event.clientX;
     let startY = event.clientY;
+    let ultimoX = startX;
+    let ultimoY = startY;
     const state = { dragging: false, clienteId, grupoKey };
     touchDragRef.current = state;
 
+    const actualizarHover = () => {
+      const target = document.elementFromPoint(ultimoX, ultimoY);
+      const fila = target?.closest("tr[data-cliente-id]");
+      if (fila && fila.dataset.grupo === grupoKey && fila.dataset.clienteId !== clienteId) {
+        setTouchOverId(fila.dataset.clienteId);
+      } else {
+        setTouchOverId(null);
+      }
+    };
+
+    const autoScroll = crearAutoScroll(actualizarHover);
+
     const cleanup = () => {
       clearTimeout(state.timer);
+      autoScroll.detener();
       el.removeEventListener("pointermove", onMove);
       el.removeEventListener("pointerup", onUp);
       el.removeEventListener("pointercancel", onCancel);
@@ -296,14 +313,11 @@ export function ClientesPage({ onPrimeraCarga }) {
         return;
       }
       moveEvent.preventDefault();
-      setDragPointerPos({ x: moveEvent.clientX, y: moveEvent.clientY });
-      const target = document.elementFromPoint(moveEvent.clientX, moveEvent.clientY);
-      const fila = target?.closest("tr[data-cliente-id]");
-      if (fila && fila.dataset.grupo === grupoKey && fila.dataset.clienteId !== clienteId) {
-        setTouchOverId(fila.dataset.clienteId);
-      } else {
-        setTouchOverId(null);
-      }
+      ultimoX = moveEvent.clientX;
+      ultimoY = moveEvent.clientY;
+      setDragPointerPos({ x: ultimoX, y: ultimoY });
+      actualizarHover();
+      autoScroll.actualizar(ultimoY);
     };
 
     const onUp = async (upEvent) => {
@@ -346,11 +360,26 @@ export function ClientesPage({ onPrimeraCarga }) {
     const el = event.currentTarget;
     let startX = event.clientX;
     let startY = event.clientY;
+    let ultimoX = startX;
+    let ultimoY = startY;
     const state = { dragging: false, barrioId };
     touchDragRef.current = state;
 
+    const actualizarHover = () => {
+      const target = document.elementFromPoint(ultimoX, ultimoY);
+      const fila = target?.closest("tr[data-barrio-id]");
+      if (fila && fila.dataset.barrioId !== barrioId && fila.dataset.barrioId !== SIN_BARRIO) {
+        setTouchOverBarrioId(fila.dataset.barrioId);
+      } else {
+        setTouchOverBarrioId(null);
+      }
+    };
+
+    const autoScroll = crearAutoScroll(actualizarHover);
+
     const cleanup = () => {
       clearTimeout(state.timer);
+      autoScroll.detener();
       el.removeEventListener("pointermove", onMove);
       el.removeEventListener("pointerup", onUp);
       el.removeEventListener("pointercancel", onCancel);
@@ -367,14 +396,11 @@ export function ClientesPage({ onPrimeraCarga }) {
         return;
       }
       moveEvent.preventDefault();
-      setDragPointerPos({ x: moveEvent.clientX, y: moveEvent.clientY });
-      const target = document.elementFromPoint(moveEvent.clientX, moveEvent.clientY);
-      const fila = target?.closest("tr[data-barrio-id]");
-      if (fila && fila.dataset.barrioId !== barrioId && fila.dataset.barrioId !== SIN_BARRIO) {
-        setTouchOverBarrioId(fila.dataset.barrioId);
-      } else {
-        setTouchOverBarrioId(null);
-      }
+      ultimoX = moveEvent.clientX;
+      ultimoY = moveEvent.clientY;
+      setDragPointerPos({ x: ultimoX, y: ultimoY });
+      actualizarHover();
+      autoScroll.actualizar(ultimoY);
     };
 
     const onUp = async (upEvent) => {
@@ -412,15 +438,13 @@ export function ClientesPage({ onPrimeraCarga }) {
     el.addEventListener("pointercancel", onCancel, { once: true });
   };
 
-  const clientesFiltrados = clientes
-    .filter((cliente) => cliente.nombre.toLowerCase().includes(busqueda.toLowerCase()))
-    .filter(
-      (cliente) =>
-        verTodos ||
-        cliente.semana === "todas" ||
-        cliente.semana === SEMANA_ACTUAL ||
-        (cliente.semana === "unaVez" && estaEnSemanaActual(cliente.semanaUnaVezDesde))
-    );
+  const clientesFiltrados = clientes.filter(
+    (cliente) =>
+      verTodos ||
+      cliente.semana === "todas" ||
+      cliente.semana === SEMANA_ACTUAL ||
+      (cliente.semana === "unaVez" && estaEnSemanaActual(cliente.semanaUnaVezDesde))
+  );
 
   const porBarrio = new Map();
   clientesFiltrados.forEach((cliente) => {
@@ -429,7 +453,7 @@ export function ClientesPage({ onPrimeraCarga }) {
     porBarrio.get(key).push(cliente);
   });
 
-  const grupos = barrios
+  const gruposDeBarrio = barrios
     .filter((barrio) => porBarrio.has(barrio.id))
     .map((barrio) => ({
       key: barrio.id,
@@ -438,12 +462,24 @@ export function ClientesPage({ onPrimeraCarga }) {
     }));
 
   if (porBarrio.has(SIN_BARRIO)) {
-    grupos.push({
+    gruposDeBarrio.push({
       key: SIN_BARRIO,
       nombre: "Sin barrio",
       clientes: porBarrio.get(SIN_BARRIO).sort((a, b) => a.ordenEnBarrio - b.ordenEnBarrio),
     });
   }
+
+  const matchea = crearMatcher(busqueda);
+
+  // Barrio que matchea: la sección entera. Si no, solo los clientes que matchean.
+  const grupos = gruposDeBarrio
+    .map((grupo) => ({
+      ...grupo,
+      clientes: matchea(grupo.nombre)
+        ? grupo.clientes
+        : grupo.clientes.filter((cliente) => matchea(cliente.nombre)),
+    }))
+    .filter((grupo) => grupo.clientes.length > 0);
 
   const clienteArrastrado = touchDragId ? clientes.find((cliente) => cliente.id === touchDragId) : null;
   const limpiezaArrastrado = clienteArrastrado
@@ -475,7 +511,7 @@ export function ClientesPage({ onPrimeraCarga }) {
       <div className="filtros-clientes">
         <input
           type="text"
-          placeholder="Buscar cliente"
+          placeholder="Buscar por cliente o barrio..."
           value={busqueda}
           onChange={(event) => setBusqueda(event.target.value)}
           className="search-input"

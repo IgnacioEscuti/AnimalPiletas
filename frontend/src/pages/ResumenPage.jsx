@@ -7,6 +7,7 @@ import { getResumen } from "../services/resumenService.js";
 import { getUsuarios } from "../services/usuarioService.js";
 import { useAuth } from "../context/AuthContext.jsx";
 import { fechaISO, formatoPeriodo, parsearFechaISO } from "../utils/fecha.js";
+import { crearMatcher } from "../utils/texto.js";
 
 const TODOS = "todos";
 
@@ -86,22 +87,25 @@ export function ResumenPage() {
     else setFechaMensual(nuevaFecha);
   };
 
-  const filtrarClientes = (clientes) =>
-    clientes.filter((fila) => fila.clienteNombre.toLowerCase().includes(busqueda.toLowerCase()));
+  const matchea = crearMatcher(busqueda);
+
+  // Barrio que matchea: la sección entera. Si no, solo los clientes que matchean.
+  const filtrarClientes = (grupo) => {
+    if (matchea(grupo.barrioNombre)) return grupo.clientes;
+    return grupo.clientes.filter((fila) => matchea(fila.clienteNombre));
+  };
 
   let contenido = null;
   if (resumen) {
-    const grupos = resumen.grupos
-      .map((grupo) => {
-        const filas = filtrarClientes(grupo.clientes);
-        if (filas.length === 0) return null;
-        return (
-          <ResumenGrupo key={grupo.barrioId} titulo={grupo.barrioNombre}>
-            <ResumenTable filas={filas} periodo={periodo} tab={tab} inicioISO={resumen.inicio} />
-          </ResumenGrupo>
-        );
-      })
-      .filter(Boolean);
+    const gruposVisibles = resumen.grupos
+      .map((grupo) => ({ grupo, filas: filtrarClientes(grupo) }))
+      .filter(({ filas }) => filas.length > 0);
+
+    const grupos = gruposVisibles.map(({ grupo, filas }) => (
+      <ResumenGrupo key={grupo.barrioId} titulo={grupo.barrioNombre}>
+        <ResumenTable filas={filas} periodo={periodo} tab={tab} inicioISO={resumen.inicio} />
+      </ResumenGrupo>
+    ));
 
     contenido =
       grupos.length === 0 ? (
@@ -173,7 +177,7 @@ export function ResumenPage() {
 
         <input
           type="text"
-          placeholder="Buscar por nombre..."
+          placeholder="Buscar por cliente o barrio..."
           value={busqueda}
           onChange={(event) => setBusqueda(event.target.value)}
           className="search-input resumen-search"
