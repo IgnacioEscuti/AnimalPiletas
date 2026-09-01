@@ -56,6 +56,10 @@ export class ClienteDAO {
     return clienteModel.find(filtro).select("nombre barrio");
   }
 
+  async countDocuments(filtro) {
+    return clienteModel.countDocuments(filtro);
+  }
+
   async actualizarOrdenes(operaciones) {
     return clienteModel.bulkWrite(
       operaciones.map(({ id, orden }) => ({

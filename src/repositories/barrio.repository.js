@@ -26,6 +26,10 @@ export class BarrioRepository {
   async findByIdAndUpdate(id, data) {
     return this.dao.findByIdAndUpdate(id, data);
   }
+
+  async findByIdAndDelete(id) {
+    return this.dao.findByIdAndDelete(id);
+  }
 }
 
 export const barrioRepository = new BarrioRepository(barrioDAO);

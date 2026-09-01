@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 
-export function TarifaList({ tarifas, onActualizar }) {
+export function TarifaList({ tarifas, onActualizar, onEliminar }) {
   const [editandoId, setEditandoId] = useState(null);
   const [precioEdit, setPrecioEdit] = useState("");
 
@@ -15,6 +15,12 @@ export function TarifaList({ tarifas, onActualizar }) {
   const guardarEdicion = async (id) => {
     await onActualizar(id, Number(precioEdit));
     setEditandoId(null);
+  };
+
+  const eliminar = async (tarifa) => {
+    if (!window.confirm(`¿Eliminar la tarifa "${tarifa.nombre}"?`)) return;
+    const eliminada = await onEliminar(tarifa.id);
+    if (eliminada) setEditandoId(null);
   };
 
   return tarifas.map((tarifa, index) => (
@@ -39,6 +45,9 @@ export function TarifaList({ tarifas, onActualizar }) {
             <button onClick={() => guardarEdicion(tarifa.id)}>Guardar</button>
             <button className="secondary" onClick={cancelarEdicion}>
               Cancelar
+            </button>
+            <button className="danger" onClick={() => eliminar(tarifa)}>
+              Eliminar
             </button>
           </div>
         </>

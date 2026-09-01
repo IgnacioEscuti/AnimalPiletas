@@ -5,7 +5,7 @@ const tarifaLimpiezaSchema = new Schema(
     nombre: {
       type: String,
       required: true,
-      enum: ["bajo", "medio", "alto"],
+      trim: true,
       unique: true,
     },
     precio: {

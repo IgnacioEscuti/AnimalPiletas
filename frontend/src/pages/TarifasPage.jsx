@@ -2,16 +2,23 @@ import { useEffect, useState } from "react";
 import { TarifaList } from "../components/TarifaList.jsx";
 import { PrecioPastillasRow } from "../components/PrecioPastillasRow.jsx";
 import { BarrioList } from "../components/BarrioList.jsx";
+import { TarifaModal } from "../components/TarifaModal.jsx";
 import { Skeleton } from "../components/Skeleton.jsx";
-import { getTarifas, actualizarTarifa } from "../services/tarifaService.js";
+import {
+  getTarifas,
+  actualizarTarifa,
+  crearTarifa,
+  eliminarTarifa,
+} from "../services/tarifaService.js";
 import { getPrecioPastillas, actualizarPrecioPastillas } from "../services/precioPastillasService.js";
-import { getBarrios, crearBarrio } from "../services/barrioService.js";
+import { getBarrios, crearBarrio, eliminarBarrio } from "../services/barrioService.js";
 
 export function TarifasPage() {
   const [tarifas, setTarifas] = useState([]);
   const [precioPastillas, setPrecioPastillas] = useState(null);
   const [barrios, setBarrios] = useState([]);
   const [nombreBarrio, setNombreBarrio] = useState("");
+  const [modalTarifaAbierto, setModalTarifaAbierto] = useState(false);
   const [error, setError] = useState("");
   const [cargando, setCargando] = useState(true);
 
@@ -43,6 +50,37 @@ export function TarifasPage() {
       await cargarTodo();
     } catch (err) {
       setError(err.response?.data?.error || "No se pudo actualizar la tarifa.");
+    }
+  };
+
+  const handleCrearTarifa = async (nombre, precio) => {
+    setError("");
+    await crearTarifa(nombre, precio);
+    setModalTarifaAbierto(false);
+    await cargarTodo();
+  };
+
+  // Devuelve si se pudo borrar, para que la lista sepa si cerrar la edición.
+  const handleEliminarTarifa = async (id) => {
+    try {
+      setError("");
+      await eliminarTarifa(id);
+      await cargarTodo();
+      return true;
+    } catch (err) {
+      setError(err.response?.data?.error || "No se pudo eliminar la tarifa.");
+      return false;
+    }
+  };
+
+  const handleEliminarBarrio = async (barrio) => {
+    if (!window.confirm(`¿Eliminar el barrio "${barrio.nombre}"?`)) return;
+    try {
+      setError("");
+      await eliminarBarrio(barrio.id);
+      setBarrios(await getBarrios());
+    } catch (err) {
+      setError(err.response?.data?.error || "No se pudo eliminar el barrio.");
     }
   };
 
@@ -81,7 +119,11 @@ export function TarifasPage() {
           <Skeleton filas={3} />
         ) : (
           <ul>
-            <TarifaList tarifas={tarifas} onActualizar={handleActualizarTarifa} />
+            <TarifaList
+              tarifas={tarifas}
+              onActualizar={handleActualizarTarifa}
+              onEliminar={handleEliminarTarifa}
+            />
             {precioPastillas && (
               <PrecioPastillasRow
                 precioPastillas={precioPastillas}
@@ -90,6 +132,9 @@ export function TarifasPage() {
             )}
           </ul>
         )}
+        <button className="btn-nueva-tarifa" onClick={() => setModalTarifaAbierto(true)}>
+          + Nueva tarifa
+        </button>
       </section>
 
       <section className="card-mobile">
@@ -107,13 +152,17 @@ export function TarifasPage() {
           <Skeleton filas={2} />
         ) : (
           <ul>
-            <BarrioList barrios={barrios} />
+            <BarrioList barrios={barrios} onEliminar={handleEliminarBarrio} />
           </ul>
         )}
         {!cargando && barrios.length === 0 && (
           <p className="empty-state">Todavía no hay barrios cargados.</p>
         )}
       </section>
+
+      {modalTarifaAbierto && (
+        <TarifaModal onClose={() => setModalTarifaAbierto(false)} onGuardar={handleCrearTarifa} />
+      )}
     </>
   );
 }

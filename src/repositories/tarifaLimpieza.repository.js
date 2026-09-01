@@ -7,6 +7,10 @@ export class TarifaLimpiezaRepository {
     this.dao = dao;
   }
 
+  async create(data) {
+    return this.dao.create(data);
+  }
+
   async find() {
     return this.dao.find();
   }
@@ -17,6 +21,10 @@ export class TarifaLimpiezaRepository {
 
   async findByIdAndUpdate(id, data) {
     return this.dao.findByIdAndUpdate(id, data);
+  }
+
+  async findByIdAndDelete(id) {
+    return this.dao.findByIdAndDelete(id);
   }
 }
 

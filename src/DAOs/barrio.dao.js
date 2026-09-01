@@ -20,4 +20,8 @@ export class BarrioDAO {
   async findByIdAndUpdate(id, data) {
     return barrioModel.findByIdAndUpdate(id, data, { returnDocument: 'after', runValidators: true });
   }
+
+  async findByIdAndDelete(id) {
+    return barrioModel.findByIdAndDelete(id);
+  }
 }

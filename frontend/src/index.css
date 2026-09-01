@@ -291,6 +291,19 @@ li.row input {
   font-size: 14px;
 }
 
+.btn-eliminar-barrio {
+  flex-shrink: 0;
+  margin-left: auto;
+  padding: 8px 12px;
+  font-size: 20px;
+  line-height: 1;
+}
+
+.btn-nueva-tarifa {
+  width: 100%;
+  margin-top: 16px;
+}
+
 .skeleton-grupo {
   display: flex;
   flex-direction: column;
@@ -962,7 +975,7 @@ input[type="number"]::-webkit-inner-spin-button {
   margin: 0;
 }
 
-.btn-nuevo-cliente-icon,
+.btn-nuevo-icon,
 .btn-logout-icon,
 .nav-icon {
   display: none;
@@ -1139,7 +1152,7 @@ input[type="number"]::-webkit-inner-spin-button {
     order: 1;
   }
 
-  .btn-nuevo-cliente {
+  .btn-nuevo {
     width: 44px;
     height: 44px;
     padding: 0;
@@ -1151,11 +1164,11 @@ input[type="number"]::-webkit-inner-spin-button {
     justify-content: center;
   }
 
-  .btn-nuevo-cliente-full {
+  .btn-nuevo-full {
     display: none;
   }
 
-  .btn-nuevo-cliente-icon {
+  .btn-nuevo-icon {
     display: inline-block;
   }
 

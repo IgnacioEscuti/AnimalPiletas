@@ -13,3 +13,7 @@ export const crearBarrio = async (nombre) => {
 export const reordenarBarrios = async (ids) => {
   await api.put("/barrios/reordenar", { ids });
 };
+
+export const eliminarBarrio = async (id) => {
+  await api.delete(`/barrios/${id}`);
+};

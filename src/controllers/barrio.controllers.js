@@ -19,6 +19,15 @@ export async function getBarrios(req, res, next) {
   }
 }
 
+export async function deleteBarrio(req, res, next) {
+  try {
+    await barrioService.deleteBarrio(req.params.id);
+    res.status(200).json({ ok: true });
+  } catch (error) {
+    next(error);
+  }
+}
+
 export async function reordenarBarrios(req, res, next) {
   try {
     await barrioService.reordenar(req.body.ids);
