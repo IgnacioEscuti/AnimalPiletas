@@ -16,7 +16,7 @@ export function BarrioList({ barrios, onEliminar }) {
         aria-label={`Eliminar ${barrio.nombre}`}
         onClick={() => onEliminar(barrio)}
       >
-        🗑
+        −
       </button>
     </motion.li>
   ));
