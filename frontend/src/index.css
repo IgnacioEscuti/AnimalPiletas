@@ -394,8 +394,48 @@ li.row input {
   margin-top: 4px;
 }
 
-.resumen-totales-tabla {
-  margin-top: 4px;
+/* Card de totales del período. Toma el look que la fila de totales tenía
+   en mobile (fondo de acento, "Total" en negrita, labels en mayúscula) y lo
+   usa también en desktop, ahí en una sola línea. */
+.resumen-totales {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px 24px;
+  background: var(--accent-bg);
+  border-radius: 14px;
+  padding: 14px 18px;
+  margin-bottom: 20px;
+}
+
+.resumen-totales-titulo {
+  font-weight: 700;
+  font-size: 17px;
+}
+
+.resumen-totales-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  margin-left: auto;
+}
+
+.resumen-totales-item {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.resumen-totales-label {
+  text-transform: uppercase;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.resumen-totales-valor {
+  font-weight: 600;
 }
 
 /* La columna de "Copiar" no tiene texto en el header, así que sin esto
@@ -518,21 +558,6 @@ tbody tr td:first-child {
 }
 
 tbody tr td:last-child {
-  border-radius: 0 14px 14px 0;
-}
-
-tfoot td {
-  background: var(--accent-bg);
-  padding: 14px 12px;
-  vertical-align: middle;
-  font-weight: 600;
-}
-
-tfoot tr td:first-child {
-  border-radius: 14px 0 0 14px;
-}
-
-tfoot tr td:last-child {
   border-radius: 0 14px 14px 0;
 }
 
@@ -1634,8 +1659,7 @@ input[type="number"]::-webkit-inner-spin-button {
   }
 
   .resumen-table,
-  .resumen-table tbody,
-  .resumen-table tfoot {
+  .resumen-table tbody {
     display: block;
   }
 
@@ -1696,17 +1720,21 @@ input[type="number"]::-webkit-inner-spin-button {
     border: none;
   }
 
-  .resumen-table tfoot tr {
-    background: var(--accent-bg);
-    margin-top: 4px;
+  .resumen-totales {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+    padding: 14px 16px;
   }
 
-  .resumen-table tfoot td:first-child {
-    padding: 14px 16px 4px !important;
+  .resumen-totales-titulo {
+    text-align: center;
   }
 
-  .resumen-table tfoot td[data-label] {
-    color: var(--text);
+  .resumen-totales-items {
+    flex-direction: column;
+    gap: 6px;
+    margin-left: 0;
   }
 
   /* Modal de cliente -> bottom sheet */

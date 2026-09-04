@@ -4,197 +4,218 @@
 
 App para gestionar clientes de una empresa de mantenimiento de piletas. Se construye de a poco, función por función. Este documento es la referencia completa del modelo de datos para que Claude Code no tenga que re-explicarse en cada prompt. Las reglas generales de workflow (simplicidad, no sobre-diseñar, verificación) viven en CLAUDE.md.
 
+> **Regla de mantenimiento:** la sección "Modelo de datos" describe lo que hay en la base **hoy**. Cuando una función cambia un modelo, se actualiza acá — no solo en la sección de esa función. El historial del porqué puede quedar más abajo.
+>
+> Las funcionalidades nuevas, las reglas de negocio y las decisiones las escribe Nacho. Claude Code solo corrige los desfasajes entre este documento y el código real, y avisa qué cambió. Si el código contradice una decisión ya documentada acá, eso es un bug a revisar, no un cambio a documentar. Ver la sección "Mantener PLAN.md sincronizado" en CLAUDE.md.
+
 ## Modelo de datos
 
 ### Cliente
 ```
-nombre: string
-direccion: string (opcional)
-telefono: string (opcional)
-tarifaLimpieza: ObjectId → ref TarifaLimpieza (tarifa asignada por defecto)
-semana: "1" | "2" | "todas" | "unaVez" (con qué frecuencia se atiende)
-semanaUnaVezDesde: Date (opcional — solo se usa cuando semana = "unaVez", fecha en la que se marcó)
+nombre: string (requerido)
+direccion: string (opcional, default "")
+telefono: string (opcional, default "")
+tarifaLimpieza: ObjectId → ref tarifaLimpieza (requerido, tarifa asignada por defecto)
+semana: "1" | "2" | "todas" | "unaVez" (default "todas")
+semanaUnaVezDesde: Date (opcional — solo cuando semana = "unaVez", fecha en la que se marcó)
 status: "activo" | "cancelado" (default "activo")
-barrio: ObjectId → ref Barrio (opcional)
-ordenEnBarrio: number (posición dentro de su barrio, para el orden manual por arrastre)
+barrio: ObjectId → ref barrio (opcional, default null)
+ordenEnBarrio: number (default 0 — posición dentro de su barrio, para el orden manual por arrastre)
+encargado: ObjectId → ref usuario (opcional, default null — quién es dueño del cliente; ver Roles)
 ```
+Índice: `{ encargado: 1 }`
 
-**Cliente "una vez" (visita puntual, sin repetir):** para clientes que llaman por una sola visita y no vuelven a necesitar servicio regular. Al elegir "unaVez" en el selector de semana, se guarda la fecha de ese momento en `semanaUnaVezDesde`. El filtro de la pantalla de Cliente muestra a ese cliente solo mientras la fecha de hoy caiga dentro de la misma semana que `semanaUnaVezDesde` (mismo cálculo de semana ISO que ya se usa para 1/2) — al cruzar a la semana siguiente, desaparece del filtro normal sin que nadie tenga que cancelarlo a mano. Sigue visible con el toggle "Ver todos", por si hay que reactivarlo eligiendo "unaVez" de nuevo (lo que actualiza `semanaUnaVezDesde` a la fecha actual). Editar al cliente por otro motivo mientras ya tiene "unaVez" seleccionado NO debe resetear esa fecha — solo se actualiza cuando se vuelve a elegir esa opción explícitamente. El resumen no se ve afectado: sigue consultando eventos por fecha, sin mirar el campo `semana` del cliente.
+**Cliente "una vez" (visita puntual, sin repetir):** para clientes que llaman por una sola visita y no vuelven a necesitar servicio regular. Al elegir "unaVez" en el selector de semana, se guarda la fecha de ese momento en `semanaUnaVezDesde`. El filtro de la pantalla de Cliente muestra a ese cliente solo mientras la fecha de hoy caiga dentro de la misma semana que `semanaUnaVezDesde` — al cruzar a la semana siguiente, desaparece del filtro normal sin que nadie tenga que cancelarlo a mano. Sigue visible con el toggle "Ver todos", por si hay que reactivarlo eligiendo "unaVez" de nuevo (lo que actualiza `semanaUnaVezDesde` a la fecha actual). Editar al cliente por otro motivo mientras ya tiene "unaVez" seleccionado NO debe resetear esa fecha — solo se actualiza cuando se vuelve a elegir esa opción explícitamente. El resumen no se ve afectado: sigue consultando eventos por fecha, sin mirar el campo `semana` del cliente.
 
-### Barrio (catálogo abierto — a diferencia de TarifaLimpieza, se pueden seguir agregando con el tiempo)
+**Cancelar un cliente (soft-delete):** desde el modal de editar cliente, un botón para pasar su `status` a "cancelado". No se borra nada de la base — los eventos históricos siguen intactos y los resúmenes de períodos pasados los siguen mostrando igual, porque el resumen consulta esos eventos por fecha, no por el status actual del cliente. Un cliente cancelado desaparece por completo de la pantalla de Cliente — ni el toggle "ver todos" lo muestra.
+
+**Reactivar:** si al crear un cliente nuevo el nombre coincide exactamente (sin importar mayúsculas/espacios) con uno ya cancelado, en vez de crear un duplicado se reactiva ese registro existente (status vuelve a "activo") con los datos nuevos que se cargaron.
+
+### Barrio (catálogo abierto — a diferencia de TarifaLimpieza, se pueden seguir agregando)
 ```
-nombre: string
-orden: number (posición de la sección en la pantalla de Cliente, se cambia arrastrando ahí mismo)
+nombre: string (requerido)
+orden: number (requerido, default 0 — posición de la sección en la pantalla de Cliente)
 ```
 
 **Agregar barrios nuevos:** vive dentro de la pestaña Tarifas ya existente — un campo de texto + botón "Agregar", con la lista de barrios ya creados debajo. Por ahora solo crear y listar, sin editar ni eliminar.
 
-**Agrupar clientes por barrio en la pantalla de Cliente:** en vez de una tabla plana, la lista se organiza en secciones — una por barrio, con su nombre como header (no se repite el nombre del barrio en cada fila de cliente, solo aparece una vez arriba de su sección). Los clientes sin barrio asignado caen en una sección "Sin barrio" al final. Las secciones no son colapsables — siempre se ven todas expandidas.
+**Agrupar clientes por barrio en la pantalla de Cliente:** en vez de una tabla plana, la lista se organiza en secciones — una por barrio, con su nombre como header (no se repite el nombre del barrio en cada fila). Los clientes sin barrio asignado caen en una sección "Sin barrio" al final.
 
 **Orden por arrastre (drag and drop), directo en la pantalla de Cliente:**
 - Arrastrando el header de una sección de barrio, se reordenan las secciones entre sí — actualiza el campo `orden` de los barrios afectados.
-- Arrastrando la fila de un cliente, se reordena su posición dentro de su misma sección de barrio — actualiza `ordenEnBarrio`. Arrastrar un cliente a la sección de OTRO barrio no le cambia el barrio asignado — cambiar de barrio se sigue haciendo únicamente desde el modal de editar cliente.
+- Arrastrando la fila de un cliente, se reordena su posición dentro de su misma sección de barrio — actualiza `ordenEnBarrio`. Arrastrar un cliente a la sección de OTRO barrio no le cambia el barrio asignado — eso se hace únicamente desde el modal de editar cliente.
 
-**Dirección y teléfono en la pantalla de Cliente:** no van como columnas propias en la tabla — al lado del nombre hay una flechita (chevron) que expande/colapsa una fila debajo mostrando la dirección y el teléfono de ese cliente. Colapsado por defecto, para no ensanchar más la tabla.
-
-**Cancelar un cliente (soft-delete):** desde el modal de editar cliente, un botón para pasar su `status` a "cancelado". No se borra nada de la base — los eventos históricos (Limpieza, UsoPastillas, UsoExtra) siguen intactos y los resúmenes de períodos pasados los siguen mostrando igual, porque el resumen consulta esos eventos por fecha, no por el status actual del cliente. Un cliente cancelado desaparece por completo de la pantalla de Cliente — ni el toggle "ver todos" lo muestra, no hace falta ninguna pantalla nueva para "ver cancelados".
-
-**Reactivar:** si al crear un cliente nuevo el nombre coincide exactamente (sin importar mayúsculas/espacios) con uno ya cancelado, en vez de crear un duplicado se reactiva ese registro existente (status vuelve a "activo") con los datos nuevos que se cargaron.
+**Dirección y teléfono en la pantalla de Cliente:** no van como columnas propias — al lado del nombre hay una flechita (chevron) que expande/colapsa una fila debajo mostrando la dirección y el teléfono. Colapsado por defecto.
 
 ### TarifaLimpieza (catálogo fijo: bajo / medio / alto)
 ```
-nombre: string ("bajo" | "medio" | "alto")
-precio: number
+nombre: string (requerido, único — "bajo" | "medio" | "alto")
+precio: number (requerido, min 0)
 ```
-Se cargan las 3 una sola vez. Para cambiar un precio para todos los clientes que usan esa tarifa, se edita un solo documento.
+Se cargan las 3 una sola vez (`npm run seed:tarifas`). Para cambiar un precio para todos los clientes que usan esa tarifa, se edita un solo documento.
 
-### Limpieza (un documento por cada limpieza realizada)
+### PrecioPastillas (documento único)
 ```
-cliente: ObjectId → ref Cliente
-fecha: Date
-tarifa: ObjectId → ref TarifaLimpieza (copiada de la tarifa del cliente al momento de crear el evento)
-precioUnitarioUsado: number (precio de esa tarifa, congelado en ese momento)
-extra: number (opcional, default 0)
-empleado: string (opcional, nombre de quién hizo el trabajo — puede quedar en blanco)
+precio: number (requerido, min 0)
 ```
-
-### UsoPastillas (un documento por cada carga de pastillas)
-```
-cliente: ObjectId → ref Cliente
-fecha: Date
-cantidad: number
-precioUnitarioUsado: number (precio fijo de pastillas, congelado en ese momento)
-empleado: string (opcional, nombre de quién hizo el trabajo — puede quedar en blanco)
-```
-
-### UsoExtra (un documento por cada carga de un extra — antes llamado "Producto")
-```
-cliente: ObjectId → ref Cliente
-fecha: Date
-nombreExtra: string (cargado a mano, sin catálogo)
-precioUnitario: number (cargado a mano en el momento, ya representa el total de esa carga)
-empleado: string (opcional, nombre de quién hizo el trabajo — puede quedar en blanco)
-```
-
-**El campo `empleado`:** en la pantalla de Cliente aparece una sola vez por fila (un cuarto campo, al mismo nivel que Limpieza/Pastillas/Extras) — un texto libre, opcional. Al guardar, ese mismo valor se copia a todos los eventos que se generen ese día para ese cliente (Limpieza, UsoPastillas, UsoExtra), sin importar si quedó vacío.
-
-**Por qué se congela el precio de la tarifa en Limpieza:** si más adelante se cambia el precio de una tarifa, los eventos ya cargados no se tienen que ver afectados. El precio histórico queda fijo tal cual era el día que se cargó. Esto no aplica a Extra, que ya se carga a mano cada vez.
-
-## Cómo funciona el filtro de semana en la pantalla de Cliente
-
-Hay clientes que se atienden todas las semanas (`semana: "todas"`) y otros que se dividen en semana 1 o semana 2, alternando semana por medio. No hace falta guardar ninguna fecha de referencia: se usa el número de semana ISO de la fecha de hoy — semana ISO impar = semana 1, semana ISO par = semana 2. Es un cálculo directo a partir del calendario, no algo que se configure a mano.
-
-Por defecto, la pantalla de Cliente muestra solo los clientes de `semana: "todas"` más los que correspondan a la semana actual (1 o 2, según el cálculo de arriba). Como esto puede dejar fuera de vista a un cliente que no le toca esta semana (por ejemplo, para editarlo o cargarlo por primera vez), hay un toggle "Ver todos" que desactiva el filtro y muestra la lista completa sin importar la semana.
-
-El campo `semana` de cada cliente se edita directo desde un selector chico (1 / 2 / todas) en su propia fila — no hace falta abrir el modal de edición para cambiarlo. Si un cliente pasa de semana 1 a semana 2, se cambia ahí mismo y el filtro lo usa a partir de ese momento.
-
-El resumen (semanal y mensual) no necesita ninguna lógica nueva por esto: sigue sumando los eventos que realmente se cargaron, sin comparar contra el campo `semana` de cada cliente. Si algún cliente fue atendido fuera de su semana (usando el toggle "ver todos"), ese trabajo real se refleja igual en el resumen.
-
-## Cómo funciona el resumen (semanal y mensual)
-
-No existe una colección "resumen" que se cree a mano — se calcula consultando las 3 colecciones de eventos (Limpieza, UsoPastillas, UsoExtra) filtrando por rango de fechas. La función es genérica: recibe un `inicio` y un `fin`, y no le importa si ese rango es una semana o un mes.
-
-```js
-// Mensual: 1° del mes hasta 1° del mes siguiente
-const inicio = new Date(anio, mes - 1, 1);
-const fin = new Date(anio, mes, 1);
-
-// Semanal: lunes de esa semana hasta el lunes siguiente
-// (mismo cálculo de inicio/fin, solo cambia cómo se arma la fecha)
-
-// Limpieza.find({ fecha: { $gte: inicio, $lt: fin } })
-// UsoPastillas.find({ fecha: { $gte: inicio, $lt: fin } })
-// UsoExtra.find({ fecha: { $gte: inicio, $lt: fin } })
-```
-
-Agrupando por cliente y sumando los totales de cada colección se arma el total por cliente en ese período. La misma función sirve para el resumen semanal, el mensual, un período ya cerrado, o uno en curso — no hace falta lógica distinta para cada caso, solo el rango de fechas cambia.
-
-**Qué muestra cada fila (por cliente):** para cada una de las 3 categorías se muestra la cantidad al lado del precio:
-- **Limpieza:** cantidad = cuántas limpiezas con `realizada: true` hubo en el período (cada una suma 1) · precio = suma de `precioUnitarioUsado + extra` de esos eventos
-- **Pastillas:** cantidad = suma del campo `cantidad` de todos los eventos UsoPastillas del período · precio = suma de `cantidad × precioUnitarioUsado`
-- **Extras:** en vez de un solo número, se lista el nombre de cada extra cargado con cuántas veces apareció (ej: "Cloro x2, Algicida x1") — agrupando los eventos UsoExtra del cliente por `nombreExtra` · precio = suma de `precioUnitario` de todos esos eventos
-
-**Fila de totales al pie de toda la lista** (solo cantidades, sin plata):
-- Total limpiezas: suma de limpiezas realizadas de todos los clientes (cada una suma 1)
-- Total pastillas: suma de las cantidades de pastillas de todos los clientes
-- Total extras: igual que en la fila de cliente pero agregando entre todos — desglosado por nombre de extra (ej: "Cloro: 15, Algicida: 8"), sumando las apariciones de cada nombre en todos los clientes del período
-
-**Navegación entre períodos:** el endpoint recibe un tipo (`semanal` o `mensual`) y una fecha de referencia cualquiera dentro del período a mostrar. A partir de esa fecha calcula el inicio/fin (lunes-a-lunes o 1°-a-1°) y corre la misma consulta. Navegar hacia atrás o adelante es mandar una fecha de referencia distinta — un solo endpoint sirve para el período actual y para cualquier período pasado. En el frontend: dos pestañas (Semanal / Mensual), flechas anterior/siguiente, un texto que muestra qué período se está viendo, y un selector de fecha nativo (`<input type="date">`) para saltar directo a cualquier período de cualquier año sin tener que ir clickeando flecha por flecha — al elegir una fecha, se manda como fecha de referencia y se recalcula el período que la contiene.
-
-**Buscador de clientes dentro del resumen:** igual que en la pantalla de Cliente, un campo de texto arriba de la tabla que filtra las filas por nombre — del lado del frontend, sobre los clientes que ya trajo la consulta del período (no hace falta pedirle nada nuevo al backend).
-
-**Período por defecto al entrar:** tanto semanal como mensual arrancan siempre mostrando el período que contiene la fecha de hoy (la semana en curso, o el mes en curso) — sin ninguna excepción para el día 1° del mes. Se eliminó la regla anterior (que el día 1° mostraba el mes anterior por defecto) porque generaba una lógica condicional extra y terminó siendo la fuente de un bug. Si al 1° del mes hace falta ver el mes que se acaba de cerrar, se navega con la flecha "anterior" o el selector de fecha — un solo click.
-
-## Login (Función 7) y Roles (Función 8)
+El precio fijo de pastillas que se congela en cada UsoPastillas al momento de la carga. No hay más de un documento. Se siembra con `npm run seed:pastillas` y se edita desde la pestaña Tarifas.
 
 ### Usuario
 ```
-email: string (único, requerido)
-passwordHash: string (bcrypt, hash del PIN de 4 dígitos)
+email: string (requerido, único, lowercase)
+passwordHash: string (requerido, bcrypt del PIN de 4 dígitos, select: false)
 nombre: string (opcional)
 intentosFallidos: number (default 0)
 bloqueadoHasta: Date (opcional — si está en el futuro, la cuenta está bloqueada)
 rol: "admin" | "encargado" (default "encargado")
 ```
 
-**Registro:** email + PIN numérico de 4 dígitos. El PIN se hashea con bcrypt antes de guardar, nunca se guarda en texto plano. El registro queda abierto — cualquiera con la URL puede crear una cuenta (decisión consciente, dado que el repo ya es privado y son solo 2 usuarios reales esperados).
+### Limpieza (un documento por cliente **por semana**)
+```
+cliente: ObjectId → ref cliente (requerido)
+fecha: Date (requerido — último día en que se marcó)
+weekStart: Date (lunes 00:00 de la semana a la que pertenece)
+tarifa: ObjectId → ref tarifaLimpieza (requerido, copiada del cliente al crear el evento)
+precioUnitarioUsado: number (requerido, precio de esa tarifa congelado en ese momento)
+extra: number (default 0, min 0)
+realizada: boolean (requerido — tick/cruz; una limpieza no realizada no se cobra ni se cuenta)
+empleado: string (opcional, default "") ← ver "Deuda técnica"
+```
+Índices: `{ cliente: 1, weekStart: 1 }`, `{ fecha: 1 }`
+
+Se guarda por upsert sobre `cliente + weekStart`: marcar de nuevo en la misma semana actualiza el documento existente en vez de crear otro.
+
+### UsoPastillas (un documento por cliente **por semana**)
+```
+cliente: ObjectId → ref cliente (requerido)
+fecha: Date (requerido)
+weekStart: Date (lunes 00:00 de la semana a la que pertenece)
+cantidad: number (requerido, min 0)
+precioUnitarioUsado: number (requerido, precio de pastillas congelado en ese momento)
+empleado: string (opcional, default "") ← ver "Deuda técnica"
+```
+Índices: `{ cliente: 1, weekStart: 1 }`, `{ fecha: 1 }`
+
+### UsoExtra (un documento por cada carga de un extra)
+```
+cliente: ObjectId → ref cliente (requerido)
+fecha: Date (requerido)
+nombreExtra: string (requerido, cargado a mano, sin catálogo)
+precioUnitario: number (requerido, min 0 — ya representa el total de esa carga)
+empleado: string (opcional, default "") ← ver "Deuda técnica"
+```
+Índice: `{ fecha: 1 }`
+
+A diferencia de Limpieza y UsoPastillas, los extras **no** se consolidan por semana: es una lista real, con un documento por carga y borrado por ítem.
+
+### EmpleadoSemana (un documento por cliente por semana)
+```
+cliente: ObjectId → ref cliente (requerido)
+weekStart: Date (requerido, lunes 00:00)
+nombre: string (opcional, default "")
+```
+Índice: `{ weekStart: 1, cliente: 1 }`
+
+**Esta es la fuente de verdad de quién hizo el trabajo.** En la pantalla de Cliente aparece una sola vez por fila (un cuarto campo, al mismo nivel que Limpieza/Pastillas/Extras) — texto libre, opcional. Se guarda por upsert sobre `cliente + weekStart`. El resumen lee los empleados exclusivamente de acá.
+
+**Por qué se congela el precio de la tarifa en Limpieza:** si más adelante se cambia el precio de una tarifa, los eventos ya cargados no se tienen que ver afectados. El precio histórico queda fijo tal cual era el día que se cargó. Esto no aplica a UsoExtra, que ya se carga a mano cada vez.
+
+## Cómo funciona el filtro de semana en la pantalla de Cliente
+
+Hay clientes que se atienden todas las semanas (`semana: "todas"`) y otros que se dividen en semana 1 o semana 2, alternando semana por medio. No hace falta guardar ninguna fecha de referencia: se usa el número de semana ISO de la fecha de hoy — semana ISO impar = semana 1, semana ISO par = semana 2. Es un cálculo directo a partir del calendario, no algo que se configure a mano.
+
+Por defecto, la pantalla de Cliente muestra solo los clientes de `semana: "todas"` más los que correspondan a la semana actual. Como esto puede dejar fuera de vista a un cliente que no le toca esta semana, hay un toggle "Ver todos" que desactiva el filtro.
+
+El campo `semana` de cada cliente se edita directo desde un selector chico (1 / 2 / todas) en su propia fila — no hace falta abrir el modal de edición.
+
+El resumen no necesita ninguna lógica nueva por esto: sigue sumando los eventos que realmente se cargaron, sin comparar contra el campo `semana` de cada cliente.
+
+## Cómo funciona el resumen (semanal y mensual)
+
+No existe una colección "resumen" — se calcula consultando las colecciones de eventos filtrando por rango de fechas. La función es genérica: recibe un `inicio` y un `fin`, y no le importa si ese rango es una semana o un mes.
+
+- **Semanal:** lunes 00:00 hasta el lunes siguiente (exclusivo) — `rangoSemanal()`
+- **Mensual:** 1° del mes hasta el 1° del mes siguiente (exclusivo) — `rangoMensual()`
+
+Limpieza, UsoPastillas y UsoExtra se filtran por `fecha`. EmpleadoSemana se filtra por `weekStart`.
+
+> Las fechas "YYYY-MM-DD" se parsean a mano, nunca con `new Date(str)`: ese formato se interpreta como UTC y corre el día en zonas horarias negativas como Argentina (UTC-3). Vale igual en backend (`src/utils/fecha.utils.js`) y frontend (`frontend/src/utils/fecha.js`).
+
+**Qué devuelve cada fila (por cliente):**
+- **Limpieza:** `cantidad` = limpiezas con `realizada: true` en el período · `precio` = suma de `precioUnitarioUsado + extra` · `fechas` = las fechas de esas limpiezas, ordenadas
+- **Pastillas:** `cantidad` = suma del campo `cantidad` · `precio` = suma de `cantidad × precioUnitarioUsado`
+- **Extras:** lista de `{ nombre, cantidad }` agrupando los UsoExtra por `nombreExtra` · `precio` = suma de `precioUnitario`
+- **empleados:** nombres únicos de EmpleadoSemana del período, unidos por coma
+- **totalGeneral:** limpieza + pastillas + extras
+
+**Fila de totales al pie** (solo cantidades, sin plata): total de limpiezas, total de pastillas, y extras desglosados por nombre.
+
+**Navegación entre períodos:** el endpoint recibe un tipo (`semanal` o `mensual`) y una fecha de referencia cualquiera dentro del período. A partir de esa fecha calcula el inicio/fin y corre la misma consulta. Un solo endpoint sirve para el período actual y para cualquier período pasado. En el frontend: dos pestañas, flechas anterior/siguiente, texto del período y un `<input type="date">` para saltar a cualquier período.
+
+**Buscador de clientes dentro del resumen:** campo de texto que filtra las filas por nombre, del lado del frontend, sobre los clientes que ya trajo la consulta.
+
+**Período por defecto al entrar:** siempre el período que contiene la fecha de hoy, sin excepción para el día 1° del mes. Se eliminó la regla anterior (que el día 1° mostraba el mes anterior) porque generaba lógica condicional extra y fue la fuente de un bug.
+
+## Login
+
+**Registro:** email + PIN numérico de 4 dígitos, hasheado con bcrypt. El registro queda abierto — cualquiera con la URL puede crear una cuenta (decisión consciente, son solo 2 usuarios reales esperados).
 
 **Login:** email + PIN.
-- Si el email no existe, error genérico ("credenciales inválidas") — no revelar si el email existe o no.
+- Si el email no existe, error genérico ("credenciales inválidas") — no revelar si el email existe.
 - Si la cuenta está bloqueada (`bloqueadoHasta` en el futuro), rechazar con el tiempo restante.
-- Si el PIN no coincide: incrementar `intentosFallidos`. Al llegar a 10 fallidos seguidos, setear `bloqueadoHasta` a 2 minutos en el futuro.
-- Si el PIN coincide: resetear `intentosFallidos` a 0, generar sesión.
+- Si el PIN no coincide: incrementar `intentosFallidos`. Al llegar a 10 seguidos, `bloqueadoHasta` = 2 minutos en el futuro.
+- Si coincide: resetear `intentosFallidos` a 0 y generar sesión.
 
-**Sesión:** cookie httpOnly (secure solo en producción, sameSite lax — mismo patrón que ya usa Gestión de Eventos), duración 8 horas. Todos los endpoints existentes de la app (clientes, limpiezas, resumen, etc.) pasan a requerir esta cookie válida — un middleware de autenticación se aplica a todas las rutas actuales.
+**Sesión:** cookie httpOnly (secure solo en producción, sameSite lax), duración 8 horas. Todos los endpoints de la app pasan por `authenticateActual`; `/api/usuarios` además requiere `autorizarRol("admin")`.
 
-**"Recordar email" en el dispositivo:** después de un login exitoso, el frontend guarda el email en `localStorage`. La próxima vez que se abre la app en ese mismo dispositivo, si hay un email guardado, la pantalla de login solo pide el PIN (mostrando el email guardado como texto). Un link "¿No sos vos?" borra el email guardado y vuelve a pedir los dos campos. Esto es puramente cosmético del lado del frontend — el login real en el backend siempre recibe el par completo (email + PIN).
+**"Recordar email" en el dispositivo:** después de un login exitoso el frontend guarda el email en `localStorage`, y la próxima vez solo pide el PIN. Un link "¿No sos vos?" lo borra. Es puramente cosmético — el backend siempre recibe el par completo.
 
-**Sin Google OAuth** — se evaluó y se descartó, no se justifica la complejidad (Google Cloud Console, callbacks, etc.) para 2 usuarios.
+**CORS:** allowlist explícita vía la env var `FRONTEND_URLS` (separada por comas), más `localhost:*` solo fuera de producción.
 
-**Arquitectura:** reusar el mismo patrón de Passport.js que ya está probado en Gestión de Eventos (estrategias register/login/current), agregando lo específico de PIN+bcrypt+bloqueo por intentos en vez de reinventar el mecanismo de sesión.
-
-## Roles (Función 8)
+## Roles
 
 **Los dos roles:**
-- **Admin** — 1 solo (el jefe). Ve y modifica todos los clientes de todas las pantallas, sin restricción.
-- **Encargado** — cantidad variable. Ve y modifica solo sus propios clientes, en todas las pantallas (Cliente, Resumen, copiado de WhatsApp — el mismo filtro se aplica en todos lados).
+- **Admin** — 1 solo (el jefe). Ve y modifica todos los clientes, sin restricción.
+- **Encargado** — cantidad variable. Ve y modifica solo sus propios clientes, en todas las pantallas.
 
-**Cómo se asigna el rol:** todo usuario que se registra queda como "encargado" automáticamente — no hay forma de auto-asignarse admin desde la app. Para que el jefe sea admin, se cambia el campo `rol` a mano una sola vez directo en MongoDB Atlas — no se construye ninguna pantalla para esto, es un cambio que prácticamente no se repite.
-
-**Cliente gana un campo nuevo, independiente de `barrio`:**
-```
-encargado: ObjectId → ref Usuario (opcional)
-```
-Completamente separado de `barrio` (que sigue siendo solo agrupación visual) — un cambio de barrio nunca afecta quién puede ver o tocar un cliente.
+**Cómo se asigna:** todo usuario que se registra queda como "encargado". Para que el jefe sea admin se cambia el campo `rol` a mano una sola vez directo en MongoDB Atlas — no se construye ninguna pantalla para esto.
 
 **Al crear o editar un cliente:**
-- Admin: elige de un desplegable a qué usuario pertenece ese cliente — el desplegable incluye tanto a los encargados como al propio admin (para poder asignarse clientes a sí mismo).
-- Encargado: el campo `encargado` se completa automáticamente con su propio usuario, sin mostrarle ningún selector — no tiene forma de elegir ni cambiar a otro usuario, ni por error ni a propósito.
+- Admin: elige de un desplegable a qué usuario pertenece (incluye al propio admin).
+- Encargado: `encargado` se completa automáticamente con su propio usuario, sin mostrarle selector.
 
-**Visibilidad, aplicada en TODAS las pantallas (Cliente, Resumen, y lo que se copia para WhatsApp):**
-- Encargado: solo ve y puede modificar los clientes donde `encargado` sea él mismo.
-- Admin: ve y modifica todos, sin filtrar por este campo.
-- Clientes sin `encargado` asignado (por ejemplo, los que ya existen en la base de antes de esta función): solo los ve el admin, hasta que se los asigne a alguien.
+**Visibilidad, en TODAS las pantallas:**
+- Encargado: solo los clientes donde `encargado` sea él mismo.
+- Admin: todos.
+- Clientes sin `encargado` asignado: solo los ve el admin, hasta que se los asigne a alguien.
 
-**Agrupado por barrio en el Resumen (con filtro opcional por encargado):**
-- El resumen agrupa siempre por barrio (mismo orden y criterio de "Sin barrio" que ya usa la pantalla de Cliente) — nunca agrupa por encargado, ni siquiera en modo "Todos".
-- Selector debajo del buscador por nombre (dropdown, alineado a la derecha, ancho chico): "Todos" + todos los usuarios (admin incluido, no solo encargados, porque un cliente puede estar asignado a cualquiera). Por defecto "Todos". Solo visible si el usuario logueado es admin.
-- Admin con "Todos": trae los clientes de todos los usuarios, mezclados en las mismas secciones de barrio.
-- Admin con un usuario elegido: filtra a solo los clientes de ese usuario, agrupado por barrio.
-- Encargado (no admin): sin selector, agrupado directo por sus propios clientes por barrio — igual que ya lo ve hoy, solo que ahora con secciones de barrio en vez de lista plana.
-- Aplica igual a Semanal y Mensual. Secciones de barrio colapsables (mismo patrón responsive que la pantalla de Cliente, en desktop y mobile), con el nombre del barrio y el ícono de colapso en texto grande y blanco.
+**Agrupado en el Resumen:** siempre por barrio (mismo criterio de "Sin barrio" que la pantalla de Cliente), nunca por encargado. El admin tiene un selector "Todos" + cada usuario, debajo del buscador. El encargado no ve el selector.
+
+## Decisiones evaluadas y descartadas
+
+- **React Router** — descartado. Con 3 pantallas planas, sin rutas anidadas ni detalle por cliente, y usándose como PWA standalone en iPhone (sin barra de direcciones ni botón atrás), no aporta nada que se use. Reevaluar solo si aparece una pantalla de detalle (`/cliente/:id`). Único costo actual: al refrescar se vuelve siempre a "clientes".
+- **Google OAuth** — descartado, no se justifica la complejidad para 2 usuarios.
+
+## Deuda técnica conocida
+
+- **Campo `empleado` muerto en los eventos.** Limpieza, UsoPastillas y UsoExtra siguen teniendo un campo `empleado` (string) que el frontend sigue mandando y el backend sigue guardando, pero el resumen lo ignora por completo: lee de EmpleadoSemana. Es escritura doble con lectura única. Limpiarlo implica migración de datos, así que no es urgente.
+- **`manifest.json` y `apple-touch-icon` no existen.** La Función 6 los daba por hechos, pero no hay `manifest.json` en `frontend/public/` ni los `<link>` en `index.html`. Los meta tags de PWA sí están (`apple-mobile-web-app-capable`, `theme-color`, status bar), por eso la app funciona instalada.
 
 ## Orden de funciones a implementar
 
-1. ✅ CRUD de Cliente (con tarifa de limpieza asignada) — hecho en Función 1
-2. ✅ Catálogo de TarifaLimpieza: seed de las 3 (bajo/medio/alto) + endpoint/formulario para editar precio — hecho entre Función 1 y 2
-3. ✅ Pantalla de Cliente: lista con buscador, alta/edición vía modal, y en cada fila: marcar limpieza del día (tick/cruz), cantidad de pastillas, y nombre+precio de extra (carga manual, antes llamado "producto") — hecho en Función 3
-4. ✅ Resumen (semanal y mensual, por cliente, con cantidad al lado del precio y totales al pie) — hecho en Función 4
-5. ✅ Campo semana en Cliente + filtro automático en la pantalla + toggle "ver todos" — hecho en Función 5
-6. ✅ Responsive (mobile): layout mobile de tarjetas colapsables por cliente, manifest.json + apple-touch-icon para PWA en iOS, meta theme-color y safe-area para el status bar — hecho en Función 6
-7. ✅ Login (email + PIN de 4 dígitos, cookie httpOnly de 8hs, bloqueo por intentos) — hecho en Función 7
-8. ✅ Roles (admin ve/modifica todo, encargado solo sus propios clientes vía campo Cliente.encargado) — hecho en Función 8
-9. ✅ Persistencia semanal en pantalla de Cliente (Limpieza y Pastillas pasan a un documento por semana en vez de por día; Extra pasa a lista real con borrado por ítem) — hecho en Función 9
-10. ✅ Resumen agrupado por encargado y barrio, con selector de encargado (solo admin) — hecho en Función 10
+1. ✅ CRUD de Cliente (con tarifa de limpieza asignada) — Función 1
+2. ✅ Catálogo de TarifaLimpieza: seed de las 3 + endpoint/formulario para editar precio
+3. ✅ Pantalla de Cliente: lista con buscador, alta/edición vía modal, marcar limpieza, pastillas y extras — Función 3
+4. ✅ Resumen (semanal y mensual, por cliente, con cantidad al lado del precio y totales al pie) — Función 4
+5. ✅ Campo semana en Cliente + filtro automático + toggle "ver todos" — Función 5
+6. ✅ Responsive (mobile): tarjetas colapsables, meta theme-color y safe-area — Función 6
+7. ✅ Login (email + PIN de 4 dígitos, cookie httpOnly de 8hs, bloqueo por intentos) — Función 7
+8. ✅ Roles (admin ve/modifica todo, encargado solo sus clientes vía `Cliente.encargado`) — Función 8
+9. ✅ Persistencia semanal (Limpieza y Pastillas pasan a un documento por semana; Extra pasa a lista real con borrado por ítem; aparece EmpleadoSemana) — Función 9
+10. ✅ Resumen agrupado por barrio con selector de encargado (solo admin) — Función 10
+11. ✅ **Endurecimiento de seguridad** — Función 11:
+    - El `errorHandler` distingue por la presencia de `err.statusCode`: los errores intencionales (400/403/404/409) siguen devolviendo su propio mensaje al cliente; los que llegan sin `statusCode` (los que `handleMongooseError` re-lanza sin tocar, o cualquier excepción inesperada) responden 500 con `"Ocurrió un error en el servidor"` y el error real va a `console.error` con el método y la URL de la request.
+    - Rate limiting por IP con `express-rate-limit`, solo en `POST /api/auth/registro` (5 por hora) y `POST /api/auth/login` (20 cada 15 minutos), definidos en `src/middlewares/rateLimit.middlewares.js`. `/api/auth/actual` queda sin límite a propósito: el frontend lo llama en cada carga de la app para restaurar la sesión. `app.set("trust proxy", 1)` para que el límite use la IP real del cliente y no la del proxy de Render.
+    - `src/config/env.js` valida al importarse y corta el arranque con `process.exit(1)` y un mensaje que nombra cuáles faltan. Obligatorias siempre: `MONGO_URI`, `JWT_SECRET`. Obligatoria solo cuando `NODE_ENV === "production"`: `FRONTEND_URLS`.
 
-App deployada y en uso: frontend en Vercel, backend en Render, base en MongoDB Atlas. Instalada como PWA en iPhone. Login y roles ya activos — todos los endpoints requieren sesión.
+App deployada y en uso: frontend en Vercel, backend en Render, base en MongoDB Atlas. Instalada como PWA en iPhone. Login y roles activos — todos los endpoints requieren sesión.

@@ -1,21 +1,23 @@
 import { listaExtras } from "../utils/resumen.js";
 
-export function ResumenTotales({ totales, tab }) {
+export function ResumenTotales({ totales }) {
   return (
-    <table className="resumen-table resumen-totales-tabla">
-      <tfoot>
-        <tr>
-          <td>
-            <strong>Total</strong>
-          </td>
-          <td data-label="Limpiezas">{totales.totalLimpiezas}</td>
-          <td data-label="Pastillas">{totales.totalPastillas}</td>
-          <td data-label="Extras">{listaExtras(totales.totalExtras)}</td>
-          {tab !== "mensual" && <td></td>}
-          <td></td>
-          <td></td>
-        </tr>
-      </tfoot>
-    </table>
+    <div className="resumen-totales">
+      <span className="resumen-totales-titulo">Total</span>
+      <div className="resumen-totales-items">
+        <div className="resumen-totales-item">
+          <span className="resumen-totales-label">Limpiezas</span>
+          <span className="resumen-totales-valor">{totales.totalLimpiezas}</span>
+        </div>
+        <div className="resumen-totales-item">
+          <span className="resumen-totales-label">Pastillas</span>
+          <span className="resumen-totales-valor">{totales.totalPastillas}</span>
+        </div>
+        <div className="resumen-totales-item">
+          <span className="resumen-totales-label">Extras</span>
+          <span className="resumen-totales-valor">{listaExtras(totales.totalExtras)}</span>
+        </div>
+      </div>
+    </div>
   );
 }

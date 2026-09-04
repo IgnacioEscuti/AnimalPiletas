@@ -20,6 +20,8 @@ import { env } from "./config/env.js";
 
 const app = express();
 
+app.set("trust proxy", 1);
+
 const origenesPermitidos = env.FRONTEND_URLS
   ? env.FRONTEND_URLS.split(",").map((url) => url.trim())
   : [];

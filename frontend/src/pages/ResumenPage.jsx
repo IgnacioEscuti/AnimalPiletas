@@ -111,10 +111,7 @@ export function ResumenPage() {
       grupos.length === 0 ? (
         <p className="empty-state">No hay clientes para mostrar.</p>
       ) : (
-        <>
-          {grupos}
-          <ResumenTotales totales={resumen.totales} tab={tab} />
-        </>
+        grupos
       );
   }
 
@@ -174,6 +171,8 @@ export function ResumenPage() {
             </select>
           </div>
         )}
+
+        {resumen && <ResumenTotales totales={resumen.totales} />}
 
         <input
           type="text"
