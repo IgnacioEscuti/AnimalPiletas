@@ -164,10 +164,22 @@ export class ResumenService {
       };
     });
 
+    // En el semanal solo se muestran los clientes con algo cargado esa semana:
+    // el resto llenaba la vista de filas en cero. El mensual las muestra todas.
+    const filasVisibles =
+      tipo === "semanal"
+        ? filas.filter(
+            (fila) =>
+              fila.limpieza.cantidad > 0 ||
+              fila.pastillas.cantidad > 0 ||
+              fila.extra.extras.length > 0
+          )
+        : filas;
+
     let totalLimpiezas = 0;
     let totalPastillas = 0;
     const totalExtrasMap = new Map();
-    for (const fila of filas) {
+    for (const fila of filasVisibles) {
       totalLimpiezas += fila.limpieza.cantidad;
       totalPastillas += fila.pastillas.cantidad;
       for (const { nombre, cantidad } of fila.extra.extras) {
@@ -179,7 +191,7 @@ export class ResumenService {
     return {
       inicio,
       fin,
-      grupos: agruparPorBarrio(filas, barrios),
+      grupos: agruparPorBarrio(filasVisibles, barrios),
       totales: { totalLimpiezas, totalPastillas, totalExtras },
     };
   }

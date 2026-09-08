@@ -109,7 +109,7 @@ export function ResumenPage() {
 
     contenido =
       grupos.length === 0 ? (
-        <p className="empty-state">No hay clientes para mostrar.</p>
+        <p className="empty-state">Todavia no hay clientes cargados esta semana.</p>
       ) : (
         grupos
       );
