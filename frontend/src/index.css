@@ -505,6 +505,20 @@ li.row input {
   margin-bottom: 0;
 }
 
+.fila-semana {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.indicador-semana {
+  margin-left: auto;
+  color: var(--text);
+  font-size: 17px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
 .toggle-ver-todos {
   display: flex;
   align-items: center;
@@ -1222,8 +1236,8 @@ input[type="number"]::-webkit-inner-spin-button {
     background-position: 16px center;
   }
 
-  .toggle-ver-todos {
-    align-self: flex-start;
+  .fila-semana {
+    gap: 10px;
   }
 
   /* Header de sección de barrio */

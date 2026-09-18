@@ -126,6 +126,9 @@ Hay clientes que se atienden todas las semanas (`semana: "todas"`) y otros que s
 
 Por defecto, la pantalla de Cliente muestra solo los clientes de `semana: "todas"` más los que correspondan a la semana actual. Como esto puede dejar fuera de vista a un cliente que no le toca esta semana, hay un toggle "Ver todos" que desactiva el filtro.
 
+**Indicador de semana:** al lado del toggle "Ver todos", alineado al extremo derecho del renglón, un texto tipo título que dice en qué semana estamos. Con el toggle destildado muestra "Semana 1" o "Semana 2" según `semanaActual()`; tildado muestra "Semana 1 y 2", porque "Ver todos" justamente saca el filtro y muestra las dos.
+Siempre visible: solo cambia el texto. Es puramente informativo — no filtra nada niagrega estado.
+
 El campo `semana` de cada cliente se edita directo desde un selector chico (1 / 2 / todas) en su propia fila — no hace falta abrir el modal de edición.
 
 El resumen no necesita ninguna lógica nueva por esto: sigue sumando los eventos que realmente se cargaron, sin comparar contra el campo `semana` de cada cliente.

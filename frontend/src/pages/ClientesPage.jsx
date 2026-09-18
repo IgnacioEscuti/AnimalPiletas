@@ -516,14 +516,19 @@ export function ClientesPage({ onPrimeraCarga }) {
           onChange={(event) => setBusqueda(event.target.value)}
           className="search-input"
         />
-        <label className="toggle-ver-todos">
-          <input
-            type="checkbox"
-            checked={verTodos}
-            onChange={(event) => setVerTodos(event.target.checked)}
-          />
-          Ver todos
-        </label>
+        <div className="fila-semana">
+          <label className="toggle-ver-todos">
+            <input
+              type="checkbox"
+              checked={verTodos}
+              onChange={(event) => setVerTodos(event.target.checked)}
+            />
+            Ver todos
+          </label>
+          <span className="indicador-semana">
+            {verTodos ? "Semana 1 y 2" : `Semana ${SEMANA_ACTUAL}`}
+          </span>
+        </div>
       </div>
 
       {error && <p className="error-message">{error}</p>}
