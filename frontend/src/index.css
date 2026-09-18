@@ -514,8 +514,11 @@ li.row input {
 .indicador-semana {
   margin-left: auto;
   margin-right: 10px;
-  color: var(--text);
-  font-size: 25px;
+  padding: 6px 16px;
+  border-radius: 999px;
+  background: var(--accent-bg);
+  color: var(--accent);
+  font-size: 20px;
   font-weight: 600;
   white-space: nowrap;
 }
