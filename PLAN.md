@@ -68,6 +68,7 @@ nombre: string (opcional)
 intentosFallidos: number (default 0)
 bloqueadoHasta: Date (opcional — si está en el futuro, la cuenta está bloqueada)
 rol: "admin" | "encargado" (default "encargado")
+estado: "pendiente" | "aprobado" (default "aprobado" — el registro lo setea explícitamente en "pendiente"; así los usuarios existentes, sin el campo, cuentan como aprobados sin migración)
 ```
 
 ### Limpieza (un documento por cliente **por semana**)
@@ -161,12 +162,20 @@ Limpieza, UsoPastillas y UsoExtra se filtran por `fecha`. EmpleadoSemana se filt
 
 ## Login
 
-**Registro:** email + PIN numérico de 4 dígitos, hasheado con bcrypt. El registro queda abierto — cualquiera con la URL puede crear una cuenta (decisión consciente, son solo 2 usuarios reales esperados).
+**Registro:** email + PIN numérico de 4 dígitos, hasheado con bcrypt. Cualquiera puede enviar una solicitud, pero la cuenta nace con `estado: "pendiente"` y rol "encargado", y no puede entrar hasta que un admin la apruebe. El registro no inicia sesión: el frontend muestra "Solicitud enviada, esperá la aprobación de un admin".
+
+**Aprobación de registros (Función 12):**
+- Al abrir la app, si el usuario es admin, el frontend pide los pendientes y muestra un pop-up por cada uno, de a uno: "[email] quiere registrarse" con los botones Aceptar, Rechazar y Después.
+- Aceptar: `estado` pasa a "aprobado". Rechazar: la cuenta se borra (el email puede volver a registrarse). Después: cierra el pop-up hasta la próxima vez que se abra la app.
+- El estado vive en la base, así que con que un admin resuelva, a los demás ya no les aparece.
+- Aprobar y rechazar son atómicos y solo actúan sobre usuarios pendientes (`findOneAndUpdate` / `findOneAndDelete` con `estado: "pendiente"` en el filtro). Si no encuentra nada, responde 409 "Esta solicitud ya fue resuelta por otro admin" y el frontend pasa al siguiente pendiente.
+- `GET /api/usuarios` (desplegable de encargado y selector del Resumen) devuelve solo usuarios aprobados.
 
 **Login:** email + PIN.
 - Si el email no existe, error genérico ("credenciales inválidas") — no revelar si el email existe.
 - Si la cuenta está bloqueada (`bloqueadoHasta` en el futuro), rechazar con el tiempo restante.
 - Si el PIN no coincide: incrementar `intentosFallidos`. Al llegar a 10 seguidos, `bloqueadoHasta` = 2 minutos en el futuro.
+- Si coincide y la cuenta está pendiente: rechazar con "Tu cuenta está esperando aprobación". El chequeo va **después** de validar el PIN, para no revelar a un tercero qué emails existen.
 - Si coincide: resetear `intentosFallidos` a 0 y generar sesión.
 
 **Sesión:** cookie httpOnly (secure solo en producción, sameSite lax), duración 8 horas. Todos los endpoints de la app pasan por `authenticateActual`; `/api/usuarios` además requiere `autorizarRol("admin")`.
@@ -178,10 +187,10 @@ Limpieza, UsoPastillas y UsoExtra se filtran por `fecha`. EmpleadoSemana se filt
 ## Roles
 
 **Los dos roles:**
-- **Admin** — 1 solo (el jefe). Ve y modifica todos los clientes, sin restricción.
+- **Admin** — uno o más. Ve y modifica todos los clientes, sin restricción.
 - **Encargado** — cantidad variable. Ve y modifica solo sus propios clientes, en todas las pantallas.
 
-**Cómo se asigna:** todo usuario que se registra queda como "encargado". Para que el jefe sea admin se cambia el campo `rol` a mano una sola vez directo en MongoDB Atlas — no se construye ninguna pantalla para esto.
+**Cómo se asigna:** todo usuario que se registra queda como "encargado" (y pendiente hasta que un admin lo apruebe). Para que el jefe sea admin se cambia el campo `rol` a mano una sola vez directo en MongoDB Atlas — no se construye ninguna pantalla para esto.
 
 **Al crear o editar un cliente:**
 - Admin: elige de un desplegable a qué usuario pertenece (incluye al propio admin).
@@ -220,5 +229,6 @@ Limpieza, UsoPastillas y UsoExtra se filtran por `fecha`. EmpleadoSemana se filt
     - El `errorHandler` distingue por la presencia de `err.statusCode`: los errores intencionales (400/403/404/409) siguen devolviendo su propio mensaje al cliente; los que llegan sin `statusCode` (los que `handleMongooseError` re-lanza sin tocar, o cualquier excepción inesperada) responden 500 con `"Ocurrió un error en el servidor"` y el error real va a `console.error` con el método y la URL de la request.
     - Rate limiting por IP con `express-rate-limit`, solo en `POST /api/auth/registro` (5 por hora) y `POST /api/auth/login` (20 cada 15 minutos), definidos en `src/middlewares/rateLimit.middlewares.js`. `/api/auth/actual` queda sin límite a propósito: el frontend lo llama en cada carga de la app para restaurar la sesión. `app.set("trust proxy", 1)` para que el límite use la IP real del cliente y no la del proxy de Render.
     - `src/config/env.js` valida al importarse y corta el arranque con `process.exit(1)` y un mensaje que nombra cuáles faltan. Obligatorias siempre: `MONGO_URI`, `JWT_SECRET`. Obligatoria solo cuando `NODE_ENV === "production"`: `FRONTEND_URLS`.
+12. ✅ Aprobación de registros por un admin (estado pendiente/aprobado + pop-up al abrir la app) — Función 12
 
 App deployada y en uso: frontend en Vercel, backend en Render, base en MongoDB Atlas. Instalada como PWA en iPhone. Login y roles activos — todos los endpoints requieren sesión.

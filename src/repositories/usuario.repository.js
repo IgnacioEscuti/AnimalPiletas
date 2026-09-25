@@ -19,8 +19,20 @@ export class UsuarioRepository {
     return this.dao.findById(id);
   }
 
-  async findAll() {
-    return this.dao.findAll();
+  async findAprobados() {
+    return this.dao.findAprobados();
+  }
+
+  async findPendientes() {
+    return this.dao.findPendientes();
+  }
+
+  async aprobarPendiente(id) {
+    return this.dao.aprobarPendiente(id);
+  }
+
+  async eliminarPendiente(id) {
+    return this.dao.eliminarPendiente(id);
   }
 }
 

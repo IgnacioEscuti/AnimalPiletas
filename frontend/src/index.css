@@ -947,6 +947,51 @@ button.modal-cancelar-cliente:hover {
   display: none;
 }
 
+/* Pop-up de solicitudes de registro pendientes (solo admin) */
+
+.solicitud-label {
+  margin: 0 0 8px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.solicitud-email {
+  margin: 0 0 4px;
+  overflow-wrap: anywhere;
+}
+
+.solicitud-aviso {
+  margin: 8px 0 0;
+}
+
+/* Outline rojo, no rojo lleno: el lleno está reservado a "cancelar cliente"
+   y acá la acción primaria es Aceptar. */
+button.solicitud-rechazar {
+  background: transparent;
+  border: 1px solid var(--danger);
+  color: var(--danger);
+}
+
+button.solicitud-rechazar:hover {
+  background: var(--danger);
+  color: #fff;
+}
+
+button.solicitud-despues {
+  width: 100%;
+  margin-top: 10px;
+  background: transparent;
+  color: var(--text-muted);
+}
+
+button.solicitud-despues:hover {
+  background: var(--border);
+  color: var(--text);
+}
+
 /* Navegación principal y Resumen */
 
 .main-nav {
@@ -1770,6 +1815,12 @@ input[type="number"]::-webkit-inner-spin-button {
     overflow-y: auto;
     box-sizing: border-box;
     animation: sheet-slide-in 0.2s ease;
+  }
+
+  /* Sin handle para arrastrar (no es un formulario), así que necesita su
+     propio aire arriba: el resto de los modales lo recibe del handle. */
+  .modal-solicitud {
+    padding-top: 22px;
   }
 
   .modal-handle-area {

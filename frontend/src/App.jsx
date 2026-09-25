@@ -7,6 +7,7 @@ import { ClientesPage } from "./pages/ClientesPage.jsx";
 import { TarifasPage } from "./pages/TarifasPage.jsx";
 import { ResumenPage } from "./pages/ResumenPage.jsx";
 import { SplashScreen } from "./components/SplashScreen.jsx";
+import { SolicitudesPendientes } from "./components/SolicitudesPendientes.jsx";
 
 const ICONOS = {
   clientes: (
@@ -83,6 +84,7 @@ function App() {
   const [pantalla, setPantalla] = useState("clientes");
   const [vistaAuth, setVistaAuth] = useState("login");
   const [listo, setListo] = useState(false);
+  const [mostrarSolicitudes, setMostrarSolicitudes] = useState(true);
 
   useEffect(() => {
     const UMBRAL_SCROLL_PX = 15;
@@ -233,6 +235,10 @@ function App() {
           <Componente onPrimeraCarga={() => setListo(true)} />
         </motion.div>
       </AnimatePresence>
+
+      {usuario.rol === "admin" && mostrarSolicitudes && (
+        <SolicitudesPendientes onCerrar={() => setMostrarSolicitudes(false)} />
+      )}
     </>
   );
 }

@@ -23,7 +23,7 @@ export class UsuarioService {
     const passwordHash = await createHash(pin);
 
     try {
-      return await this.repository.create({ email, passwordHash });
+      return await this.repository.create({ email, passwordHash, estado: "pendiente" });
     } catch (error) {
       handleMongooseError(error);
     }
@@ -59,6 +59,14 @@ export class UsuarioService {
       throw error;
     }
 
+    // Después de validar el PIN a propósito: si se chequeara antes, un
+    // tercero podría descubrir qué emails existen solo por el mensaje.
+    if (usuario.estado === "pendiente") {
+      const error = new Error("Tu cuenta está esperando aprobación");
+      error.statusCode = 403;
+      throw error;
+    }
+
     usuario.intentosFallidos = 0;
     usuario.bloqueadoHasta = undefined;
     await usuario.save();
@@ -67,7 +75,39 @@ export class UsuarioService {
   }
 
   async getUsuarios() {
-    return this.repository.findAll();
+    return this.repository.findAprobados();
+  }
+
+  async getPendientes() {
+    return this.repository.findPendientes();
+  }
+
+  async aprobarPendiente(id) {
+    let usuario;
+    try {
+      usuario = await this.repository.aprobarPendiente(id);
+    } catch (error) {
+      handleMongooseError(error);
+    }
+    if (!usuario) throw this.errorSolicitudResuelta();
+    return usuario;
+  }
+
+  async rechazarPendiente(id) {
+    let usuario;
+    try {
+      usuario = await this.repository.eliminarPendiente(id);
+    } catch (error) {
+      handleMongooseError(error);
+    }
+    if (!usuario) throw this.errorSolicitudResuelta();
+    return usuario;
+  }
+
+  errorSolicitudResuelta() {
+    const error = new Error("Esta solicitud ya fue resuelta por otro admin");
+    error.statusCode = 409;
+    return error;
   }
 
   generarToken(usuario) {

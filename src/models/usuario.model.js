@@ -31,6 +31,11 @@ const usuarioSchema = new Schema(
       enum: ["admin", "encargado"],
       default: "encargado",
     },
+    estado: {
+      type: String,
+      enum: ["pendiente", "aprobado"],
+      default: "aprobado",
+    },
   },
   { timestamps: true }
 );

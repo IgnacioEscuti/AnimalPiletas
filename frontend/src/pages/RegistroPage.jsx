@@ -33,9 +33,9 @@ export function RegistroPage({ onIrALogin }) {
   if (exito) {
     return (
       <section className="card-mobile">
-        <h2>Cuenta creada</h2>
-        <p>Ya podés iniciar sesión con tu email y PIN.</p>
-        <button onClick={onIrALogin}>Ir a iniciar sesión</button>
+        <h2>Solicitud enviada</h2>
+        <p>Esperá la aprobación de un admin. Cuando la acepte, vas a poder entrar con tu email y PIN.</p>
+        <button onClick={onIrALogin}>Volver al inicio</button>
       </section>
     );
   }
