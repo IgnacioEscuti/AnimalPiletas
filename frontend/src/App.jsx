@@ -88,36 +88,40 @@ function App() {
 
   useEffect(() => {
     const UMBRAL_SCROLL_PX = 15;
-    let scrollInicio = null;
+    let toqueInicioY = null;
 
     const esCampo = (el) =>
       el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.tagName === "SELECT");
 
-    const cerrarTecladoAlScrollear = () => {
+    const guardarInicioToque = (event) => {
+      const ignorarGesto =
+        event.target.closest(".modal") || event.target === document.activeElement;
+      toqueInicioY = ignorarGesto ? null : event.touches[0].clientY;
+    };
+
+    const cerrarTecladoAlDeslizar = (event) => {
+      if (toqueInicioY === null) return;
       const activo = document.activeElement;
-      if (!esCampo(activo)) {
-        scrollInicio = null;
-        return;
-      }
-      if (scrollInicio === null) {
-        scrollInicio = window.scrollY;
-        return;
-      }
-      if (Math.abs(window.scrollY - scrollInicio) > UMBRAL_SCROLL_PX) {
+      if (!esCampo(activo)) return;
+      if (Math.abs(event.touches[0].clientY - toqueInicioY) > UMBRAL_SCROLL_PX) {
         activo.blur();
-        scrollInicio = null;
+        toqueInicioY = null;
       }
     };
 
-    const resetearAlEnfocar = (event) => {
-      if (esCampo(event.target)) scrollInicio = null;
+    const resetearToque = () => {
+      toqueInicioY = null;
     };
 
-    window.addEventListener("scroll", cerrarTecladoAlScrollear, { passive: true });
-    window.addEventListener("focus", resetearAlEnfocar, true);
+    window.addEventListener("touchstart", guardarInicioToque, { passive: true });
+    window.addEventListener("touchmove", cerrarTecladoAlDeslizar, { passive: true });
+    window.addEventListener("touchend", resetearToque, { passive: true });
+    window.addEventListener("touchcancel", resetearToque, { passive: true });
     return () => {
-      window.removeEventListener("scroll", cerrarTecladoAlScrollear);
-      window.removeEventListener("focus", resetearAlEnfocar, true);
+      window.removeEventListener("touchstart", guardarInicioToque);
+      window.removeEventListener("touchmove", cerrarTecladoAlDeslizar);
+      window.removeEventListener("touchend", resetearToque);
+      window.removeEventListener("touchcancel", resetearToque);
     };
   }, []);
 
