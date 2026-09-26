@@ -1649,6 +1649,13 @@ input[type="number"]::-webkit-inner-spin-button {
     justify-content: space-around;
   }
 
+  /* iOS ancla position:fixed al layout viewport, que no se achica con el
+     teclado: la barra quedaría flotando. Se oculta como en las apps nativas.
+     visibility (no display) para no romper el layoutId del indicador. */
+  body.teclado-abierto .main-nav {
+    visibility: hidden;
+  }
+
   .main-nav button,
   .main-nav button.secondary {
     flex-direction: column;

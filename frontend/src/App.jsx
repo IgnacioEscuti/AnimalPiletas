@@ -125,6 +125,60 @@ function App() {
     };
   }, []);
 
+  useEffect(() => {
+    const TIPOS_CON_TECLADO = ["text", "email", "password", "number", "search", "tel"];
+    const MS_ESPERA_CIERRE_TECLADO = 500;
+    const viewport = window.visualViewport;
+    let timerSiguienteTick = null;
+    let timerFallback = null;
+
+    const abreTeclado = (el) =>
+      el?.tagName === "TEXTAREA" ||
+      (el?.tagName === "INPUT" && TIPOS_CON_TECLADO.includes(el.type));
+
+    const cancelarCierre = () => {
+      clearTimeout(timerSiguienteTick);
+      clearTimeout(timerFallback);
+      viewport?.removeEventListener("resize", finalizarCierre);
+    };
+
+    const finalizarCierre = () => {
+      cancelarCierre();
+      if (document.body.style.position !== "fixed") {
+        window.scrollTo(window.scrollX, window.scrollY);
+      }
+      document.body.classList.remove("teclado-abierto");
+    };
+
+    const esperarCierreTeclado = () => {
+      viewport?.addEventListener("resize", finalizarCierre, { once: true });
+      timerFallback = setTimeout(finalizarCierre, MS_ESPERA_CIERRE_TECLADO);
+    };
+
+    const alEnfocar = (event) => {
+      if (!abreTeclado(event.target)) return;
+      cancelarCierre();
+      document.body.classList.add("teclado-abierto");
+    };
+
+    const alDesenfocar = (event) => {
+      if (!abreTeclado(event.target) || abreTeclado(event.relatedTarget)) return;
+      cancelarCierre();
+      timerSiguienteTick = setTimeout(() => {
+        if (!abreTeclado(document.activeElement)) esperarCierreTeclado();
+      }, 0);
+    };
+
+    document.addEventListener("focusin", alEnfocar);
+    document.addEventListener("focusout", alDesenfocar);
+    return () => {
+      document.removeEventListener("focusin", alEnfocar);
+      document.removeEventListener("focusout", alDesenfocar);
+      cancelarCierre();
+      document.body.classList.remove("teclado-abierto");
+    };
+  }, []);
+
   if (cargando) return <SplashScreen />;
 
   if (!usuario) {
