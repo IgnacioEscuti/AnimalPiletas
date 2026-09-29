@@ -4,6 +4,10 @@
 
 App para gestionar clientes de una empresa de mantenimiento de piletas. Se construye de a poco, función por función. Este documento es la referencia completa del modelo de datos para que Claude Code no tenga que re-explicarse en cada prompt. Las reglas generales de workflow (simplicidad, no sobre-diseñar, verificación) viven en CLAUDE.md.
 
+**Contexto del negocio:**
+- La app está en uso real en la empresa. El admin (el jefe) ve y modifica todo; los encargados cargan el trabajo de sus propios clientes.
+- A los clientes se les cobra por transferencia bancaria, efectivo o Mercado Pago (incluye transferencias recibidas dentro de Mercado Pago). No hay links de pago por cliente.
+
 > **Regla de mantenimiento:** la sección "Modelo de datos" describe lo que hay en la base **hoy**. Cuando una función cambia un modelo, se actualiza acá — no solo en la sección de esa función. El historial del porqué puede quedar más abajo.
 >
 > Las funcionalidades nuevas, las reglas de negocio y las decisiones las escribe Nacho. Claude Code solo corrige los desfasajes entre este documento y el código real, y avisa qué cambió. Si el código contradice una decisión ya documentada acá, eso es un bug a revisar, no un cambio a documentar. Ver la sección "Mantener PLAN.md sincronizado" en CLAUDE.md.
@@ -207,6 +211,12 @@ Limpieza, UsoPastillas y UsoExtra se filtran por `fecha`. EmpleadoSemana se filt
 
 - **React Router** — descartado. Con 3 pantallas planas, sin rutas anidadas ni detalle por cliente, y usándose como PWA standalone en iPhone (sin barra de direcciones ni botón atrás), no aporta nada que se use. Reevaluar solo si aparece una pantalla de detalle (`/cliente/:id`). Único costo actual: al refrescar se vuelve siempre a "clientes".
 - **Google OAuth** — descartado, no se justifica la complejidad para 2 usuarios.
+- **Línea de pagos en efectivo en los resúmenes** — dejada de lado por ahora.
+
+## Ideas futuras (sin planificar todavía)
+
+- **Balances financieros:** entidad de empleados con pagos de sueldo (semanales o mensuales según el empleado), cruzando ingresos por cobranzas de clientes contra egresos por sueldos. Incluye seguimiento de deuda acumulada por cliente cuando no paga en más de un mes.
+- **Bandeja de pagos de Mercado Pago:** un webhook registra automáticamente cada pago entrante (monto, fecha, nombre del pagador) en una bandeja dentro de la app, y desde ahí se asigna a mano a cada cliente con un clic. Sin matching automático (los nombres no suelen coincidir). Efectivo y transferencias fuera de Mercado Pago se siguen cargando a mano.
 
 ## Deuda técnica conocida
 
