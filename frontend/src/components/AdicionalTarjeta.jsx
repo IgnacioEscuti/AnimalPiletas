@@ -9,8 +9,6 @@ export function AdicionalTarjeta({ cliente, puedeEditar, onEditar, onGuardar, on
   const [precioExtra, setPrecioExtra] = useState("");
   const [extras, setExtras] = useState([]);
   const [empleado, setEmpleado] = useState("");
-  const [enviando, setEnviando] = useState(false);
-  const [error, setError] = useState("");
 
   const extraPendiente = nombreExtra.trim() && precioExtra !== "";
 
@@ -25,26 +23,19 @@ export function AdicionalTarjeta({ cliente, puedeEditar, onEditar, onGuardar, on
     setCantidadPastillas(String(Math.max(0, (Number(cantidadPastillas) || 0) + delta)));
   };
 
-  const handleGuardar = async () => {
-    setEnviando(true);
-    setError("");
-    try {
-      // Si quedó un extra escrito sin pasar a chip, se guarda igual.
-      const extrasFinales = extraPendiente
-        ? [...extras, { nombre: nombreExtra.trim(), precio: Number(precioExtra) }]
-        : extras;
-      await onGuardar({
-        cliente: cliente.id,
-        realizada,
-        extra: 0,
-        cantidadPastillas: Math.max(0, Number(cantidadPastillas) || 0),
-        extras: extrasFinales,
-        empleado: empleado.trim(),
-      });
-    } catch (err) {
-      setError(err.response?.data?.error || "No se pudo guardar la limpieza adicional.");
-      setEnviando(false);
-    }
+  const handleGuardar = () => {
+    // Si quedó un extra escrito sin pasar a chip, se guarda igual.
+    const extrasFinales = extraPendiente
+      ? [...extras, { nombre: nombreExtra.trim(), precio: Number(precioExtra) }]
+      : extras;
+    onGuardar({
+      cliente: cliente.id,
+      realizada,
+      extra: 0,
+      cantidadPastillas: Math.max(0, Number(cantidadPastillas) || 0),
+      extras: extrasFinales,
+      empleado: empleado.trim(),
+    });
   };
 
   return (
@@ -176,8 +167,6 @@ export function AdicionalTarjeta({ cliente, puedeEditar, onEditar, onGuardar, on
         </div>
       </div>
 
-      {error && <p className="error-message">{error}</p>}
-
       <div className="adicional-acciones">
         {puedeEditar && (
           <button type="button" className="btn-outline-accent" onClick={() => onEditar(cliente.id)}>
@@ -187,7 +176,7 @@ export function AdicionalTarjeta({ cliente, puedeEditar, onEditar, onGuardar, on
             Editar
           </button>
         )}
-        <button type="button" onClick={handleGuardar} disabled={realizada === null || enviando}>
+        <button type="button" onClick={handleGuardar} disabled={realizada === null}>
           Guardar
         </button>
       </div>

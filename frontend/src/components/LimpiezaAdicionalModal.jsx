@@ -7,9 +7,10 @@ import {
   registrarLimpiezaAdicional,
   eliminarLimpiezaAdicional,
 } from "../services/limpiezaAdicionalService.js";
+import { getPrecioPastillas } from "../services/precioPastillasService.js";
 import { useAuth } from "../context/AuthContext.jsx";
 import { crearMatcher, normalizar } from "../utils/texto.js";
-import { parsearFechaISO } from "../utils/fecha.js";
+import { hoyISO, parsearFechaISO } from "../utils/fecha.js";
 
 const DIAS = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
 
@@ -23,6 +24,18 @@ function formatoDia(fecha) {
 
 function formatoPrecio(valor) {
   return `$ ${valor.toLocaleString("es-AR")}`;
+}
+
+const esTemporal = (adicional) => adicional.id.startsWith("temp-");
+
+const ordenarPorFecha = (lista) => [...lista].sort((a, b) => a.fecha.localeCompare(b.fecha));
+
+// Mismo cálculo que el DTO del backend, para que la adicional temporal
+// muestre el total que va a volver del servidor.
+function calcularTotal({ realizada, precioUnitarioUsado, extra, cantidadPastillas, precioPastillasUsado, extras }) {
+  const limpieza = realizada ? precioUnitarioUsado + extra : 0;
+  const pastillas = cantidadPastillas * precioPastillasUsado;
+  return limpieza + pastillas + extras.reduce((suma, { precio }) => suma + precio, 0);
 }
 
 // Resalta en cada palabra del nombre el prefijo que coincide con lo buscado.
@@ -55,10 +68,10 @@ export function LimpiezaAdicionalModal({ clientesPagina, onEditarCliente, onClos
   const esAdmin = usuario?.rol === "admin";
   const [clientes, setClientes] = useState([]);
   const [adicionales, setAdicionales] = useState([]);
+  const [precioPastillas, setPrecioPastillas] = useState(0);
   const [busqueda, setBusqueda] = useState("");
   const [clienteElegidoId, setClienteElegidoId] = useState(null);
   const [aEliminar, setAEliminar] = useState(null);
-  const [eliminando, setEliminando] = useState(false);
   const [error, setError] = useState("");
   const modalRef = useRef(null);
   const dragRef = useRef({ startY: 0, arrastrando: false });
@@ -95,8 +108,12 @@ export function LimpiezaAdicionalModal({ clientesPagina, onEditarCliente, onClos
 
   const cargarAdicionales = async () => {
     try {
-      const data = await getLimpiezasAdicionales();
-      setAdicionales([...data].sort((a, b) => a.fecha.localeCompare(b.fecha)));
+      const [data, precioPastillasData] = await Promise.all([
+        getLimpiezasAdicionales(),
+        getPrecioPastillas(),
+      ]);
+      setAdicionales(ordenarPorFecha(data));
+      setPrecioPastillas(precioPastillasData.precio);
     } catch {
       setError("No se pudieron cargar las limpiezas adicionales.");
     }
@@ -131,23 +148,41 @@ export function LimpiezaAdicionalModal({ clientesPagina, onEditarCliente, onClos
   };
 
   const handleGuardar = async (datos) => {
-    await registrarLimpiezaAdicional(datos);
+    const cliente = clientes.find((c) => c.id === datos.cliente);
+    const idTemporal = `temp-${Date.now()}`;
+    const temporal = {
+      ...datos,
+      id: idTemporal,
+      cliente: { id: cliente.id, nombre: cliente.nombre },
+      fecha: hoyISO(),
+      precioUnitarioUsado: cliente.tarifaLimpieza.precio,
+      precioPastillasUsado: precioPastillas,
+    };
+    temporal.total = calcularTotal(temporal);
+
     setClienteElegidoId(null);
     setBusqueda("");
-    await cargarAdicionales();
+    setError("");
+    setAdicionales((actuales) => [...actuales, temporal]);
+    try {
+      const creada = await registrarLimpiezaAdicional(datos);
+      setAdicionales((actuales) => actuales.map((a) => (a.id === idTemporal ? creada : a)));
+    } catch (err) {
+      setAdicionales((actuales) => actuales.filter((a) => a.id !== idTemporal));
+      setError(err.response?.data?.error || "No se pudo guardar la limpieza adicional.");
+    }
   };
 
   const handleEliminar = async () => {
-    setEliminando(true);
+    const adicional = aEliminar;
+    setAEliminar(null);
     setError("");
+    setAdicionales((actuales) => actuales.filter((a) => a.id !== adicional.id));
     try {
-      await eliminarLimpiezaAdicional(aEliminar.id);
-      await cargarAdicionales();
+      await eliminarLimpiezaAdicional(adicional.id);
     } catch (err) {
+      setAdicionales((actuales) => ordenarPorFecha([...actuales, adicional]));
       setError(err.response?.data?.error || "No se pudo eliminar la limpieza adicional.");
-    } finally {
-      setEliminando(false);
-      setAEliminar(null);
     }
   };
 
@@ -209,7 +244,11 @@ export function LimpiezaAdicionalModal({ clientesPagina, onEditarCliente, onClos
                     <ul className="adicional-semana adicional-scroll">
                       {adicionales.map((adicional) => (
                         <li key={adicional.id}>
-                          <button type="button" onClick={() => setAEliminar(adicional)}>
+                          <button
+                            type="button"
+                            onClick={() => setAEliminar(adicional)}
+                            disabled={esTemporal(adicional)}
+                          >
                             <span>
                               <span className="adicional-item-nombre">{adicional.cliente?.nombre}</span>
                               <span className="adicional-item-detalle">{formatoDia(adicional.fecha)}</span>
@@ -291,7 +330,7 @@ export function LimpiezaAdicionalModal({ clientesPagina, onEditarCliente, onClos
                 <button type="button" className="secondary" onClick={() => setAEliminar(null)}>
                   Cancelar
                 </button>
-                <button type="button" className="danger" onClick={handleEliminar} disabled={eliminando}>
+                <button type="button" className="danger" onClick={handleEliminar}>
                   Eliminar
                 </button>
               </div>
