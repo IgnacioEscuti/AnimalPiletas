@@ -505,6 +505,10 @@ li.row input {
   margin-bottom: 0;
 }
 
+.filtros-clientes .select-encargado {
+  flex-shrink: 0;
+}
+
 .fila-semana {
   display: flex;
   align-items: center;

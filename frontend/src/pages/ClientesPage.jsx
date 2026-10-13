@@ -25,6 +25,7 @@ import { crearAutoScroll } from "../utils/autoScroll.js";
 
 const SEMANA_ACTUAL = semanaActual();
 const SIN_BARRIO = "sin-barrio";
+const TODOS = "todos";
 
 const enviarPastillas = (clienteId, { cantidad, empleado }) =>
   registrarUsoPastillas(clienteId, cantidad, empleado);
@@ -51,6 +52,7 @@ export function ClientesPage({ onPrimeraCarga }) {
   const [empleadosSemana, setEmpleadosSemana] = useState([]);
   const [busqueda, setBusqueda] = useState("");
   const [verTodos, setVerTodos] = useState(false);
+  const [encargadoSeleccionado, setEncargadoSeleccionado] = useState(usuario?.id);
   const [clienteEnEdicion, setClienteEnEdicion] = useState(null);
   const [modalAbierto, setModalAbierto] = useState(false);
   const [borradorModal, setBorradorModal] = useState(null);
@@ -533,10 +535,11 @@ export function ClientesPage({ onPrimeraCarga }) {
 
   const clientesFiltrados = clientes.filter(
     (cliente) =>
-      verTodos ||
-      cliente.semana === "todas" ||
-      cliente.semana === SEMANA_ACTUAL ||
-      (cliente.semana === "unaVez" && estaEnSemanaActual(cliente.semanaUnaVezDesde))
+      (verTodos ||
+        cliente.semana === "todas" ||
+        cliente.semana === SEMANA_ACTUAL ||
+        (cliente.semana === "unaVez" && estaEnSemanaActual(cliente.semanaUnaVezDesde))) &&
+      (!esAdmin || encargadoSeleccionado === TODOS || cliente.encargado?.id === encargadoSeleccionado)
   );
 
   const porBarrio = new Map();
@@ -609,6 +612,20 @@ export function ClientesPage({ onPrimeraCarga }) {
           onChange={(event) => setBusqueda(event.target.value)}
           className="search-input"
         />
+        {esAdmin && (
+          <select
+            className="select-encargado"
+            value={encargadoSeleccionado}
+            onChange={(event) => setEncargadoSeleccionado(event.target.value)}
+          >
+            <option value={TODOS}>Todos</option>
+            {usuarios.map((usuarioItem) => (
+              <option key={usuarioItem.id} value={usuarioItem.id}>
+                {usuarioItem.nombre || usuarioItem.email}
+              </option>
+            ))}
+          </select>
+        )}
         <div className="fila-semana">
           <label className="toggle-ver-todos">
             <input
