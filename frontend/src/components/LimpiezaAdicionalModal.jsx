@@ -98,7 +98,7 @@ export function LimpiezaAdicionalModal({ clientesPagina, onEditarCliente, onClos
       const data = await getLimpiezasAdicionales();
       setAdicionales([...data].sort((a, b) => a.fecha.localeCompare(b.fecha)));
     } catch {
-      setError("No se pudieron cargar las limpiezas extra.");
+      setError("No se pudieron cargar las limpiezas adicionales.");
     }
   };
 
@@ -144,7 +144,7 @@ export function LimpiezaAdicionalModal({ clientesPagina, onEditarCliente, onClos
       await eliminarLimpiezaAdicional(aEliminar.id);
       await cargarAdicionales();
     } catch (err) {
-      setError(err.response?.data?.error || "No se pudo eliminar la limpieza extra.");
+      setError(err.response?.data?.error || "No se pudo eliminar la limpieza adicional.");
     } finally {
       setEliminando(false);
       setAEliminar(null);
@@ -154,8 +154,11 @@ export function LimpiezaAdicionalModal({ clientesPagina, onEditarCliente, onClos
   // Si el cliente elegido se canceló mientras tanto, desaparece del buscador
   // y se vuelve solo al paso 1.
   const clienteElegido = clientes.find((cliente) => cliente.id === clienteElegidoId);
+  const buscando = Boolean(busqueda.trim());
   const matchea = crearMatcher(busqueda);
-  const resultados = busqueda.trim() ? clientes.filter((cliente) => matchea(cliente.nombre)) : [];
+  const resultados = clientes
+    .filter((cliente) => matchea(cliente.nombre))
+    .sort((a, b) => a.nombre.localeCompare(b.nombre, "es"));
 
   return (
     <>
@@ -179,10 +182,11 @@ export function LimpiezaAdicionalModal({ clientesPagina, onEditarCliente, onClos
                   puedeEditar={esAdmin || String(clienteElegido.encargado) === usuario?.id}
                   onEditar={onEditarCliente}
                   onGuardar={handleGuardar}
+                  onVolver={() => setClienteElegidoId(null)}
                 />
               </motion.div>
             ) : (
-              <motion.div key="buscador" className="adicional-paso" {...transicionPaso}>
+              <motion.div key="buscador" className="adicional-paso adicional-paso-buscador" {...transicionPaso}>
                 <h2>Limpieza adicional</h2>
                 <input
                   type="text"
@@ -191,37 +195,19 @@ export function LimpiezaAdicionalModal({ clientesPagina, onEditarCliente, onClos
                   value={busqueda}
                   onChange={(event) => setBusqueda(event.target.value)}
                   onKeyDown={(event) => {
-                    if (event.key === "Enter" && resultados[0]) setClienteElegidoId(resultados[0].id);
+                    if (event.key === "Enter" && buscando && resultados[0]) {
+                      setClienteElegidoId(resultados[0].id);
+                    }
                   }}
                 />
 
                 {error && <p className="error-message">{error}</p>}
 
-                {busqueda.trim() ? (
-                  resultados.length > 0 ? (
+                <div className={`adicional-lista ${buscando ? "buscando" : ""}`}>
+                  {!buscando && adicionales.length > 0 && (
                     <>
-                      <ul className="adicional-resultados">
-                        {resultados.map((cliente) => (
-                          <li key={cliente.id}>
-                            <button type="button" onClick={() => setClienteElegidoId(cliente.id)}>
-                              <span className="adicional-item-nombre">
-                                <NombreResaltado nombre={cliente.nombre} busqueda={busqueda} />
-                              </span>
-                              <span className="adicional-item-detalle">{cliente.barrio ?? "Sin barrio"}</span>
-                            </button>
-                          </li>
-                        ))}
-                      </ul>
-                      <p className="empty-state">Elegí un cliente para cargar la adicional</p>
-                    </>
-                  ) : (
-                    <p className="empty-state">No hay clientes que coincidan.</p>
-                  )
-                ) : (
-                  <>
-                    <p className="adicional-seccion">Limpiezas extra de esta semana</p>
-                    {adicionales.length > 0 ? (
-                      <ul className="adicional-semana">
+                      <p className="adicional-seccion">Limpiezas adicionales de esta semana</p>
+                      <ul>
                         {adicionales.map((adicional) => (
                           <li key={adicional.id}>
                             <button type="button" onClick={() => setAEliminar(adicional)}>
@@ -234,10 +220,28 @@ export function LimpiezaAdicionalModal({ clientesPagina, onEditarCliente, onClos
                           </li>
                         ))}
                       </ul>
-                    ) : (
-                      <p className="empty-state">Todavía no hay limpiezas extra esta semana.</p>
-                    )}
-                  </>
+                    </>
+                  )}
+                  {!buscando && <p className="adicional-seccion">Clientes</p>}
+                  {resultados.length > 0 ? (
+                    <ul className="adicional-clientes">
+                      {resultados.map((cliente) => (
+                        <li key={cliente.id}>
+                          <button type="button" onClick={() => setClienteElegidoId(cliente.id)}>
+                            <span className="adicional-item-nombre">
+                              <NombreResaltado nombre={cliente.nombre} busqueda={busqueda} />
+                            </span>
+                            <span className="adicional-item-detalle">{cliente.barrio ?? "Sin barrio"}</span>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    buscando && <p className="empty-state">No hay clientes que coincidan.</p>
+                  )}
+                </div>
+                {buscando && resultados.length > 0 && (
+                  <p className="adicional-ayuda">Elegí un cliente para cargar la adicional</p>
                 )}
 
                 <div className="adicional-acciones">
@@ -278,7 +282,7 @@ export function LimpiezaAdicionalModal({ clientesPagina, onEditarCliente, onClos
                   <path d="M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM96,40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8v8H96Zm96,168H64V64H192ZM112,104v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Z" />
                 </svg>
               </span>
-              <h2>¿Eliminar esta limpieza extra?</h2>
+              <h2>¿Eliminar esta limpieza adicional?</h2>
               <p className="confirmacion-detalle">
                 {aEliminar.cliente?.nombre} · {formatoDia(aEliminar.fecha)} · {formatoPrecio(aEliminar.total)}
               </p>

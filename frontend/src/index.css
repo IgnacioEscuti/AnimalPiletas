@@ -1069,6 +1069,10 @@ button.btn-limpieza-adicional {
   flex: 1;
 }
 
+.adicional-paso-buscador {
+  min-height: 0;
+}
+
 input.adicional-buscador,
 input.adicional-buscador:focus {
   flex: none;
@@ -1088,57 +1092,66 @@ input.adicional-buscador:focus {
   color: var(--text-muted);
 }
 
-.adicional-semana button,
-.adicional-resultados button {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  width: 100%;
-  text-align: left;
-  color: var(--text);
-  font-weight: 400;
-}
-
-.adicional-semana button {
-  padding: 14px 18px;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 18px;
-}
-
-.adicional-semana button:hover {
-  background: var(--bg);
-  border-color: var(--accent);
-}
-
-.adicional-resultados {
-  gap: 2px;
+/* Único recuadro con scroll del paso 1 (unos 5 clientes de alto): título,
+   buscador y botones quedan fijos. Alto fijo para que la hoja no salte al
+   filtrar; si falta lugar, se achica él. */
+.adicional-lista {
+  flex: 0 1 300px;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 6px;
   background: var(--bg);
   border: 1px solid var(--border);
   border-radius: 18px;
 }
 
-.adicional-resultados button {
+.adicional-lista ul {
+  gap: 2px;
+}
+
+.adicional-lista .adicional-seccion {
+  margin: 0;
+  padding: 10px 14px 6px;
+}
+
+.adicional-lista button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
   padding: 10px 14px;
+  text-align: left;
+  color: var(--text);
+  font-weight: 400;
   background: transparent;
+}
+
+.adicional-clientes button {
   display: block;
 }
 
-.adicional-resultados:not(:hover) li:first-child button,
-.adicional-resultados button:hover {
+.adicional-lista.buscando:not(:hover) li:first-child button,
+.adicional-lista button:hover {
   background: var(--accent-bg);
 }
 
-.adicional-resultados mark {
+.adicional-lista mark {
   background: transparent;
   color: var(--accent);
 }
 
-.adicional-resultados + .empty-state {
-  text-align: center;
+.adicional-lista .empty-state {
+  margin: 0;
+  padding: 10px 14px;
+}
+
+.adicional-ayuda {
   margin: 12px 0 0;
+  text-align: center;
+  font-size: 15px;
+  color: var(--text-muted);
 }
 
 .adicional-item-nombre {
@@ -1183,6 +1196,24 @@ input.adicional-buscador:focus {
   align-items: center;
   gap: 10px;
   margin: 4px 0 18px;
+}
+
+button.adicional-volver {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  margin-left: -6px;
+  padding: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text);
+}
+
+button.adicional-volver:hover {
+  background: rgba(233, 233, 237, 0.08);
 }
 
 .adicional-tarjeta .estado-punto {
@@ -2261,9 +2292,9 @@ input[type="number"]::-webkit-inner-spin-button {
     padding-top: 22px;
   }
 
+  /* Alto fijo: al filtrar o al aparecer la ayuda, el título no se mueve */
   .modal-adicional {
-    min-height: 66dvh;
-    max-height: 88dvh;
+    height: min(88dvh, 580px);
   }
 
   .modal-handle-area {

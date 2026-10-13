@@ -2,7 +2,7 @@ import { useState } from "react";
 
 // Misma tarjeta expandida de ClienteRow, pero sin guardar nada al tocar ni
 // en onBlur: todo junta en estado local y sale en un solo POST con "Guardar".
-export function AdicionalTarjeta({ cliente, puedeEditar, onEditar, onGuardar }) {
+export function AdicionalTarjeta({ cliente, puedeEditar, onEditar, onGuardar, onVolver }) {
   const [realizada, setRealizada] = useState(null);
   const [cantidadPastillas, setCantidadPastillas] = useState("");
   const [nombreExtra, setNombreExtra] = useState("");
@@ -51,6 +51,11 @@ export function AdicionalTarjeta({ cliente, puedeEditar, onEditar, onGuardar }) 
     <>
       <div className="adicional-tarjeta">
         <div className="adicional-titulo">
+          <button type="button" className="adicional-volver" onClick={onVolver} aria-label="Volver al buscador">
+            <svg width="18" height="18" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true">
+              <path d="M165.66,202.34a8,8,0,0,1-11.32,11.32l-80-80a8,8,0,0,1,0-11.32l80-80a8,8,0,0,1,11.32,11.32L91.31,128Z" />
+            </svg>
+          </button>
           <span className="estado-punto estado-pendiente" aria-hidden="true">
             –
           </span>

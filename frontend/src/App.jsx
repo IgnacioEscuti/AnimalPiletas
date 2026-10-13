@@ -94,8 +94,11 @@ function App() {
       el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.tagName === "SELECT");
 
     const guardarInicioToque = (event) => {
-      const ignorarGesto =
-        event.target.closest(".modal") || event.target === document.activeElement;
+      // Dentro de un modal el gesto se ignora (formularios cortos, arrastre
+      // para cerrar la hoja), salvo en la lista con scroll de Limpieza adicional.
+      const enModal =
+        event.target.closest(".modal") && !event.target.closest(".adicional-lista");
+      const ignorarGesto = enModal || event.target === document.activeElement;
       toqueInicioY = ignorarGesto ? null : event.touches[0].clientY;
     };
 
