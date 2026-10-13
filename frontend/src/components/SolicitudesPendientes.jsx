@@ -7,7 +7,6 @@ import {
 
 export function SolicitudesPendientes({ onCerrar }) {
   const [pendientes, setPendientes] = useState([]);
-  const [procesando, setProcesando] = useState(false);
   const [aviso, setAviso] = useState("");
 
   // Se pide una sola vez, al abrir la app. Si falla (red caída o sesión
@@ -49,23 +48,20 @@ export function SolicitudesPendientes({ onCerrar }) {
   if (!solicitud) return null;
 
   const resolver = async (accion) => {
-    setProcesando(true);
+    const resuelta = solicitud;
     setAviso("");
+    setPendientes((actuales) => actuales.filter((p) => p.id !== resuelta.id));
     try {
-      await accion(solicitud.id);
+      await accion(resuelta.id);
     } catch (error) {
-      // 409: otro admin ya resolvió esta solicitud. Se avisa y se pasa a la
-      // siguiente igual, porque este pendiente ya no existe.
+      // 409: otro admin ya la resolvió. El resultado es el mismo, así que
+      // no se avisa ni se vuelve atrás.
+      if (error.response?.status === 409) return;
+      setPendientes((actuales) => [resuelta, ...actuales]);
       setAviso(
         error.response?.data?.error || "No se pudo resolver la solicitud. Probá de nuevo."
       );
-      if (error.response?.status !== 409) {
-        setProcesando(false);
-        return;
-      }
     }
-    setPendientes((actuales) => actuales.slice(1));
-    setProcesando(false);
   };
 
   return (
@@ -89,12 +85,11 @@ export function SolicitudesPendientes({ onCerrar }) {
           <button
             type="button"
             className="solicitud-rechazar"
-            disabled={procesando}
             onClick={() => resolver(rechazarPendiente)}
           >
             Rechazar
           </button>
-          <button type="button" disabled={procesando} onClick={() => resolver(aprobarPendiente)}>
+          <button type="button" onClick={() => resolver(aprobarPendiente)}>
             Aceptar
           </button>
         </div>

@@ -11,9 +11,9 @@ export function PrecioPastillasRow({ precioPastillas, onActualizar }) {
 
   const cancelarEdicion = () => setEditando(false);
 
-  const guardarEdicion = async () => {
-    await onActualizar(Number(precioEdit));
+  const guardarEdicion = () => {
     setEditando(false);
+    onActualizar(Number(precioEdit));
   };
 
   return (

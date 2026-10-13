@@ -1,12 +1,15 @@
 import { motion } from "framer-motion";
 
+const esTemporal = (barrio) => barrio.id.startsWith("temp-");
+
 export function BarrioList({ barrios, onEliminar }) {
   return barrios.map((barrio, index) => (
     <motion.li
       className="row row-motion"
-      key={barrio.id}
+      key={barrio.claveRender ?? barrio.id}
+      inert={esTemporal(barrio)}
       initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
+      animate={{ opacity: esTemporal(barrio) ? 0.5 : 1, y: 0 }}
       transition={{ duration: 0.2, delay: index * 0.04 }}
     >
       <span className="row-name">{barrio.nombre}</span>

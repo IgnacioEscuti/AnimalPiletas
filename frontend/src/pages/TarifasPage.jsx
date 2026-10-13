@@ -13,6 +13,11 @@ import {
 import { getPrecioPastillas, actualizarPrecioPastillas } from "../services/precioPastillasService.js";
 import { getBarrios, crearBarrio, eliminarBarrio } from "../services/barrioService.js";
 
+const mensajeDeError = (err, porDefecto) => err.response?.data?.error || porDefecto;
+
+// Para que un item que no se pudo eliminar vuelva a su lugar.
+const insertarEn = (lista, index, item) => [...lista.slice(0, index), item, ...lista.slice(index)];
+
 export function TarifasPage() {
   const [tarifas, setTarifas] = useState([]);
   const [precioPastillas, setPrecioPastillas] = useState(null);
@@ -44,66 +49,90 @@ export function TarifasPage() {
   };
 
   const handleActualizarTarifa = async (id, precio) => {
+    const anterior = tarifas.find((t) => t.id === id);
+    setError("");
+    setTarifas((actuales) => actuales.map((t) => (t.id === id ? { ...t, precio } : t)));
     try {
-      setError("");
-      await actualizarTarifa(id, precio);
-      await cargarTodo();
+      const actualizada = await actualizarTarifa(id, precio);
+      setTarifas((actuales) => actuales.map((t) => (t.id === id ? { ...t, ...actualizada } : t)));
     } catch (err) {
-      setError(err.response?.data?.error || "No se pudo actualizar la tarifa.");
+      setTarifas((actuales) => actuales.map((t) => (t.id === id ? anterior : t)));
+      setError(mensajeDeError(err, "No se pudo actualizar la tarifa."));
     }
   };
 
   const handleCrearTarifa = async (nombre, precio) => {
+    const idTemporal = `temp-${Date.now()}`;
     setError("");
-    await crearTarifa(nombre, precio);
     setModalTarifaAbierto(false);
-    await cargarTodo();
+    setTarifas((actuales) => [...actuales, { id: idTemporal, nombre, precio }]);
+    try {
+      const creada = await crearTarifa(nombre, precio);
+      // claveRender mantiene la key de la fila: si cambiara con el id
+      // real, React la volvería a montar y repetiría la animación.
+      setTarifas((actuales) =>
+        actuales.map((t) => (t.id === idTemporal ? { ...creada, claveRender: idTemporal } : t))
+      );
+    } catch (err) {
+      setTarifas((actuales) => actuales.filter((t) => t.id !== idTemporal));
+      setError(mensajeDeError(err, "No se pudo crear la tarifa."));
+    }
   };
 
-  // Devuelve si se pudo borrar, para que la lista sepa si cerrar la edición.
   const handleEliminarTarifa = async (id) => {
+    const index = tarifas.findIndex((t) => t.id === id);
+    const tarifa = tarifas[index];
+    setError("");
+    setTarifas((actuales) => actuales.filter((t) => t.id !== id));
     try {
-      setError("");
       await eliminarTarifa(id);
-      await cargarTodo();
-      return true;
     } catch (err) {
-      setError(err.response?.data?.error || "No se pudo eliminar la tarifa.");
-      return false;
+      setTarifas((actuales) => insertarEn(actuales, index, tarifa));
+      setError(mensajeDeError(err, "No se pudo eliminar la tarifa."));
     }
   };
 
   const handleEliminarBarrio = async (barrio) => {
     if (!window.confirm(`¿Eliminar el barrio "${barrio.nombre}"?`)) return;
+    const index = barrios.findIndex((b) => b.id === barrio.id);
+    setError("");
+    setBarrios((actuales) => actuales.filter((b) => b.id !== barrio.id));
     try {
-      setError("");
       await eliminarBarrio(barrio.id);
-      setBarrios(await getBarrios());
     } catch (err) {
-      setError(err.response?.data?.error || "No se pudo eliminar el barrio.");
+      setBarrios((actuales) => insertarEn(actuales, index, barrio));
+      setError(mensajeDeError(err, "No se pudo eliminar el barrio."));
     }
   };
 
   const handleActualizarPastillas = async (precio) => {
+    const anterior = precioPastillas;
+    setError("");
+    setPrecioPastillas({ ...anterior, precio });
     try {
-      setError("");
-      await actualizarPrecioPastillas(precio);
-      await cargarTodo();
+      setPrecioPastillas(await actualizarPrecioPastillas(precio));
     } catch (err) {
-      setError(err.response?.data?.error || "No se pudo actualizar el precio de pastillas.");
+      setPrecioPastillas(anterior);
+      setError(mensajeDeError(err, "No se pudo actualizar el precio de pastillas."));
     }
   };
 
   const handleAgregarBarrio = async (event) => {
     event.preventDefault();
-    if (!nombreBarrio.trim()) return;
+    const nombre = nombreBarrio.trim();
+    if (!nombre) return;
+    const idTemporal = `temp-${Date.now()}`;
+    setError("");
+    setNombreBarrio("");
+    setBarrios((actuales) => [...actuales, { id: idTemporal, nombre, orden: actuales.length }]);
     try {
-      setError("");
-      await crearBarrio(nombreBarrio.trim());
-      setNombreBarrio("");
-      setBarrios(await getBarrios());
+      const creado = await crearBarrio(nombre);
+      setBarrios((actuales) =>
+        actuales.map((b) => (b.id === idTemporal ? { ...creado, claveRender: idTemporal } : b))
+      );
     } catch (err) {
-      setError(err.response?.data?.error || "No se pudo agregar el barrio.");
+      setBarrios((actuales) => actuales.filter((b) => b.id !== idTemporal));
+      setError(mensajeDeError(err, "No se pudo agregar el barrio."));
     }
   };
 
