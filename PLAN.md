@@ -207,6 +207,34 @@ Limpieza, UsoPastillas y UsoExtra se filtran por `fecha`. EmpleadoSemana se filt
 
 **Agrupado en el Resumen:** siempre por barrio (mismo criterio de "Sin barrio" que la pantalla de Cliente), nunca por encargado. El admin tiene un selector "Todos" + cada usuario, debajo del buscador. El encargado no ve el selector.
 
+## Guardador de cargas (frontend)
+
+Problema que resuelve: con toques rápidos en + / − de pastillas salían varios POST en paralelo con el valor absoluto, llegaban desordenados y la base quedaba con un valor distinto al de la pantalla. Además el rollback a una foto vieja pisaba cargas buenas, y el input solo guardaba en `onBlur` (en iOS a veces no se dispara al bloquear el celular).
+
+El backend no cambia: se sigue mandando el valor absoluto, que es idempotente y se puede reintentar sin riesgo. Todo vive en el frontend:
+
+- `frontend/src/utils/guardador.js` — `crearGuardador({ nombre, usuarioId, enviar })`, la lógica genérica (sin React).
+- `frontend/src/hooks/useGuardador.js` — conecta el guardador a React con `useSyncExternalStore`. Hay un guardador por `nombre` + usuario para toda la sesión, guardado a nivel de módulo: así sigue habiendo un solo pedido en vuelo por cliente aunque la pantalla de Cliente se desmonte al cambiar de pestaña.
+
+Hoy está aplicado **solo a pastillas** (`nombre: "pastillas"`). La idea es enchufarlo después en limpieza y empleado.
+
+**Reglas:**
+1. **Un pedido a la vez por id (cliente).** Si hay uno en vuelo, el valor nuevo queda como pendiente y se reemplaza con cada toque. Cuando vuelve la respuesta, si hay pendiente se manda solo el último.
+2. **Debounce de 500 ms** antes de mandar.
+3. **Sin rollback.** La pantalla siempre muestra lo que cargó el encargado. Si falla, se reintenta a los 2 s, 4 s y 8 s. Si fallan los tres, queda en estado error. Si mientras tanto llega un valor nuevo, ese reemplaza al que falló y la cuenta de reintentos vuelve a cero.
+4. **Timeout de 10 s** en axios (`frontend/src/services/api.js`, aplica a todos los pedidos).
+5. **El input de cantidad pasa por el mismo guardador** en cada `onChange` (ya no se guarda en `onBlur`), así no choca con un + tocado justo después.
+6. **Segundo plano:** en cada `visibilitychange` (al ocultarse: manda ya lo pendiente salteando el debounce; al volver: reenvía) y en el evento `online` se reenvía todo lo que esté sin confirmar o en error.
+7. **localStorage:** al guardar se anota el valor con la clave `guardador:<nombre>:<usuarioId>:<lunes de la semana YYYY-MM-DD>:<clienteId>`. Cuando el servidor confirma ese mismo valor, se borra la anotación. Al cargar la pantalla de Cliente, después de traer los datos, los pendientes de esta semana pisan el valor de la base, se muestran como pendientes y se reenvían solos; los de otra semana se descartan. Todo acceso a localStorage va en try/catch: si falla, la app anda igual, solo sin anotación.
+8. El `useEffect` de `ClienteRow` que sincroniza `cantidadPastillas` desde `pastillasHoy` no corre mientras el estado sea pendiente o error.
+
+**Indicador en el número de pastillas:**
+- **Pendiente** (sin confirmar): número en gris (`--text-muted`).
+- **Guardado:** número verde con un ✓ al costado durante 1,5 s, después vuelve al color normal.
+- **Error** (fallaron los reintentos): número en rojo con un ! al costado, fijo hasta que se guarde. Tocar el ! reintenta en el momento.
+
+En mobile la marca aparece a la izquierda de la píldora del stepper, para que la píldora no se corra.
+
 ## Decisiones evaluadas y descartadas
 
 - **React Router** — descartado. Con 3 pantallas planas, sin rutas anidadas ni detalle por cliente, y usándose como PWA standalone en iPhone (sin barra de direcciones ni botón atrás), no aporta nada que se use. Reevaluar solo si aparece una pantalla de detalle (`/cliente/:id`). Único costo actual: al refrescar se vuelve siempre a "clientes".

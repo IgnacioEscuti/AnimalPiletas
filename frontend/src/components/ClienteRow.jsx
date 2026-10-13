@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 
 export function ClienteRow({
   cliente,
@@ -12,6 +12,8 @@ export function ClienteRow({
   onEditar,
   onLimpieza,
   onPastillas,
+  estadoPastillas,
+  onReintentarPastillas,
   onExtra,
   onEliminarExtra,
   onEmpleado,
@@ -38,9 +40,11 @@ export function ClienteRow({
     filaRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, [expandido]);
 
+  // Mientras haya un valor sin confirmar, manda lo que cargó el encargado.
   useEffect(() => {
+    if (estadoPastillas === "pendiente" || estadoPastillas === "error") return;
     setCantidadPastillas(pastillasHoy?.cantidad ? String(pastillasHoy.cantidad) : "");
-  }, [pastillasHoy?.cantidad]);
+  }, [pastillasHoy?.cantidad, estadoPastillas]);
 
   useEffect(() => {
     setEmpleado(empleadoSemanaHoy?.nombre ?? "");
@@ -57,6 +61,11 @@ export function ClienteRow({
     const nuevo = Math.max(0, (Number(cantidadPastillas) || 0) + delta);
     setCantidadPastillas(String(nuevo));
     onPastillas(cliente.id, nuevo, empleado);
+  };
+
+  const handleCambioPastillas = (event) => {
+    setCantidadPastillas(event.target.value);
+    onPastillas(cliente.id, Math.max(0, Number(event.target.value) || 0), empleado);
   };
 
   const estadoLimpieza =
@@ -131,22 +140,54 @@ export function ClienteRow({
         </td>
         <td>
           <span className="pastillas-label">Pastillas cargadas</span>
-          <div className="pastillas-stepper">
-            <button type="button" className="stepper-btn" onClick={() => ajustarPastillas(-1)}>
-              −
-            </button>
-            <input
-              type="number"
-              min="0"
-              placeholder="0"
-              className="pastillas-input"
-              value={cantidadPastillas}
-              onChange={(event) => setCantidadPastillas(event.target.value)}
-              onBlur={() => onPastillas(cliente.id, Number(cantidadPastillas) || 0, empleado)}
-            />
-            <button type="button" className="stepper-btn" onClick={() => ajustarPastillas(1)}>
-              +
-            </button>
+          <div className="pastillas-control">
+            <div className="pastillas-stepper">
+              <button type="button" className="stepper-btn" onClick={() => ajustarPastillas(-1)}>
+                −
+              </button>
+              <input
+                type="number"
+                min="0"
+                placeholder="0"
+                className={`pastillas-input ${estadoPastillas ? `pastillas-${estadoPastillas}` : ""}`}
+                value={cantidadPastillas}
+                onChange={handleCambioPastillas}
+              />
+              <button type="button" className="stepper-btn" onClick={() => ajustarPastillas(1)}>
+                +
+              </button>
+            </div>
+            <AnimatePresence>
+              {estadoPastillas === "guardado" && (
+                <motion.span
+                  key="guardado"
+                  className="pastillas-marca pastillas-marca-guardado"
+                  aria-label="Guardado"
+                  initial={{ opacity: 0, scale: 0.6 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  ✓
+                </motion.span>
+              )}
+              {estadoPastillas === "error" && (
+                <motion.button
+                  key="error"
+                  type="button"
+                  className="pastillas-marca pastillas-marca-error"
+                  onClick={() => onReintentarPastillas(cliente.id)}
+                  aria-label="No se pudo guardar. Reintentar"
+                  title="No se pudo guardar. Tocá para reintentar"
+                  initial={{ opacity: 0, scale: 0.6 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  !
+                </motion.button>
+              )}
+            </AnimatePresence>
           </div>
         </td>
         <td data-label="Extra de hoy">

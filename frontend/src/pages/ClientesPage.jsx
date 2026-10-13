@@ -17,6 +17,7 @@ import { getUsosExtraDeHoy, registrarUsoExtra, eliminarUsoExtra } from "../servi
 import { getEmpleadoSemana, guardarEmpleadoSemana } from "../services/empleadoSemanaService.js";
 import { getUsuarios } from "../services/usuarioService.js";
 import { useAuth } from "../context/AuthContext.jsx";
+import { useGuardador } from "../hooks/useGuardador.js";
 import { semanaActual, estaEnSemanaActual } from "../utils/fecha.js";
 import { crearMatcher } from "../utils/texto.js";
 import { crearAutoScroll } from "../utils/autoScroll.js";
@@ -24,9 +25,17 @@ import { crearAutoScroll } from "../utils/autoScroll.js";
 const SEMANA_ACTUAL = semanaActual();
 const SIN_BARRIO = "sin-barrio";
 
+const enviarPastillas = (clienteId, { cantidad, empleado }) =>
+  registrarUsoPastillas(clienteId, cantidad, empleado);
+
 export function ClientesPage({ onPrimeraCarga }) {
   const { usuario } = useAuth();
   const esAdmin = usuario?.rol === "admin";
+  const guardadorPastillas = useGuardador({
+    nombre: "pastillas",
+    usuarioId: usuario?.id,
+    enviar: enviarPastillas,
+  });
   const [clientes, setClientes] = useState([]);
   const [tarifas, setTarifas] = useState([]);
   const [barrios, setBarrios] = useState([]);
@@ -89,7 +98,12 @@ export function ClientesPage({ onPrimeraCarga }) {
       setTarifas(tarifasData);
       setBarrios(barriosData);
       setLimpiezas(limpiezasData);
-      setPastillas(pastillasData);
+      setPastillas(
+        Object.entries(guardadorPastillas.restaurar()).reduce(
+          (lista, [clienteId, valor]) => actualizarPorCliente(lista, clienteId, valor),
+          pastillasData
+        )
+      );
       setExtras(extrasData);
       setEmpleadosSemana(empleadosSemanaData);
       setUsuarios(usuariosData);
@@ -137,15 +151,9 @@ export function ClientesPage({ onPrimeraCarga }) {
     }
   };
 
-  const handlePastillas = async (clienteId, cantidad, empleado) => {
-    const anterior = pastillas;
-    setPastillas(actualizarPorCliente(anterior, clienteId, { cantidad, empleado }));
-    try {
-      await registrarUsoPastillas(clienteId, cantidad, empleado);
-    } catch {
-      setPastillas(anterior);
-      setError("No se pudo registrar la carga de pastillas.");
-    }
+  const handlePastillas = (clienteId, cantidad, empleado) => {
+    setPastillas((actuales) => actualizarPorCliente(actuales, clienteId, { cantidad, empleado }));
+    guardadorPastillas.guardar(clienteId, { cantidad, empleado });
   };
 
   const handleExtra = async (clienteId, nombreExtra, precioUnitario, empleado) => {
@@ -588,6 +596,8 @@ export function ClientesPage({ onPrimeraCarga }) {
                   onEditar={abrirEdicion}
                   onLimpieza={handleLimpieza}
                   onPastillas={handlePastillas}
+                  estadoPastillas={guardadorPastillas.estados[cliente.id]}
+                  onReintentarPastillas={guardadorPastillas.reintentar}
                   onExtra={handleExtra}
                   onEliminarExtra={handleEliminarExtra}
                   onEmpleado={handleEmpleado}

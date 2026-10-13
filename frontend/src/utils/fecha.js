@@ -32,8 +32,9 @@ export function semanaActual() {
   return semanaISO() % 2 === 1 ? "1" : "2";
 }
 
-// Lunes (00:00 local) de la semana que contiene `fecha`.
-function inicioDeSemana(fecha = new Date()) {
+// Lunes (00:00 local) de la semana que contiene `fecha`. Mismo criterio que
+// `rangoSemanal` del backend.
+export function inicioDeSemana(fecha = new Date()) {
   const dia = new Date(fecha.getFullYear(), fecha.getMonth(), fecha.getDate());
   const diaDeSemana = dia.getDay(); // domingo=0, lunes=1, ..., sábado=6
   const diasHastaElLunes = diaDeSemana === 0 ? -6 : 1 - diaDeSemana;
