@@ -17,7 +17,10 @@ export class LimpiezaAdicionalService {
 
   // Cualquier usuario puede cargar en cualquier cliente activo, sea o no
   // su encargado: por eso no se usa verificarAcceso de ClienteService.
-  async registrar({ cliente: clienteId, extra, cantidadPastillas, extras }, usuarioActual) {
+  async registrar(
+    { cliente: clienteId, extra, realizada, empleado, cantidadPastillas, extras },
+    usuarioActual
+  ) {
     if (extras !== undefined && !Array.isArray(extras)) {
       const error = new Error("extras debe ser una lista");
       error.statusCode = 400;
@@ -46,6 +49,8 @@ export class LimpiezaAdicionalService {
         tarifa: cliente.tarifaLimpieza.id ?? cliente.tarifaLimpieza._id,
         precioUnitarioUsado: cliente.tarifaLimpieza.precio,
         extra,
+        realizada,
+        empleado,
         cantidadPastillas,
         precioPastillasUsado: precioPastillas.precio,
         extras: extras?.map((item) => ({
@@ -59,15 +64,12 @@ export class LimpiezaAdicionalService {
     }
   }
 
+  // Sin clienteId devuelve las de todos los clientes (la lista "Limpiezas
+  // extra de esta semana" del buscador).
   async getDeEstaSemana(clienteId, usuarioActual) {
-    if (!clienteId) {
-      const error = new Error("falta el cliente");
-      error.statusCode = 400;
-      throw error;
-    }
-
     const { inicio, fin } = rangoSemanal();
-    const filtro = { cliente: clienteId, fecha: { $gte: inicio, $lt: fin } };
+    const filtro = { fecha: { $gte: inicio, $lt: fin } };
+    if (clienteId) filtro.cliente = clienteId;
     if (usuarioActual.rol === "encargado") filtro.cargadoPor = idDe(usuarioActual);
 
     try {

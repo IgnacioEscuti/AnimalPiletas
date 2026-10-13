@@ -42,6 +42,15 @@ const limpiezaAdicionalSchema = new Schema(
       default: 0,
       min: 0,
     },
+    realizada: {
+      type: Boolean,
+      required: true,
+    },
+    empleado: {
+      type: String,
+      trim: true,
+      default: "",
+    },
     cantidadPastillas: {
       type: Number,
       default: 0,

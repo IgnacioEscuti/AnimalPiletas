@@ -1,11 +1,13 @@
 import { limpiezaAdicionalModel } from "../models/limpiezaAdicional.model.js";
 
+const POPULATE = [
+  { path: "cliente", select: "nombre" },
+  { path: "cargadoPor", select: "nombre email" },
+];
+
 export class LimpiezaAdicionalDAO {
   async find(filters) {
-    return limpiezaAdicionalModel
-      .find(filters)
-      .sort({ fecha: 1, createdAt: 1 })
-      .populate("cargadoPor", "nombre email");
+    return limpiezaAdicionalModel.find(filters).sort({ fecha: 1, createdAt: 1 }).populate(POPULATE);
   }
 
   async findById(id) {
@@ -14,7 +16,7 @@ export class LimpiezaAdicionalDAO {
 
   async crear(data) {
     const adicional = await limpiezaAdicionalModel.create(data);
-    return adicional.populate("cargadoPor", "nombre email");
+    return adicional.populate(POPULATE);
   }
 
   async eliminarPorId(id) {

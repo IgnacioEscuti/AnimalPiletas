@@ -120,6 +120,8 @@ fecha: Date (requerido — siempre la fecha de hoy al cargar)
 tarifa: ObjectId → ref tarifaLimpieza (requerido, copiada del cliente al crear)
 precioUnitarioUsado: number (requerido, precio de esa tarifa congelado)
 extra: number (default 0, min 0)
+realizada: boolean (requerido — Confirmar / No se pudo; si es false la limpieza no se cobra ni se cuenta, pero pastillas y extras sí)
+empleado: string (opcional, default "")
 cantidadPastillas: number (default 0, min 0)
 precioPastillasUsado: number (requerido, precio de PrecioPastillas congelado)
 extras: [{ nombre: string (requerido), precio: number (requerido, min 0) }] (default [])
@@ -182,13 +184,14 @@ Limpieza, UsoPastillas y UsoExtra se filtran por `fecha`. EmpleadoSemana se filt
 
 ## Limpieza adicional
 
-**Dónde:** botón "Limpieza adicional" arriba en la pantalla de Clientes, al lado de "+ Nuevo cliente". Abre un modal con la misma estética y el mismo comportamiento que el modal de cliente (incluida la hoja inferior en mobile).
+**Dónde:** botón "+ Limpieza adicional" (outline violeta, ancho completo) en la pantalla de Clientes, debajo de la fila "Ver todos" / "Semana N".
 
-**El modal:**   
-- Arriba, un buscador de clientes por nombre (mismo estilo que la barra de búsqueda de Clientes). Muestra **todos los clientes activos, de cualquier encargado**, sin filtro de semana. Cada resultado muestra el nombre y su barrio.
-- Elegido el cliente: campos de monto extra, pastillas y extras (nombre + precio, se pueden agregar varios). Cancelar / Guardar. La tarifa sale del cliente.
-- Debajo, "Adicionales de esta semana" de ese cliente. El encargado ve solo las que cargó él; el admin ve todas.
-- Tocando una de la lista, sus valores se muestran sin poder editarse y aparece abajo un botón "Eliminar" (mismo estilo que "Cancelar cliente"), con confirmación. Borra la visita entera.
+**Modal paso 1, buscador:** hoja inferior con el título "Limpieza adicional" y una barra "Buscar cliente...". Muestra todos los clientes activos de cualquier encargado, sin filtro de semana (nombre + barrio). Sin texto escrito, muestra "LIMPIEZAS EXTRA DE ESTA SEMANA": cliente, día y precio de cada una. El encargado ve las que cargó él; el admin, todas. Al tocar una aparece la confirmación "¿Eliminar esta limpieza extra?" (Cancelar / Eliminar), que borra la visita entera.
+
+**Modal paso 2, cliente elegido:** la misma tarjeta expandida del cliente de la pantalla de Clientes (Limpieza de hoy con Confirmar / No se pudo, Pastillas cargadas, Extra de hoy, Empleado, dirección y teléfono). Diferencias:
+- Nada se guarda al tocar ni al salir de un campo: todo se guarda junto con "Guardar", que se habilita al elegir Confirmar o No se pudo.
+- Abajo, "Editar" (abre el modal de editar cliente) y "Guardar", uno al lado del otro. Si el usuario no puede editar ese cliente (encargado con cliente ajeno), "Editar" no aparece y "Guardar" ocupa todo el ancho.
+- La carga semanal del cliente no se toca.
 
 **Permisos:** cualquier usuario puede cargar una adicional en cualquier cliente activo. Borrar: solo quien la cargó, o un admin.
 
@@ -197,7 +200,7 @@ Limpieza, UsoPastillas y UsoExtra se filtran por `fecha`. EmpleadoSemana se filt
 - Admin con un usuario elegido: las que cargó ese usuario.
 - Admin en "Todos": todas.
 
-Se suman a la fila del cliente como cualquier carga: limpieza (+1 en cantidad, su fecha y `precioUnitarioUsado + extra`), pastillas (`cantidadPastillas × precioPastillasUsado`) y extras agrupados por nombre. Si el cliente no está en el filtro de quien mira (por ejemplo, el jefe mirando su propio resumen), la fila del cliente aparece igual, solo con lo de la adicional. El nombre de quien la cargó (`nombre`, o `email` si no tiene) se suma a la columna de empleados de esa fila.
+Se suman a la fila del cliente como cualquier carga: limpieza (+1 solo si realizada, su fecha y `precioUnitarioUsado + extra`), pastillas (`cantidadPastillas × precioPastillasUsado`) y extras agrupados por nombre. Si el cliente no está en el filtro de quien mira (por ejemplo, el jefe mirando su propio resumen), la fila del cliente aparece igual, solo con lo de la adicional. En empleados se usa `empleado` y, si está vacío, el nombre (o email) de `cargadoPor`.
 
 ## Login
 
@@ -239,8 +242,7 @@ Se suman a la fila del cliente como cualquier carga: limpieza (+1 en cantidad, s
 - Encargado: solo los clientes donde `encargado` sea él mismo.
 - Admin: todos.
 - Clientes sin `encargado` asignado: solo los ve el admin, hasta que se los asigne a alguien.
-- **Única excepción:** el buscador del modal de Limpieza adicional muestra todos los clientes activos a cualquier usuario, solo con `id`, `nombre` y barrio (sin dirección ni teléfono), porque un encargado puede tener que limpiar un cliente que no es suyo.
-
+- **Única excepción:** el buscador del modal de Limpieza adicional muestra a cualquier usuario todos los clientes activos, con nombre, barrio, dirección, teléfono y tarifa (más el id de su encargado, para saber si mostrar "Editar"), porque un encargado puede tener que limpiar un cliente que no es suyo.
 **Agrupado en el Resumen:** siempre por barrio (mismo criterio de "Sin barrio" que la pantalla de Cliente), nunca por encargado. El admin tiene un selector "Todos" + cada usuario, debajo del buscador. El encargado no ve el selector.
 
 ## Guardador de cargas (frontend)

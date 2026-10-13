@@ -3,9 +3,9 @@ import { LimpiezaAdicionalDTO } from "../DTOs/limpiezaAdicional.dto.js";
 
 export async function createLimpiezaAdicional(req, res, next) {
   try {
-    const { cliente, extra, cantidadPastillas, extras } = req.body;
+    const { cliente, extra, realizada, empleado, cantidadPastillas, extras } = req.body;
     const adicional = await limpiezaAdicionalService.registrar(
-      { cliente, extra, cantidadPastillas, extras },
+      { cliente, extra, realizada, empleado, cantidadPastillas, extras },
       req.usuario
     );
     res.status(201).json({ limpiezaAdicional: new LimpiezaAdicionalDTO(adicional) });

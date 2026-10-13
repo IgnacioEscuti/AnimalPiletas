@@ -121,7 +121,7 @@ export class ResumenService {
     // adicional cargada por él: su fila aparece igual, dentro de su barrio.
     const idsEnFiltro = new Set(clientes.map((cliente) => cliente.id));
     const idsFueraDeFiltro = [
-      ...new Set(adicionales.map((adicional) => adicional.cliente.toString())),
+      ...new Set(adicionales.map((adicional) => adicional.cliente._id.toString())),
     ].filter((id) => !idsEnFiltro.has(id));
 
     let clientesFueraDeFiltro = [];
@@ -175,19 +175,23 @@ export class ResumenService {
       porCliente.set(id, datosVacios());
     }
 
+    // Igual que en Limpieza: si no se realizó, la limpieza no se cuenta ni
+    // se cobra, pero las pastillas y los extras sí.
     for (const adicional of adicionales) {
-      const datos = datosDe(adicional.cliente);
-      datos.limpiezaCantidad += 1;
-      datos.limpiezaPrecio += adicional.precioUnitarioUsado + adicional.extra;
-      datos.limpiezaFechas.push(adicional.fecha);
+      const datos = datosDe(adicional.cliente._id);
+      if (adicional.realizada) {
+        datos.limpiezaCantidad += 1;
+        datos.limpiezaPrecio += adicional.precioUnitarioUsado + adicional.extra;
+        datos.limpiezaFechas.push(adicional.fecha);
+      }
       datos.pastillasCantidad += adicional.cantidadPastillas;
       datos.pastillasPrecio += adicional.cantidadPastillas * adicional.precioPastillasUsado;
       for (const { nombre, precio } of adicional.extras) {
         datos.extras.set(nombre, (datos.extras.get(nombre) ?? 0) + 1);
         datos.extraPrecio += precio;
       }
-      const cargadoPor = adicional.cargadoPor;
-      if (cargadoPor) datos.empleados.add(cargadoPor.nombre || cargadoPor.email);
+      const empleado = adicional.empleado || adicional.cargadoPor?.nombre || adicional.cargadoPor?.email;
+      if (empleado) datos.empleados.add(empleado);
     }
 
     const filas = [...clientes, ...clientesFueraDeFiltro].map((cliente) => {

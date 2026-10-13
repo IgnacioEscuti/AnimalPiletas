@@ -57,12 +57,14 @@ export class ClienteDAO {
   }
 
   // Para el buscador de Limpieza adicional: lo ve cualquier usuario, así
-  // que solo trae nombre y barrio (nada de dirección, teléfono ni encargado).
+  // que trae solo lo que muestra la tarjeta del cliente. Del encargado,
+  // únicamente el id (sin populate).
   async findActivosParaBuscador() {
     return clienteModel
       .find({ status: { $ne: "cancelado" } })
-      .select("nombre barrio")
-      .populate("barrio", "nombre");
+      .select("nombre barrio direccion telefono tarifaLimpieza encargado")
+      .populate("barrio", "nombre")
+      .populate("tarifaLimpieza", "nombre precio");
   }
 
   async countDocuments(filtro) {
