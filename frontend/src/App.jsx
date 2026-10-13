@@ -95,9 +95,9 @@ function App() {
 
     const guardarInicioToque = (event) => {
       // Dentro de un modal el gesto se ignora (formularios cortos, arrastre
-      // para cerrar la hoja), salvo en la lista con scroll de Limpieza adicional.
+      // para cerrar la hoja), salvo en las listas con scroll de Limpieza adicional.
       const enModal =
-        event.target.closest(".modal") && !event.target.closest(".adicional-lista");
+        event.target.closest(".modal") && !event.target.closest(".adicional-scroll");
       const ignorarGesto = enModal || event.target === document.activeElement;
       toqueInicioY = ignorarGesto ? null : event.touches[0].clientY;
     };

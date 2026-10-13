@@ -203,26 +203,27 @@ export function LimpiezaAdicionalModal({ clientesPagina, onEditarCliente, onClos
 
                 {error && <p className="error-message">{error}</p>}
 
-                <div className={`adicional-lista ${buscando ? "buscando" : ""}`}>
-                  {!buscando && adicionales.length > 0 && (
-                    <>
-                      <p className="adicional-seccion">Limpiezas adicionales de esta semana</p>
-                      <ul>
-                        {adicionales.map((adicional) => (
-                          <li key={adicional.id}>
-                            <button type="button" onClick={() => setAEliminar(adicional)}>
-                              <span>
-                                <span className="adicional-item-nombre">{adicional.cliente?.nombre}</span>
-                                <span className="adicional-item-detalle">{formatoDia(adicional.fecha)}</span>
-                              </span>
-                              <span className="adicional-item-precio">{formatoPrecio(adicional.total)}</span>
-                            </button>
-                          </li>
-                        ))}
-                      </ul>
-                    </>
-                  )}
-                  {!buscando && <p className="adicional-seccion">Clientes</p>}
+                {!buscando && adicionales.length > 0 && (
+                  <>
+                    <p className="adicional-seccion">Limpiezas adicionales de esta semana</p>
+                    <ul className="adicional-semana adicional-scroll">
+                      {adicionales.map((adicional) => (
+                        <li key={adicional.id}>
+                          <button type="button" onClick={() => setAEliminar(adicional)}>
+                            <span>
+                              <span className="adicional-item-nombre">{adicional.cliente?.nombre}</span>
+                              <span className="adicional-item-detalle">{formatoDia(adicional.fecha)}</span>
+                            </span>
+                            <span className="adicional-item-precio">{formatoPrecio(adicional.total)}</span>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                )}
+
+                {!buscando && <p className="adicional-seccion">Clientes</p>}
+                <div className={`adicional-lista adicional-scroll ${buscando ? "buscando" : ""}`}>
                   {resultados.length > 0 ? (
                     <ul className="adicional-clientes">
                       {resultados.map((cliente) => (

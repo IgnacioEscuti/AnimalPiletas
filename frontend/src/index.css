@@ -1110,12 +1110,8 @@ input.adicional-buscador:focus {
   gap: 2px;
 }
 
-.adicional-lista .adicional-seccion {
-  margin: 0;
-  padding: 10px 14px 6px;
-}
-
-.adicional-lista button {
+.adicional-lista button,
+.adicional-semana button {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1130,6 +1126,29 @@ input.adicional-buscador:focus {
 
 .adicional-clientes button {
   display: block;
+}
+
+/* Adicionales de la semana: tarjetas sueltas fuera del recuadro de clientes.
+   Con varias, scrollean solas (una y media a la vista) para no comerse la lista. */
+.adicional-semana {
+  flex: none;
+  max-height: 112px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.adicional-semana button {
+  padding: 12px 18px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+}
+
+.adicional-semana button:hover {
+  background: var(--bg);
+  border-color: var(--accent);
 }
 
 .adicional-lista.buscando:not(:hover) li:first-child button,
