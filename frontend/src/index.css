@@ -1043,6 +1043,377 @@ button.solicitud-despues:hover {
   color: var(--text);
 }
 
+/* Limpieza adicional. La tarjeta del paso 2 reusa las clases de ClienteRow;
+   como su versión de tarjeta solo existe en mobile, acá se replica acotada a
+   .adicional-tarjeta para que el modal se vea igual en escritorio. */
+
+button.btn-limpieza-adicional {
+  width: 100%;
+  margin-bottom: 20px;
+  padding: 12px 20px;
+  border-radius: 999px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.modal-adicional {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100dvh - 48px);
+  overflow-y: auto;
+}
+
+.adicional-paso {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+input.adicional-buscador,
+input.adicional-buscador:focus {
+  flex: none;
+  width: 100%;
+  margin-bottom: 20px;
+  padding: 13px 16px 13px 44px;
+  border-radius: 999px;
+  background: var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238a8a94' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='7'%3E%3C/circle%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'%3E%3C/line%3E%3C/svg%3E") no-repeat 16px center;
+}
+
+.adicional-seccion {
+  margin: 4px 0 12px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.adicional-semana button,
+.adicional-resultados button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  color: var(--text);
+  font-weight: 400;
+}
+
+.adicional-semana button {
+  padding: 14px 18px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+}
+
+.adicional-semana button:hover {
+  background: var(--bg);
+  border-color: var(--accent);
+}
+
+.adicional-resultados {
+  gap: 2px;
+  padding: 6px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+}
+
+.adicional-resultados button {
+  padding: 10px 14px;
+  background: transparent;
+  display: block;
+}
+
+.adicional-resultados:not(:hover) li:first-child button,
+.adicional-resultados button:hover {
+  background: var(--accent-bg);
+}
+
+.adicional-resultados mark {
+  background: transparent;
+  color: var(--accent);
+}
+
+.adicional-resultados + .empty-state {
+  text-align: center;
+  margin: 12px 0 0;
+}
+
+.adicional-item-nombre {
+  display: block;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.adicional-item-detalle {
+  display: block;
+  margin-top: 2px;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.adicional-item-precio {
+  font-size: 17px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.adicional-acciones {
+  display: flex;
+  gap: 12px;
+  margin-top: auto;
+  padding-top: 24px;
+}
+
+.adicional-acciones button {
+  flex: 1;
+  padding: 14px 20px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.adicional-tarjeta ~ .adicional-acciones button {
+  border-radius: 999px;
+}
+
+.adicional-titulo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 4px 0 18px;
+}
+
+.adicional-tarjeta .estado-punto {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 700;
+  background: rgba(233, 233, 237, 0.12);
+  color: var(--text-muted);
+}
+
+.adicional-tarjeta .cliente-nombre {
+  flex: 1;
+  min-width: 0;
+  font-size: 17px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.adicional-campo {
+  margin-bottom: 18px;
+}
+
+.adicional-campo::before {
+  content: attr(data-label);
+  display: block;
+  margin-bottom: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.adicional-tarjeta .limpieza-buttons {
+  gap: 10px;
+}
+
+.adicional-tarjeta .icon-button {
+  flex: 1;
+  width: auto;
+  height: 48px;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.adicional-tarjeta .limpieza-label {
+  display: inline;
+}
+
+/* Elegido: anillo del color del estado; el otro queda atenuado */
+.adicional-tarjeta .icon-button.active-tick {
+  outline: 2px solid var(--success);
+  outline-offset: 3px;
+}
+
+.adicional-tarjeta .icon-button.active-cross {
+  outline: 2px solid var(--danger);
+  outline-offset: 3px;
+}
+
+.adicional-tarjeta .limpieza-buttons:has(.active-tick) .icon-button:last-child,
+.adicional-tarjeta .limpieza-buttons:has(.active-cross) .icon-button:first-child {
+  opacity: 0.5;
+}
+
+.adicional-pastillas {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.adicional-tarjeta .pastillas-label {
+  display: block;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.adicional-tarjeta .pastillas-stepper {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  background: var(--bg);
+  border-radius: 999px;
+}
+
+.adicional-tarjeta .stepper-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border-radius: 50%;
+  background: rgba(233, 233, 237, 0.08);
+  color: var(--text);
+  font-size: 16px;
+}
+
+.adicional-tarjeta .pastillas-input {
+  flex: none;
+  width: 28px;
+  padding: 0;
+  text-align: center;
+  background: transparent;
+  border: none;
+  font-weight: 700;
+}
+
+.adicional-tarjeta .extra-columna {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.adicional-tarjeta .extra-inputs {
+  width: 100%;
+}
+
+.adicional-tarjeta .extra-inputs input[type="text"] {
+  flex: 1;
+  width: auto;
+}
+
+.adicional-tarjeta .extra-inputs input[type="number"] {
+  flex: none;
+  width: 90px;
+  text-align: right;
+  color: var(--accent);
+}
+
+.adicional-tarjeta .extra-chips {
+  margin: 0;
+}
+
+.adicional-tarjeta .extra-chip {
+  padding: 4px 8px 4px 12px;
+  font-size: 13px;
+}
+
+.adicional-tarjeta .extra-chip-cerrar {
+  width: 20px;
+  height: 20px;
+  font-size: 12px;
+}
+
+.adicional-tarjeta .empleado-columna {
+  display: flex;
+  width: 100%;
+  padding: 14px 16px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+
+.adicional-tarjeta .empleado-columna:focus-within {
+  background: var(--surface);
+  border-color: var(--accent);
+}
+
+.adicional-tarjeta .empleado-input,
+.adicional-tarjeta .empleado-input:focus {
+  width: 100%;
+  padding: 0;
+  font-size: 15px;
+  background: transparent;
+  border: none;
+}
+
+.adicional-tarjeta .detalle-cliente {
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 8px 16px 0;
+  background: transparent;
+  text-align: center;
+}
+
+/* Confirmación de borrado: card centrada también en mobile */
+.modal-overlay.confirmacion-overlay {
+  align-items: center;
+  padding: 24px;
+}
+
+.confirmacion {
+  width: 100%;
+  max-width: 360px;
+  padding: 28px 24px 24px;
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  text-align: center;
+}
+
+.confirmacion-icono {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  margin-bottom: 16px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--danger) 16%, transparent);
+  color: var(--danger);
+}
+
+.confirmacion h2 {
+  margin: 0 0 6px;
+  font-size: 19px;
+}
+
+.confirmacion-detalle {
+  margin: 0;
+  font-size: 15px;
+  color: var(--text-muted);
+}
+
+.confirmacion .adicional-acciones {
+  padding-top: 20px;
+}
+
 /* Navegación principal y Resumen */
 
 .main-nav {
@@ -1888,6 +2259,11 @@ input[type="number"]::-webkit-inner-spin-button {
      propio aire arriba: el resto de los modales lo recibe del handle. */
   .modal-solicitud {
     padding-top: 22px;
+  }
+
+  .modal-adicional {
+    min-height: 66dvh;
+    max-height: 88dvh;
   }
 
   .modal-handle-area {

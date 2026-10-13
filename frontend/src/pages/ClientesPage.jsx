@@ -1,6 +1,7 @@
 import { Fragment, useEffect, useRef, useState } from "react";
 import { ClienteModal } from "../components/ClienteModal.jsx";
 import { ClienteRow } from "../components/ClienteRow.jsx";
+import { LimpiezaAdicionalModal } from "../components/LimpiezaAdicionalModal.jsx";
 import { Skeleton } from "../components/Skeleton.jsx";
 import {
   getClientes,
@@ -48,6 +49,7 @@ export function ClientesPage({ onPrimeraCarga }) {
   const [verTodos, setVerTodos] = useState(false);
   const [clienteEnEdicion, setClienteEnEdicion] = useState(null);
   const [modalAbierto, setModalAbierto] = useState(false);
+  const [adicionalAbierto, setAdicionalAbierto] = useState(false);
   const [error, setError] = useState("");
   const [dragBarrioId, setDragBarrioId] = useState(null);
   const [dragCliente, setDragCliente] = useState(null);
@@ -123,6 +125,11 @@ export function ClientesPage({ onPrimeraCarga }) {
   const abrirEdicion = (cliente) => {
     setClienteEnEdicion(cliente);
     setModalAbierto(true);
+  };
+
+  const abrirEdicionDesdeAdicional = (clienteId) => {
+    const cliente = clientes.find((c) => c.id === clienteId);
+    if (cliente) abrirEdicion(cliente);
   };
 
   const handleGuardar = async (datos) => {
@@ -539,6 +546,14 @@ export function ClientesPage({ onPrimeraCarga }) {
         </div>
       </div>
 
+      <button
+        type="button"
+        className="btn-outline-accent btn-limpieza-adicional"
+        onClick={() => setAdicionalAbierto(true)}
+      >
+        + Limpieza adicional
+      </button>
+
       {error && <p className="error-message">{error}</p>}
 
       {cargando ? (
@@ -637,6 +652,14 @@ export function ClientesPage({ onPrimeraCarga }) {
         >
           <span className="cliente-nombre">{barrioArrastrado.nombre}</span>
         </div>
+      )}
+
+      {adicionalAbierto && (
+        <LimpiezaAdicionalModal
+          clientesPagina={clientes}
+          onEditarCliente={abrirEdicionDesdeAdicional}
+          onClose={() => setAdicionalAbierto(false)}
+        />
       )}
 
       {modalAbierto && (

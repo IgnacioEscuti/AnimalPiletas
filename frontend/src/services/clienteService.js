@@ -5,6 +5,11 @@ export const getClientes = async () => {
   return data.clientes;
 };
 
+export const getClientesBuscador = async () => {
+  const { data } = await api.get("/clientes/buscador");
+  return data.clientes;
+};
+
 export const crearCliente = async (cliente) => {
   const { data } = await api.post("/clientes", cliente);
   return data.cliente;
