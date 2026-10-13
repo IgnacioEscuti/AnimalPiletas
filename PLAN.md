@@ -113,6 +113,22 @@ empleado: string (opcional, default "") ← ver "Deuda técnica"
 
 A diferencia de Limpieza y UsoPastillas, los extras **no** se consolidan por semana: es una lista real, con un documento por carga y borrado por ítem.
 
+### LimpiezaAdicional (un documento por visita, sin consolidar por semana)
+```
+cliente: ObjectId → ref cliente (requerido)
+fecha: Date (requerido — siempre la fecha de hoy al cargar)
+tarifa: ObjectId → ref tarifaLimpieza (requerido, copiada del cliente al crear)
+precioUnitarioUsado: number (requerido, precio de esa tarifa congelado)
+extra: number (default 0, min 0)
+cantidadPastillas: number (default 0, min 0)
+precioPastillasUsado: number (requerido, precio de PrecioPastillas congelado)
+extras: [{ nombre: string (requerido), precio: number (requerido, min 0) }] (default [])
+cargadoPor: ObjectId → ref usuario (requerido, el usuario de la sesión)
+```
+Índices: `{ fecha: 1 }`, `{ cliente: 1, fecha: 1 }`
+
+**Para qué existe:** cuando un cliente se limpia más de una vez en la misma semana (por ejemplo, el jefe la hace el lunes y el encargado el viernes). Limpieza y UsoPastillas hacen upsert por `cliente + weekStart`, así que una segunda carga pisaba la primera y en el resumen figuraba una sola. La adicional es un documento aparte: no pasa por ese upsert y la pantalla de Clientes no la lee, así que la carga semanal del cliente no cambia.
+
 ### EmpleadoSemana (un documento por cliente por semana)
 ```
 cliente: ObjectId → ref cliente (requerido)
@@ -164,6 +180,25 @@ Limpieza, UsoPastillas y UsoExtra se filtran por `fecha`. EmpleadoSemana se filt
 
 **Período por defecto al entrar:** siempre el período que contiene la fecha de hoy, sin excepción para el día 1° del mes. Se eliminó la regla anterior (que el día 1° mostraba el mes anterior) porque generaba lógica condicional extra y fue la fuente de un bug.
 
+## Limpieza adicional
+
+**Dónde:** botón "Limpieza adicional" arriba en la pantalla de Clientes, al lado de "+ Nuevo cliente". Abre un modal con la misma estética y el mismo comportamiento que el modal de cliente (incluida la hoja inferior en mobile).
+
+**El modal:**   
+- Arriba, un buscador de clientes por nombre (mismo estilo que la barra de búsqueda de Clientes). Muestra **todos los clientes activos, de cualquier encargado**, sin filtro de semana. Cada resultado muestra el nombre y su barrio.
+- Elegido el cliente: campos de monto extra, pastillas y extras (nombre + precio, se pueden agregar varios). Cancelar / Guardar. La tarifa sale del cliente.
+- Debajo, "Adicionales de esta semana" de ese cliente. El encargado ve solo las que cargó él; el admin ve todas.
+- Tocando una de la lista, sus valores se muestran sin poder editarse y aparece abajo un botón "Eliminar" (mismo estilo que "Cancelar cliente"), con confirmación. Borra la visita entera.
+
+**Permisos:** cualquier usuario puede cargar una adicional en cualquier cliente activo. Borrar: solo quien la cargó, o un admin.
+
+**Resumen:** las adicionales se filtran por `cargadoPor`, no por `cliente.encargado`:
+- Encargado: ve las que cargó él, sea o no el encargado del cliente.
+- Admin con un usuario elegido: las que cargó ese usuario.
+- Admin en "Todos": todas.
+
+Se suman a la fila del cliente como cualquier carga: limpieza (+1 en cantidad, su fecha y `precioUnitarioUsado + extra`), pastillas (`cantidadPastillas × precioPastillasUsado`) y extras agrupados por nombre. Si el cliente no está en el filtro de quien mira (por ejemplo, el jefe mirando su propio resumen), la fila del cliente aparece igual, solo con lo de la adicional. El nombre de quien la cargó (`nombre`, o `email` si no tiene) se suma a la columna de empleados de esa fila.
+
 ## Login
 
 **Registro:** email + PIN numérico de 4 dígitos, hasheado con bcrypt. Cualquiera puede enviar una solicitud, pero la cuenta nace con `estado: "pendiente"` y rol "encargado", y no puede entrar hasta que un admin la apruebe. El registro no inicia sesión: el frontend muestra "Solicitud enviada, esperá la aprobación de un admin".
@@ -204,6 +239,7 @@ Limpieza, UsoPastillas y UsoExtra se filtran por `fecha`. EmpleadoSemana se filt
 - Encargado: solo los clientes donde `encargado` sea él mismo.
 - Admin: todos.
 - Clientes sin `encargado` asignado: solo los ve el admin, hasta que se los asigne a alguien.
+- **Única excepción:** el buscador del modal de Limpieza adicional muestra todos los clientes activos a cualquier usuario, solo con `id`, `nombre` y barrio (sin dirección ni teléfono), porque un encargado puede tener que limpiar un cliente que no es suyo.
 
 **Agrupado en el Resumen:** siempre por barrio (mismo criterio de "Sin barrio" que la pantalla de Cliente), nunca por encargado. El admin tiene un selector "Todos" + cada usuario, debajo del buscador. El encargado no ve el selector.
 
@@ -268,5 +304,6 @@ En mobile la marca aparece a la izquierda de la píldora del stepper, para que l
     - Rate limiting por IP con `express-rate-limit`, solo en `POST /api/auth/registro` (5 por hora) y `POST /api/auth/login` (20 cada 15 minutos), definidos en `src/middlewares/rateLimit.middlewares.js`. `/api/auth/actual` queda sin límite a propósito: el frontend lo llama en cada carga de la app para restaurar la sesión. `app.set("trust proxy", 1)` para que el límite use la IP real del cliente y no la del proxy de Render.
     - `src/config/env.js` valida al importarse y corta el arranque con `process.exit(1)` y un mensaje que nombra cuáles faltan. Obligatorias siempre: `MONGO_URI`, `JWT_SECRET`. Obligatoria solo cuando `NODE_ENV === "production"`: `FRONTEND_URLS`.
 12. ✅ Aprobación de registros por un admin (estado pendiente/aprobado + pop-up al abrir la app) — Función 12
+13. Limpieza adicional (visita extra en la semana, cuenta para quien la cargó) — Función 13
 
 App deployada y en uso: frontend en Vercel, backend en Render, base en MongoDB Atlas. Instalada como PWA en iPhone. Login y roles activos — todos los endpoints requieren sesión.

@@ -3,6 +3,7 @@ import { limpiezaRepository } from "../repositories/limpieza.repository.js";
 import { usoPastillasRepository } from "../repositories/usoPastillas.repository.js";
 import { usoExtraRepository } from "../repositories/usoExtra.repository.js";
 import { empleadoSemanaRepository } from "../repositories/empleadoSemana.repository.js";
+import { limpiezaAdicionalRepository } from "../repositories/limpiezaAdicional.repository.js";
 import { barrioRepository } from "../repositories/barrio.repository.js";
 import { rangoSemanal, rangoMensual } from "../utils/fecha.utils.js";
 import { handleMongooseError } from "../utils/mongooseError.utils.js";
@@ -60,7 +61,8 @@ export class ResumenService {
     usoPastillasRepository,
     usoExtraRepository,
     empleadoSemanaRepository,
-    barrioRepository
+    barrioRepository,
+    limpiezaAdicionalRepository
   ) {
     this.clienteRepository = clienteRepository;
     this.limpiezaRepository = limpiezaRepository;
@@ -68,6 +70,7 @@ export class ResumenService {
     this.usoExtraRepository = usoExtraRepository;
     this.empleadoSemanaRepository = empleadoSemanaRepository;
     this.barrioRepository = barrioRepository;
+    this.limpiezaAdicionalRepository = limpiezaAdicionalRepository;
   }
 
   async getResumen(tipo, fecha, usuarioActual, encargadoId) {
@@ -86,25 +89,50 @@ export class ResumenService {
     // a un encargado puntual (cualquiera sea su rol), o dejarlo en "Todos"
     // para traer los clientes de todos, mezclados en las mismas secciones
     // de barrio — el resumen nunca agrupa por encargado.
+    //
+    // Las limpiezas adicionales usan el mismo usuario, pero filtrando por
+    // quién las cargó (cargadoPor), no por el encargado del cliente.
     let filtroClientes = {};
+    const filtroAdicionales = { ...filtroFecha };
     if (usuarioActual.rol === "encargado") {
       filtroClientes = { encargado: usuarioActual.id ?? usuarioActual._id };
+      filtroAdicionales.cargadoPor = usuarioActual.id ?? usuarioActual._id;
     } else if (encargadoId) {
       filtroClientes = { encargado: encargadoId };
+      filtroAdicionales.cargadoPor = encargadoId;
     }
 
-    let clientes, limpiezas, usosPastillas, usosExtra, empleadosSemana, barrios;
+    let clientes, limpiezas, usosPastillas, usosExtra, empleadosSemana, barrios, adicionales;
     try {
-      [clientes, limpiezas, usosPastillas, usosExtra, empleadosSemana, barrios] = await Promise.all([
+      [clientes, limpiezas, usosPastillas, usosExtra, empleadosSemana, barrios, adicionales] = await Promise.all([
         this.clienteRepository.findSoloNombre(filtroClientes),
         this.limpiezaRepository.find(filtroFecha),
         this.usoPastillasRepository.find(filtroFecha),
         this.usoExtraRepository.find(filtroFecha),
         this.empleadoSemanaRepository.find(filtroWeekStart),
         this.barrioRepository.find(),
+        this.limpiezaAdicionalRepository.find(filtroAdicionales),
       ]);
     } catch (error) {
       handleMongooseError(error);
+    }
+
+    // Clientes que no están en el filtro de quien mira pero tienen una
+    // adicional cargada por él: su fila aparece igual, dentro de su barrio.
+    const idsEnFiltro = new Set(clientes.map((cliente) => cliente.id));
+    const idsFueraDeFiltro = [
+      ...new Set(adicionales.map((adicional) => adicional.cliente.toString())),
+    ].filter((id) => !idsEnFiltro.has(id));
+
+    let clientesFueraDeFiltro = [];
+    if (idsFueraDeFiltro.length > 0) {
+      try {
+        clientesFueraDeFiltro = await this.clienteRepository.findSoloNombre({
+          _id: { $in: idsFueraDeFiltro },
+        });
+      } catch (error) {
+        handleMongooseError(error);
+      }
     }
 
     const porCliente = new Map();
@@ -140,7 +168,29 @@ export class ResumenService {
       if (empleadoSemana.nombre) datosDe(empleadoSemana.cliente).empleados.add(empleadoSemana.nombre);
     }
 
-    const filas = clientes.map((cliente) => {
+    // Limpieza, UsoPastillas, UsoExtra y EmpleadoSemana se traen sin filtrar
+    // por cliente: para los clientes fuera del filtro se descarta lo que se
+    // acumuló de ellos, así su fila muestra solo lo de la adicional.
+    for (const id of idsFueraDeFiltro) {
+      porCliente.set(id, datosVacios());
+    }
+
+    for (const adicional of adicionales) {
+      const datos = datosDe(adicional.cliente);
+      datos.limpiezaCantidad += 1;
+      datos.limpiezaPrecio += adicional.precioUnitarioUsado + adicional.extra;
+      datos.limpiezaFechas.push(adicional.fecha);
+      datos.pastillasCantidad += adicional.cantidadPastillas;
+      datos.pastillasPrecio += adicional.cantidadPastillas * adicional.precioPastillasUsado;
+      for (const { nombre, precio } of adicional.extras) {
+        datos.extras.set(nombre, (datos.extras.get(nombre) ?? 0) + 1);
+        datos.extraPrecio += precio;
+      }
+      const cargadoPor = adicional.cargadoPor;
+      if (cargadoPor) datos.empleados.add(cargadoPor.nombre || cargadoPor.email);
+    }
+
+    const filas = [...clientes, ...clientesFueraDeFiltro].map((cliente) => {
       const datos = porCliente.get(cliente.id) ?? datosVacios();
       const extra = {
         extras: Array.from(datos.extras, ([nombre, cantidad]) => ({ nombre, cantidad })),
@@ -203,5 +253,6 @@ export const resumenService = new ResumenService(
   usoPastillasRepository,
   usoExtraRepository,
   empleadoSemanaRepository,
-  barrioRepository
+  barrioRepository,
+  limpiezaAdicionalRepository
 );

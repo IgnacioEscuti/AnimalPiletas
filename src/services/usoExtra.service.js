@@ -5,7 +5,7 @@ import { hoyNormalizado, rangoSemanal } from "../utils/fecha.utils.js";
 
 // Normaliza "cloro", "CLORO", "  cloro " -> "Cloro", para que el mismo
 // extra agrupe siempre bajo el mismo nombre en el resumen.
-function normalizarNombreExtra(nombre) {
+export function normalizarNombreExtra(nombre) {
   const limpio = nombre.trim();
   return limpio.charAt(0).toUpperCase() + limpio.slice(1).toLowerCase();
 }

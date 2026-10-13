@@ -1,5 +1,6 @@
 import { clienteService } from "../services/cliente.service.js";
 import { ClienteDTO } from "../DTOs/cliente.dto.js";
+import { ClienteBuscadorDTO } from "../DTOs/clienteBuscador.dto.js";
 
 export async function createCliente(req, res, next) {
   try {
@@ -14,6 +15,15 @@ export async function getClientes(req, res, next) {
   try {
     const clientes = await clienteService.getClientes(req.usuario);
     res.status(200).json({ clientes: clientes.map((cliente) => new ClienteDTO(cliente)) });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getClientesBuscador(req, res, next) {
+  try {
+    const clientes = await clienteService.getClientesParaBuscador();
+    res.status(200).json({ clientes: clientes.map((cliente) => new ClienteBuscadorDTO(cliente)) });
   } catch (error) {
     next(error);
   }

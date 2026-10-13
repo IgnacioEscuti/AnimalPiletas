@@ -12,6 +12,7 @@ import limpiezaRoutes from "./routes/limpieza.routes.js";
 import usoPastillasRoutes from "./routes/usoPastillas.routes.js";
 import usoExtraRoutes from "./routes/usoExtra.routes.js";
 import empleadoSemanaRoutes from "./routes/empleadoSemana.routes.js";
+import limpiezaAdicionalRoutes from "./routes/limpiezaAdicional.routes.js";
 import resumenRoutes from "./routes/resumen.routes.js";
 import usuarioRoutes from "./routes/usuario.routes.js";
 import { errorHandler } from "./middlewares/error.middlewares.js";
@@ -55,6 +56,7 @@ app.use("/api/limpiezas", authenticateActual, limpiezaRoutes);
 app.use("/api/usos-pastillas", authenticateActual, usoPastillasRoutes);
 app.use("/api/usos-extra", authenticateActual, usoExtraRoutes);
 app.use("/api/empleado-semana", authenticateActual, empleadoSemanaRoutes);
+app.use("/api/limpiezas-adicionales", authenticateActual, limpiezaAdicionalRoutes);
 app.use("/api/resumen", authenticateActual, resumenRoutes);
 app.use("/api/usuarios", authenticateActual, autorizarRol("admin"), usuarioRoutes);
 

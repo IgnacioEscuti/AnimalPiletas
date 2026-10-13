@@ -56,6 +56,15 @@ export class ClienteDAO {
     return clienteModel.find(filtro).select("nombre barrio");
   }
 
+  // Para el buscador de Limpieza adicional: lo ve cualquier usuario, así
+  // que solo trae nombre y barrio (nada de dirección, teléfono ni encargado).
+  async findActivosParaBuscador() {
+    return clienteModel
+      .find({ status: { $ne: "cancelado" } })
+      .select("nombre barrio")
+      .populate("barrio", "nombre");
+  }
+
   async countDocuments(filtro) {
     return clienteModel.countDocuments(filtro);
   }

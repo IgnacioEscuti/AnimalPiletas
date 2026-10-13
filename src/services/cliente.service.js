@@ -211,6 +211,13 @@ export class ClienteService {
     return this.repository.findActivos(filtro);
   }
 
+  // Única excepción a la visibilidad por encargado (ver Roles en PLAN.md):
+  // un encargado puede tener que cargar una limpieza adicional en un
+  // cliente que no es suyo.
+  async getClientesParaBuscador() {
+    return this.repository.findActivosParaBuscador();
+  }
+
   async getClienteById(id, usuarioActual) {
     return this.obtenerClienteConAcceso(id, usuarioActual);
   }

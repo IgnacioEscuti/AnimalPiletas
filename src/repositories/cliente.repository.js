@@ -31,6 +31,10 @@ export class ClienteRepository {
     return this.dao.findSoloNombre(filtro);
   }
 
+  async findActivosParaBuscador() {
+    return this.dao.findActivosParaBuscador();
+  }
+
   async countDocuments(filtro) {
     return this.dao.countDocuments(filtro);
   }
