@@ -29,6 +29,10 @@ const SIN_BARRIO = "sin-barrio";
 const enviarPastillas = (clienteId, { cantidad, empleado }) =>
   registrarUsoPastillas(clienteId, cantidad, empleado);
 
+const esTemporal = (cliente) => cliente.id.startsWith("temp-");
+
+const mensajeDeError = (err, porDefecto) => err.response?.data?.error || porDefecto;
+
 export function ClientesPage({ onPrimeraCarga }) {
   const { usuario } = useAuth();
   const esAdmin = usuario?.rol === "admin";
@@ -49,6 +53,7 @@ export function ClientesPage({ onPrimeraCarga }) {
   const [verTodos, setVerTodos] = useState(false);
   const [clienteEnEdicion, setClienteEnEdicion] = useState(null);
   const [modalAbierto, setModalAbierto] = useState(false);
+  const [borradorModal, setBorradorModal] = useState(null);
   const [adicionalAbierto, setAdicionalAbierto] = useState(false);
   const [error, setError] = useState("");
   const [dragBarrioId, setDragBarrioId] = useState(null);
@@ -119,11 +124,19 @@ export function ClientesPage({ onPrimeraCarga }) {
 
   const abrirNuevo = () => {
     setClienteEnEdicion(null);
+    setBorradorModal(null);
     setModalAbierto(true);
   };
 
   const abrirEdicion = (cliente) => {
     setClienteEnEdicion(cliente);
+    setBorradorModal(null);
+    setModalAbierto(true);
+  };
+
+  const reabrirModalConError = (cliente, datos, error) => {
+    setClienteEnEdicion(cliente);
+    setBorradorModal({ datos, error });
     setModalAbierto(true);
   };
 
@@ -132,14 +145,68 @@ export function ClientesPage({ onPrimeraCarga }) {
     if (cliente) abrirEdicion(cliente);
   };
 
-  const handleGuardar = async (datos) => {
-    if (clienteEnEdicion) {
-      await actualizarCliente(clienteEnEdicion.id, datos);
-    } else {
-      await crearCliente(datos);
+  // Arma el cliente como lo devolvería el backend (barrio, tarifa y
+  // encargado poblados) con las listas que ya están en memoria, para que
+  // la fila se dibuje igual antes de que llegue la respuesta.
+  const armarCliente = (base, datos) => {
+    const unaVezVigente = base.semana === "unaVez" && estaEnSemanaActual(base.semanaUnaVezDesde);
+    return {
+      ...base,
+      ...datos,
+      tarifaLimpieza: tarifas.find((tarifa) => tarifa.id === datos.tarifaLimpieza),
+      barrio: barrios.find((barrio) => barrio.id === datos.barrio) ?? null,
+      encargado: esAdmin
+        ? usuarios.find((u) => u.id === datos.encargado) ?? null
+        : base.encargado,
+      semanaUnaVezDesde:
+        datos.semana === "unaVez" && !unaVezVigente
+          ? new Date().toISOString()
+          : base.semanaUnaVezDesde,
+    };
+  };
+
+  const crearClienteOptimista = async (datos) => {
+    const idTemporal = `temp-${Date.now()}`;
+    const temporal = armarCliente(
+      { id: idTemporal, status: "activo", ordenEnBarrio: 0, encargado: null },
+      datos
+    );
+    setClientes((actuales) => [...actuales, temporal]);
+    try {
+      const creado = await crearCliente(datos);
+      // claveRender mantiene la key de la fila: si cambiara con el id
+      // real, React la volvería a montar y repetiría la animación.
+      setClientes((actuales) =>
+        actuales.map((c) => (c.id === idTemporal ? { ...creado, claveRender: idTemporal } : c))
+      );
+    } catch (err) {
+      setClientes((actuales) => actuales.filter((c) => c.id !== idTemporal));
+      reabrirModalConError(null, datos, mensajeDeError(err, "No se pudo guardar el cliente."));
     }
+  };
+
+  const editarClienteOptimista = async (cliente, datos) => {
+    setClientes((actuales) =>
+      actuales.map((c) => (c.id === cliente.id ? armarCliente(c, datos) : c))
+    );
+    try {
+      const actualizado = await actualizarCliente(cliente.id, datos);
+      setClientes((actuales) =>
+        actuales.map((c) => (c.id === cliente.id ? { ...c, ...actualizado } : c))
+      );
+    } catch (err) {
+      setClientes((actuales) => actuales.map((c) => (c.id === cliente.id ? cliente : c)));
+      reabrirModalConError(cliente, datos, mensajeDeError(err, "No se pudo guardar el cliente."));
+    }
+  };
+
+  const handleGuardar = (datos) => {
     setModalAbierto(false);
-    await cargarTodo();
+    if (clienteEnEdicion) {
+      editarClienteOptimista(clienteEnEdicion, datos);
+    } else {
+      crearClienteOptimista(datos);
+    }
   };
 
   const actualizarPorCliente = (lista, clienteId, cambios) =>
@@ -199,9 +266,15 @@ export function ClientesPage({ onPrimeraCarga }) {
   };
 
   const handleCancelarCliente = async (id) => {
-    await cancelarCliente(id);
+    const cliente = clientes.find((c) => c.id === id);
     setModalAbierto(false);
-    await cargarTodo();
+    setClientes((actuales) => actuales.filter((c) => c.id !== id));
+    try {
+      await cancelarCliente(id);
+    } catch (err) {
+      setClientes((actuales) => [...actuales, cliente]);
+      setError(mensajeDeError(err, "No se pudo cancelar el cliente."));
+    }
   };
 
   const handleBarrioDragStart = (event, barrioId) => {
@@ -223,11 +296,16 @@ export function ClientesPage({ onPrimeraCarga }) {
     ids.splice(fromIndex, 1);
     ids.splice(toIndex, 0, origenId);
 
+    const barriosAnteriores = barrios;
+    setBarrios(
+      ids.map((id, index) => ({ ...barrios.find((barrio) => barrio.id === id), orden: index }))
+    );
+
     try {
       await reordenarBarrios(ids);
-      setBarrios(await getBarrios());
-    } catch {
-      setError("No se pudo reordenar los barrios.");
+    } catch (err) {
+      setBarrios(barriosAnteriores);
+      setError(mensajeDeError(err, "No se pudo reordenar los barrios."));
     }
   };
 
@@ -251,7 +329,7 @@ export function ClientesPage({ onPrimeraCarga }) {
     if (!origenId || origenId === targetClienteId) return;
 
     const ids = clientes
-      .filter((cliente) => (cliente.barrio?.id ?? SIN_BARRIO) === grupoKey)
+      .filter((cliente) => (cliente.barrio?.id ?? SIN_BARRIO) === grupoKey && !esTemporal(cliente))
       .sort((a, b) => a.ordenEnBarrio - b.ordenEnBarrio)
       .map((cliente) => cliente.id);
     const fromIndex = ids.indexOf(origenId);
@@ -600,8 +678,9 @@ export function ClientesPage({ onPrimeraCarga }) {
               </tbody>
               {grupo.clientes.map((cliente, index) => (
                 <ClienteRow
-                  key={cliente.id}
+                  key={cliente.claveRender ?? cliente.id}
                   cliente={cliente}
+                  temporal={esTemporal(cliente)}
                   index={index}
                   grupoKey={grupo.key}
                   limpiezaHoy={limpiezas.find((limpieza) => limpieza.cliente === cliente.id)}
@@ -669,6 +748,8 @@ export function ClientesPage({ onPrimeraCarga }) {
           barrios={barrios}
           usuarios={usuarios}
           esAdmin={esAdmin}
+          borrador={borradorModal?.datos}
+          error={borradorModal?.error}
           onClose={() => setModalAbierto(false)}
           onGuardar={handleGuardar}
           onCancelar={handleCancelarCliente}

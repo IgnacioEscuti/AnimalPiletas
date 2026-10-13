@@ -273,6 +273,27 @@ Hoy está aplicado **solo a pastillas** (`nombre: "pastillas"`). La idea es ench
 
 En mobile la marca aparece a la izquierda de la píldora del stepper, para que la píldora no se corra.
 
+## UI optimista (frontend)
+
+Problema que resuelve: varias acciones esperaban la respuesta del servidor para reflejarse en pantalla (ej. el modal de crear cliente no se cerraba hasta que el cliente estaba en la base), y después recargaban todos los datos de la pantalla.
+
+**Regla general:**
+1. La pantalla se actualiza al instante en el estado local, el modal se cierra y el pedido sale de fondo.
+2. No se recarga todo después de cada acción (`cargarTodo()` / `getX()`): con la respuesta del servidor se reemplaza el item temporal.
+3. **Si falla: rollback + mensaje.** Se vuelve al estado anterior y se muestra el mensaje del servidor en el error de la pantalla (mismo patrón que limpieza y extras). No hay reintentos: eso queda solo para el guardador.
+4. **Al crear:** el item usa un id temporal `temp-<timestamp>` hasta que vuelve el `_id` real. Mientras sea temporal se ve atenuado y sin acciones (no se abre, no se arrastra, no se le carga nada, no se elimina).
+5. Login y registro quedan esperando la respuesta (necesitan el token / la validación del PIN).
+
+**Por pantalla:**
+- **Clientes**
+  - Crear y editar cliente al instante. El cliente temporal arma `barrio` y `tarifaLimpieza` con las listas que ya están en memoria, para dibujarse igual que uno real.
+  - Si crear o editar falla, se deshace y **se reabre el modal con lo que se había escrito y el error del servidor** (ej. "ya existe ese nombre"), para no tener que cargar todo de nuevo.
+  - Cancelar cliente y reordenar barrios también al instante.
+- **Limpieza adicional:** registrar (con id temporal, sin botón de eliminar hasta confirmarse) y eliminar al instante.
+- **Tarifas (admin):** editar precio de tarifa y de pastillas, crear tarifa, crear barrio, eliminar tarifa y eliminar barrio al instante. Si el backend rechaza el borrado por estar en uso, el item vuelve a aparecer con ese mensaje.
+- **Solicitudes (admin):** aprobar o rechazar pasa a la siguiente al instante. Un 409 (ya la resolvió otro admin) se ignora. Con cualquier otro error, la solicitud vuelve a la cola con el aviso.
+
+Ya eran optimistas antes de esta sección: pastillas (guardador), limpieza, extras, eliminar extra, empleado y reordenar clientes.
 ## Decisiones evaluadas y descartadas
 
 - **React Router** — descartado. Con 3 pantallas planas, sin rutas anidadas ni detalle por cliente, y usándose como PWA standalone en iPhone (sin barra de direcciones ni botón atrás), no aporta nada que se use. Reevaluar solo si aparece una pantalla de detalle (`/cliente/:id`). Único costo actual: al refrescar se vuelve siempre a "clientes".

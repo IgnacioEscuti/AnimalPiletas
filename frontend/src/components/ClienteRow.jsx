@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 
 export function ClienteRow({
   cliente,
+  temporal,
   grupoKey,
   index,
   limpiezaHoy,
@@ -81,10 +82,11 @@ export function ClienteRow({
         }`}
         data-cliente-id={cliente.id}
         data-grupo={grupoKey}
+        inert={temporal}
         onDragOver={onDragOver}
         onDrop={onDrop}
         initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: arrastrando ? 0.4 : 1, y: 0 }}
+        animate={{ opacity: arrastrando ? 0.4 : temporal ? 0.5 : 1, y: 0 }}
         transition={{ duration: 0.2, delay: Math.min(index ?? 0, 10) * 0.03 }}
       >
         <td

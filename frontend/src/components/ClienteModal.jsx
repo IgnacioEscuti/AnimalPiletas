@@ -6,19 +6,29 @@ export function ClienteModal({
   barrios,
   usuarios,
   esAdmin,
+  borrador,
+  error,
   onClose,
   onGuardar,
   onCancelar,
 }) {
-  const [nombre, setNombre] = useState(cliente?.nombre ?? "");
-  const [direccion, setDireccion] = useState(cliente?.direccion ?? "");
-  const [telefono, setTelefono] = useState(cliente?.telefono ?? "");
-  const [tarifaLimpieza, setTarifaLimpieza] = useState(cliente?.tarifaLimpieza?.id ?? "");
-  const [semana, setSemana] = useState(cliente?.semana ?? "1");
-  const [barrio, setBarrio] = useState(cliente?.barrio?.id ?? "");
-  const [encargado, setEncargado] = useState(cliente?.encargado?.id ?? "");
-  const [enviando, setEnviando] = useState(false);
-  const [error, setError] = useState("");
+  // Si el guardado falló, el modal se reabre con lo que se había escrito.
+  const inicial = borrador ?? {
+    nombre: cliente?.nombre ?? "",
+    direccion: cliente?.direccion ?? "",
+    telefono: cliente?.telefono ?? "",
+    tarifaLimpieza: cliente?.tarifaLimpieza?.id ?? "",
+    semana: cliente?.semana ?? "1",
+    barrio: cliente?.barrio?.id ?? "",
+    encargado: cliente?.encargado?.id ?? "",
+  };
+  const [nombre, setNombre] = useState(inicial.nombre);
+  const [direccion, setDireccion] = useState(inicial.direccion);
+  const [telefono, setTelefono] = useState(inicial.telefono);
+  const [tarifaLimpieza, setTarifaLimpieza] = useState(inicial.tarifaLimpieza);
+  const [semana, setSemana] = useState(inicial.semana);
+  const [barrio, setBarrio] = useState(inicial.barrio ?? "");
+  const [encargado, setEncargado] = useState(inicial.encargado ?? "");
   const modalRef = useRef(null);
   const dragRef = useRef({ startY: 0, arrastrando: false });
 
@@ -51,20 +61,13 @@ export function ClienteModal({
     };
   }, []);
 
-  const handleSubmit = async (event) => {
+  const handleSubmit = (event) => {
     event.preventDefault();
-    setEnviando(true);
-    setError("");
-    try {
-      const datos = { nombre, direccion, telefono, tarifaLimpieza, semana, barrio: barrio || null };
-      if (esAdmin) {
-        datos.encargado = encargado || null;
-      }
-      await onGuardar(datos);
-    } catch (err) {
-      setError(err.response?.data?.error || "No se pudo guardar el cliente.");
-      setEnviando(false);
+    const datos = { nombre, direccion, telefono, tarifaLimpieza, semana, barrio: barrio || null };
+    if (esAdmin) {
+      datos.encargado = encargado || null;
     }
+    onGuardar(datos);
   };
 
   const handleHandleDown = (event) => {
@@ -95,20 +98,11 @@ export function ClienteModal({
     }
   };
 
-  const handleCancelarCliente = async () => {
+  const handleCancelarCliente = () => {
     const confirmado = window.confirm(
       `¿Cancelar a ${cliente.nombre}? Va a dejar de aparecer en la lista.`
     );
-    if (!confirmado) return;
-
-    setEnviando(true);
-    setError("");
-    try {
-      await onCancelar(cliente.id);
-    } catch (err) {
-      setError(err.response?.data?.error || "No se pudo cancelar el cliente.");
-      setEnviando(false);
-    }
+    if (confirmado) onCancelar(cliente.id);
   };
 
   return (
@@ -190,7 +184,7 @@ export function ClienteModal({
             <button type="button" className="secondary" onClick={onClose}>
               Cancelar
             </button>
-            <button type="submit" disabled={enviando}>
+            <button type="submit">
               Guardar
             </button>
           </div>
@@ -200,7 +194,6 @@ export function ClienteModal({
             type="button"
             className="danger modal-cancelar-cliente"
             onClick={handleCancelarCliente}
-            disabled={enviando}
           >
             Cancelar cliente
           </button>
