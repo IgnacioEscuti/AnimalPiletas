@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { IconoArrastre } from "./IconoArrastre.jsx";
 
@@ -35,6 +35,31 @@ export function ClienteRow({
   const [precioExtra, setPrecioExtra] = useState("");
   const [empleado, setEmpleado] = useState(empleadoSemanaHoy?.nombre ?? "");
   const filaRef = useRef(null);
+  const grupoRef = useRef(null);
+  const alturaAnteriorRef = useRef(null);
+
+  // Al expandir/colapsar, anima la altura desde la que tenía antes hasta la
+  // nueva, así la fila se ve abriéndose en vez de aparecer de golpe.
+  useLayoutEffect(() => {
+    const grupo = grupoRef.current;
+    const alturaAnterior = alturaAnteriorRef.current;
+    const alturaNueva = grupo.offsetHeight;
+    if (alturaAnterior === null || alturaAnterior === alturaNueva) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    grupo.style.overflow = "hidden";
+    const animacion = grupo.animate(
+      [{ height: `${alturaAnterior}px` }, { height: `${alturaNueva}px` }],
+      { duration: 280, easing: "cubic-bezier(0.2, 0.8, 0.2, 1)" }
+    );
+    animacion.onfinish = animacion.oncancel = () => {
+      grupo.style.overflow = "";
+    };
+  }, [expandido]);
+
+  // Guarda la altura después de cada render: es el "antes" del próximo cambio.
+  useLayoutEffect(() => {
+    alturaAnteriorRef.current = grupoRef.current.offsetHeight;
+  });
 
   useEffect(() => {
     if (!expandido) return;
@@ -75,7 +100,7 @@ export function ClienteRow({
   const simboloEstado = estadoLimpieza === "tick" ? "✓" : estadoLimpieza === "cross" ? "✕" : "–";
 
   return (
-    <div className="fila-cliente-grupo">
+    <div ref={grupoRef} className="fila-cliente-grupo">
       <motion.div
         ref={filaRef}
         className={`fila-cliente row-motion ${expandido ? "expandido" : ""} ${arrastrando ? "arrastrando" : ""} ${

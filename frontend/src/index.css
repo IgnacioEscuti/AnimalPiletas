@@ -2081,6 +2081,12 @@ input[type="number"]::-webkit-inner-spin-button {
     margin: 8px;
     border: 1px solid var(--accent);
     border-radius: 18px;
+    box-shadow: 0 0 12px rgba(145, 132, 217, 0.22), 0 8px 20px -6px rgba(0, 0, 0, 0.5);
+  }
+
+  /* El contenido aparece con un fade mientras la altura se anima (ClienteRow) */
+  .fila-cliente.expandido .celda:not(.celda-titulo) {
+    animation: fade-in 0.25s ease;
   }
 
   .fila-cliente-grupo:has(.fila-cliente.expandido)::before,

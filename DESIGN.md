@@ -191,14 +191,16 @@ En Clientes, desktop y mobile agrupan a los clientes en una tarjeta por barrio (
 
 ## Elevation & Depth
 
-Plano por defecto — `--shadow: none` en toda superficie que vive dentro del flujo normal de la página (tarjetas, filas, inputs). La profundidad ahí se transmite por capas de tono (page bg más oscuro → tarjeta `surface` más clara → fila/input `bg` recesado de nuevo), no por sombra. Solo los elementos que literalmente flotan por encima del contenido — porque el usuario los abrió o porque están fijos en pantalla — usan una sombra real, y son exactamente dos:
+Plano por defecto — `--shadow: none` en toda superficie que vive dentro del flujo normal de la página (tarjetas, filas, inputs). La profundidad ahí se transmite por capas de tono (page bg más oscuro → tarjeta `surface` más clara → fila/input `bg` recesado de nuevo), no por sombra. Solo los elementos que literalmente flotan por encima del contenido — porque el usuario los abrió o porque están fijos en pantalla — usan una sombra real, y son exactamente tres:
 
 ### Shadow Vocabulary
 - **Modal** (`box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3)`): el modal centrado de desktop, para despegarlo del overlay oscuro detrás.
 - **Tab bar flotante** (`box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45)` + `backdrop-filter: blur(14px)` sobre `nav-blur`): la navegación fija inferior de mobile, para que se lea como una barra suspendida sobre el contenido que scrollea debajo.
 
+- **Cliente expandido en mobile** (`box-shadow: 0 0 12px rgba(145,132,217,0.22), 0 8px 20px -6px rgba(0,0,0,0.5)`): un halo violeta suave más una sombra hacia abajo, para que la fila abierta se despegue del resto de la tarjeta del barrio.
+
 ### Named Rules
-**La Regla de las Dos Sombras.** Ningún otro elemento de la app usa `box-shadow`. Si algo no es un modal ni la tab bar fija, su profundidad se resuelve con tono, no con sombra.
+**La Regla de las Tres Sombras.** Ningún otro elemento de la app usa `box-shadow` para dar profundidad (el contorno de `drag-over` es un borde inset, no una sombra). Si algo no es un modal, la tab bar fija o el cliente expandido, su profundidad se resuelve con tono, no con sombra.
 
 ## Shapes
 
@@ -238,7 +240,7 @@ Todo redondeado, sin esquinas duras en ningún control. Botones cuadrados muy ch
 - **Mobile:** tab bar fija abajo, flotante con blur, ícono + label chico; el tab activo se lee solo por el color del ícono/texto (violeta).
 
 ### Tarjeta de barrio (Clientes)
-Cada barrio (y "Sin barrio") es una sola tarjeta: `surface`, borde 1px `border`, radio 18px, `overflow: hidden`, 14px entre tarjetas. Header con fondo `barrio-header-bg`: handle de arrastre (ícono SVG de dos líneas, violeta), nombre del barrio en Title (22px desktop / 19px mobile) en `text`, y el contador a la derecha. Los clientes van adentro, sin tarjeta propia, separados por una línea de 1px `border` (en mobile arranca alineada con el punto de estado). En mobile, el cliente expandido queda demarcado: borde 1px `accent`, radio 18px, 8px de separación con los bordes de la tarjeta, chevron hacia arriba a la derecha y sin separadores pegados. En escritorio, los títulos de columna van una sola vez arriba de todas las tarjetas, en Caption Small mayúscula y `text-muted`, y las filas son un grid con las mismas columnas; Pastillas, Extra/Precio (un solo contenedor partido por una línea), Empleado y "Editar cliente" miden 44px de alto.
+Cada barrio (y "Sin barrio") es una sola tarjeta: `surface`, borde 1px `border`, radio 18px, `overflow: hidden`, 14px entre tarjetas. Header con fondo `barrio-header-bg`: handle de arrastre (ícono SVG de dos líneas, violeta), nombre del barrio en Title (22px desktop / 19px mobile) en `text`, y el contador a la derecha. Los clientes van adentro, sin tarjeta propia, separados por una línea de 1px `border` (en mobile arranca alineada con el punto de estado). En mobile, el cliente expandido queda demarcado: borde 1px `accent`, radio 18px, 8px de separación con los bordes de la tarjeta, chevron hacia arriba a la derecha, la sombra de "Cliente expandido" y sin separadores pegados. Al abrir y cerrar, la altura se anima (280ms, ease-out) y el contenido entra con un fade; con "reducir movimiento" activado aparece directo. En escritorio, los títulos de columna van una sola vez arriba de todas las tarjetas, en Caption Small mayúscula y `text-muted`, y las filas son un grid con las mismas columnas; Pastillas, Extra/Precio (un solo contenedor partido por una línea), Empleado y "Editar cliente" miden 44px de alto.
 
 ### Fila de cliente colapsable (componente de firma)
 Cada cliente arranca colapsado: handle de arrastre (mismo ícono SVG, violeta al 60%), ícono de estado circular de 26px (tick verde / cruz roja / guion gris "pendiente"), nombre, badge de pastillas si corresponde, y un chevron puramente indicativo — tocar cualquier parte del encabezado (no solo el chevron) expande o colapsa. Expandido, revela Limpieza/Pastillas/Extra/Empleado y, antes del botón Editar, dirección y teléfono con ícono. El reordenamiento dentro de un barrio se hace con drag-and-drop nativo en desktop y con mantener-presionado + arrastrar en mobile (mismo endpoint de persistencia en ambos casos).
@@ -254,5 +256,5 @@ Cada cliente arranca colapsado: handle de arrastre (mismo ícono SVG, violeta al
 ### Don't:
 - **Don't** introducir un segundo color de acento — todo lo no-semántico es violeta o neutro.
 - **Don't** usar verde o rojo fuera de los estados "confirmado" / "cancelado-rechazado".
-- **Don't** agregar `box-shadow` como recurso de jerarquía; el sistema es plano por diseño.
+- **Don't** agregar `box-shadow` como recurso de jerarquía fuera de las tres sombras de Elevation & Depth; el sistema es plano por diseño.
 - **Don't** permitir scroll horizontal en ningún breakpoint.
