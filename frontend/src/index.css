@@ -7,7 +7,6 @@
   --accent: #9184d9;
   --accent-hover: #7c6fc4;
   --accent-bg: rgba(145, 132, 217, 0.14);
-  --accent-soft: #c7bef2;
   --barrio-header-bg: #2a2a41;
   --success: #29c34f;
   --success-hover: #28a745;
@@ -985,7 +984,7 @@ button.pastillas-marca-error:hover {
   font-size: 22px;
   font-weight: 600;
   letter-spacing: -0.01em;
-  color: var(--accent-soft);
+  color: var(--text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -2074,6 +2073,31 @@ input[type="number"]::-webkit-inner-spin-button {
     right: 16px;
     height: 1px;
     background: var(--border);
+  }
+
+  /* Cliente expandido: queda demarcado con un borde violeta, separado de
+     los bordes de la tarjeta del barrio. Sin separadores pegados a él. */
+  .fila-cliente-grupo:has(.fila-cliente.expandido) {
+    margin: 8px;
+    border: 1px solid var(--accent);
+    border-radius: 18px;
+  }
+
+  .fila-cliente-grupo:has(.fila-cliente.expandido)::before,
+  .fila-cliente-grupo:has(.fila-cliente.expandido) + .fila-cliente-grupo::before {
+    display: none;
+  }
+
+  /* Compensa margen + borde para que el handle no se corra */
+  .fila-cliente.expandido .celda.celda-titulo {
+    padding-left: 7px;
+  }
+
+  .fila-cliente.expandido .chevron {
+    display: inline-flex;
+    order: 1;
+    color: var(--text);
+    transform: rotate(-90deg);
   }
 
   .fila-cliente .celda {

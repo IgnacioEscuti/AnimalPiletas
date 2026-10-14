@@ -10,7 +10,6 @@ colors:
   accent: "#9184d9"
   accent-hover: "#7c6fc4"
   accent-bg: "rgba(145, 132, 217, 0.14)"
-  accent-soft: "#c7bef2"
   barrio-header-bg: "#2a2a41"
   success: "#34c759"
   success-hover: "#28a745"
@@ -144,7 +143,6 @@ Paleta mono-acento sobre fondo casi negro: dos tonos oscuros neutros para profun
 ### Primary
 - **Violeta guardia** (`#9184d9`): el único acento de la app. Botones primarios, tabs/filtros activos, precios, badges, bordes de foco, ícono "+" de nuevo cliente, botón "Editar" (variante outline).
 
-- **Violeta claro** (`#c7bef2`, `--accent-soft`): solo el nombre del barrio en el header de su tarjeta, para que se lea como título sobre el fondo tintado sin competir con los controles violetas.
 - **Header de barrio** (`#2a2a41`, `--barrio-header-bg`): mezcla sólida de `surface` con el acento al 12%. Fondo del header de cada tarjeta de barrio en Clientes. Es sólido (no una opacidad) porque tiene que tapar el `surface` de la tarjeta de forma pareja; es la única excepción a la Regla del Tinte por Opacidad.
 
 ### Neutral
@@ -240,7 +238,7 @@ Todo redondeado, sin esquinas duras en ningún control. Botones cuadrados muy ch
 - **Mobile:** tab bar fija abajo, flotante con blur, ícono + label chico; el tab activo se lee solo por el color del ícono/texto (violeta).
 
 ### Tarjeta de barrio (Clientes)
-Cada barrio (y "Sin barrio") es una sola tarjeta: `surface`, borde 1px `border`, radio 18px, `overflow: hidden`, 14px entre tarjetas. Header con fondo `barrio-header-bg`: handle de arrastre (ícono SVG de dos líneas, violeta), nombre del barrio en Title (22px desktop / 19px mobile) en `accent-soft`, y el contador a la derecha. Los clientes van adentro, sin tarjeta propia, separados por una línea de 1px `border` (en mobile arranca alineada con el punto de estado). En escritorio, los títulos de columna van una sola vez arriba de todas las tarjetas, en Caption Small mayúscula y `text-muted`, y las filas son un grid con las mismas columnas; Pastillas, Extra/Precio (un solo contenedor partido por una línea), Empleado y "Editar cliente" miden 44px de alto.
+Cada barrio (y "Sin barrio") es una sola tarjeta: `surface`, borde 1px `border`, radio 18px, `overflow: hidden`, 14px entre tarjetas. Header con fondo `barrio-header-bg`: handle de arrastre (ícono SVG de dos líneas, violeta), nombre del barrio en Title (22px desktop / 19px mobile) en `text`, y el contador a la derecha. Los clientes van adentro, sin tarjeta propia, separados por una línea de 1px `border` (en mobile arranca alineada con el punto de estado). En mobile, el cliente expandido queda demarcado: borde 1px `accent`, radio 18px, 8px de separación con los bordes de la tarjeta, chevron hacia arriba a la derecha y sin separadores pegados. En escritorio, los títulos de columna van una sola vez arriba de todas las tarjetas, en Caption Small mayúscula y `text-muted`, y las filas son un grid con las mismas columnas; Pastillas, Extra/Precio (un solo contenedor partido por una línea), Empleado y "Editar cliente" miden 44px de alto.
 
 ### Fila de cliente colapsable (componente de firma)
 Cada cliente arranca colapsado: handle de arrastre (mismo ícono SVG, violeta al 60%), ícono de estado circular de 26px (tick verde / cruz roja / guion gris "pendiente"), nombre, badge de pastillas si corresponde, y un chevron puramente indicativo — tocar cualquier parte del encabezado (no solo el chevron) expande o colapsa. Expandido, revela Limpieza/Pastillas/Extra/Empleado y, antes del botón Editar, dirección y teléfono con ícono. El reordenamiento dentro de un barrio se hace con drag-and-drop nativo en desktop y con mantener-presionado + arrastrar en mobile (mismo endpoint de persistencia en ambos casos).
