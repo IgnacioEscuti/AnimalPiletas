@@ -4,6 +4,7 @@ import {
   aprobarPendiente,
   rechazarPendiente,
 } from "../services/usuarioService.js";
+import { useBloquearScroll } from "../hooks/useBloquearScroll.js";
 
 export function SolicitudesPendientes({ onCerrar }) {
   const [pendientes, setPendientes] = useState([]);
@@ -25,25 +26,7 @@ export function SolicitudesPendientes({ onCerrar }) {
   // Mismo bloqueo de scroll del body que los otros modales, pero atado a que
   // haya cola: mientras se cargan los pendientes este componente no muestra
   // nada, así que no tiene por qué congelar la página detrás.
-  useEffect(() => {
-    if (!hayCola) return;
-
-    const scrollY = window.scrollY;
-    const { overflow, position, width, top } = document.body.style;
-
-    document.body.style.overflow = "hidden";
-    document.body.style.position = "fixed";
-    document.body.style.width = "100%";
-    document.body.style.top = `-${scrollY}px`;
-
-    return () => {
-      document.body.style.overflow = overflow;
-      document.body.style.position = position;
-      document.body.style.width = width;
-      document.body.style.top = top;
-      window.scrollTo(0, scrollY);
-    };
-  }, [hayCola]);
+  useBloquearScroll(hayCola);
 
   if (!solicitud) return null;
 

@@ -1,28 +1,11 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useBloquearScroll } from "../hooks/useBloquearScroll.js";
 
 export function TarifaModal({ onClose, onGuardar }) {
   const [nombre, setNombre] = useState("");
   const [precio, setPrecio] = useState("");
 
-  // Mismo bloqueo de scroll del body que usa ClienteModal: sin esto, en
-  // mobile el fondo scrollea detrás de la hoja.
-  useEffect(() => {
-    const scrollY = window.scrollY;
-    const { overflow, position, width, top } = document.body.style;
-
-    document.body.style.overflow = "hidden";
-    document.body.style.position = "fixed";
-    document.body.style.width = "100%";
-    document.body.style.top = `-${scrollY}px`;
-
-    return () => {
-      document.body.style.overflow = overflow;
-      document.body.style.position = position;
-      document.body.style.width = width;
-      document.body.style.top = top;
-      window.scrollTo(0, scrollY);
-    };
-  }, []);
+  useBloquearScroll();
 
   const handleSubmit = (event) => {
     event.preventDefault();

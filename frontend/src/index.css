@@ -2177,6 +2177,13 @@ input[type="number"]::-webkit-inner-spin-button {
     background-color: var(--surface);
   }
 
+  /* Con un modal abierto el body queda en position: fixed (useBloquearScroll)
+     y iOS deja de usar .safari-bg-fix-bottom: pinta la franja del indicador
+     de inicio con el fondo del body. */
+  body.modal-abierto {
+    background-color: var(--surface);
+  }
+
   /* Tarjeta mobile genérica (Resumen, Tarifas, Login/Registro) — mismo
      lenguaje de tarjeta que Clientes (superficie + radio card-mobile),
      ya que el reset de <section> de arriba está pensado para la tabla

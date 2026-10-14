@@ -9,6 +9,7 @@ import {
 } from "../services/limpiezaAdicionalService.js";
 import { getPrecioPastillas } from "../services/precioPastillasService.js";
 import { useAuth } from "../context/AuthContext.jsx";
+import { useBloquearScroll } from "../hooks/useBloquearScroll.js";
 import { crearMatcher, normalizar } from "../utils/texto.js";
 import { hoyISO, parsearFechaISO } from "../utils/fecha.js";
 
@@ -88,23 +89,7 @@ export function LimpiezaAdicionalModal({ clientesPagina, onEditarCliente, onClos
     cargarAdicionales();
   }, []);
 
-  useEffect(() => {
-    const scrollY = window.scrollY;
-    const { overflow, position, width, top } = document.body.style;
-
-    document.body.style.overflow = "hidden";
-    document.body.style.position = "fixed";
-    document.body.style.width = "100%";
-    document.body.style.top = `-${scrollY}px`;
-
-    return () => {
-      document.body.style.overflow = overflow;
-      document.body.style.position = position;
-      document.body.style.width = width;
-      document.body.style.top = top;
-      window.scrollTo(0, scrollY);
-    };
-  }, []);
+  useBloquearScroll();
 
   const cargarAdicionales = async () => {
     try {
