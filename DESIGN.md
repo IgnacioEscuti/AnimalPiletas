@@ -10,6 +10,8 @@ colors:
   accent: "#9184d9"
   accent-hover: "#7c6fc4"
   accent-bg: "rgba(145, 132, 217, 0.14)"
+  accent-soft: "#c7bef2"
+  barrio-header-bg: "#2a2a41"
   success: "#34c759"
   success-hover: "#28a745"
   success-bg: "rgba(52, 199, 89, 0.16)"
@@ -142,6 +144,9 @@ Paleta mono-acento sobre fondo casi negro: dos tonos oscuros neutros para profun
 ### Primary
 - **Violeta guardia** (`#9184d9`): el único acento de la app. Botones primarios, tabs/filtros activos, precios, badges, bordes de foco, ícono "+" de nuevo cliente, botón "Editar" (variante outline).
 
+- **Violeta claro** (`#c7bef2`, `--accent-soft`): solo el nombre del barrio en el header de su tarjeta, para que se lea como título sobre el fondo tintado sin competir con los controles violetas.
+- **Header de barrio** (`#2a2a41`, `--barrio-header-bg`): mezcla sólida de `surface` con el acento al 12%. Fondo del header de cada tarjeta de barrio en Clientes. Es sólido (no una opacidad) porque tiene que tapar el `surface` de la tarjeta de forma pareja; es la única excepción a la Regla del Tinte por Opacidad.
+
 ### Neutral
 - **Casi-negro** (`#14151f`): fondo de página (como gradiente radial hacia `surface`), y también el tono "recesado" de inputs y filas de tabla dentro de una tarjeta más clara.
 - **Navy tarjeta** (`#1c1e2c`): superficie de las tarjetas de sección (desktop) y del modal; el punto más claro del gradiente de fondo. A opacidad reducida (92%) es también el fondo con blur de la tab bar flotante de mobile.
@@ -168,15 +173,15 @@ Paleta mono-acento sobre fondo casi negro: dos tonos oscuros neutros para profun
 Escala completa, de mayor a menor. Varios roles se reutilizan a propósito en más de un lugar cuando cumplen la misma función visual en contextos distintos (p. ej. "title" es el `h1` en mobile y el `h2` en desktop — ambos son el título de la pantalla en su propio contexto).
 
 - **Display** (600, 34px, letter-spacing -0.02em): título de página en desktop ("AnimalPiletas").
-- **Title** (600, 22px, letter-spacing -0.01em): subtítulo de sección en desktop (`h2`) y título de página en mobile (`h1`).
+- **Title** (600, 22px, letter-spacing -0.01em): subtítulo de sección en desktop (`h2`), título de página en mobile (`h1`) y nombre de barrio en las tarjetas de Clientes (desktop; 19px en mobile).
 - **Subtitle** (600, 19px): subtítulo de sección en mobile (`h2`).
 - **Lead** (400, 17px): bajada de la página, label del período en Resumen, botones de Limpieza en desktop.
 - **Body** (400, 16px): inputs, botones, texto de control estándar.
-- **Body Small** (500, 15px): chevron indicador, header de barrio en desktop.
+- **Body Small** (500, 15px): chevron indicador.
 - **Caption** (500, 14px): inputs chicos (Empleado, Extra), botones de Limpieza en mobile.
 - **Caption Small** (600, 13px, letter-spacing 0.02em): encabezados de columna de tabla, bajada de página en mobile, badge de tarifa.
 - **Small** (600, 12px): badge de pastillas cargadas.
-- **Label** (700, 11px, letter-spacing 0.06em, mayúscula): encabezados de sección pequeños ("LIMPIEZA", "PASTILLAS", "SIN BARRIO") — el recurso principal para separar contenido sin usar líneas.
+- **Label** (700, 11px, letter-spacing 0.06em, mayúscula): encabezados de sección pequeños ("LIMPIEZA", "PASTILLAS") — el recurso principal para separar contenido sin usar líneas.
 - **Micro** (600, 10px): labels de la tab bar inferior en mobile.
 
 ### Named Rules
@@ -184,7 +189,7 @@ Escala completa, de mayor a menor. Varios roles se reutilizan a propósito en m�
 
 ## Layout
 
-Desktop mantiene la tabla clásica (columnas Nombre/Limpieza/Pastillas/Extra/Empleado) dentro de una tarjeta contenedora `surface`, con filas individuales en el tono `bg` (más oscuro, "recesado" respecto a la tarjeta que las contiene). Mobile abandona la tabla: cada fila se convierte en su propia tarjeta apilada de ancho completo, agrupadas bajo un label de barrio en mayúscula. La navegación pasa de tabs arriba (desktop) a una tab bar flotante fija abajo (mobile, con blur de fondo). El modal pasa de tarjeta centrada (desktop) a hoja inferior deslizable (mobile). Ningún breakpoint permite scroll horizontal.
+En Clientes, desktop y mobile agrupan a los clientes en una tarjeta por barrio (ver "Tarjeta de barrio"). Desktop las muestra como filas en grid con las columnas Nombre/Limpieza/Pastillas/Extra/Empleado alineadas a títulos que van una sola vez arriba; mobile muestra solo la fila colapsada (handle, estado y nombre) y expande el resto adentro de la misma tarjeta. La navegación pasa de tabs arriba (desktop) a una tab bar flotante fija abajo (mobile, con blur de fondo). El modal pasa de tarjeta centrada (desktop) a hoja inferior deslizable (mobile). Ningún breakpoint permite scroll horizontal.
 
 ## Elevation & Depth
 
@@ -211,13 +216,14 @@ Todo redondeado, sin esquinas duras en ningún control. Botones cuadrados muy ch
 - **Danger:** fondo rojo — solo para "cancelar cliente" dentro del modal de edición.
 
 ### Icon buttons (Limpieza)
-- **Desktop:** compactos, solo ícono (36px, circulares).
+- **Desktop (lista de Clientes):** cuadrados de 44px, radio 14px, solo ícono. Tick y cruz arrancan en gris neutro (texto al 8%); el tick se llena de verde solo cuando la limpieza está marcada como realizada, y la cruz de rojo solo cuando está marcada como no realizada. Así el estado de cada fila se lee de un vistazo.
 - **Mobile:** pills anchas con ícono + texto ("Confirmar" / "No se pudo"), 48px de alto, ocupan el ancho disponible en partes iguales.
 - **Estado:** "Confirmar" es verde lleno por defecto (acción primaria de la fila); "No se pudo" es outline neutro salvo que sea el estado activo, en cuyo caso se invierte (confirmar pasa a neutro, no-se-pudo pasa a rojo lleno).
 
 ### Badges / Chips
 - **Style:** fondo `accent-bg` (violeta al 14%), texto violeta, radio 999px.
 - **Uso:** cantidad de pastillas cargadas hoy en la tarjeta colapsada ("N past.", solo si N > 0), y la tarifa asignada en el detalle expandido.
+- **Contador de barrio:** variante llena — fondo `accent`, texto `bg`, 13px en negrita, radio 999px. Va a la derecha del header de cada tarjeta de barrio ("X/Y").
 
 ### Cards / Containers
 - **Corner Style:** 22px (contenedor de sección desktop, modal) / 18px (tarjeta de cliente mobile).
@@ -233,8 +239,11 @@ Todo redondeado, sin esquinas duras en ningún control. Botones cuadrados muy ch
 - **Desktop:** fila de botones simples arriba (Clientes/Resumen/Tarifas), el activo en violeta lleno.
 - **Mobile:** tab bar fija abajo, flotante con blur, ícono + label chico; el tab activo se lee solo por el color del ícono/texto (violeta).
 
+### Tarjeta de barrio (Clientes)
+Cada barrio (y "Sin barrio") es una sola tarjeta: `surface`, borde 1px `border`, radio 18px, `overflow: hidden`, 14px entre tarjetas. Header con fondo `barrio-header-bg`: handle de arrastre (ícono SVG de dos líneas, violeta), nombre del barrio en Title (22px desktop / 19px mobile) en `accent-soft`, y el contador a la derecha. Los clientes van adentro, sin tarjeta propia, separados por una línea de 1px `border` (en mobile arranca alineada con el punto de estado). En escritorio, los títulos de columna van una sola vez arriba de todas las tarjetas, en Caption Small mayúscula y `text-muted`, y las filas son un grid con las mismas columnas; Pastillas, Extra/Precio (un solo contenedor partido por una línea), Empleado y "Editar cliente" miden 44px de alto.
+
 ### Fila de cliente colapsable (componente de firma)
-Cada cliente arranca colapsado: ícono de estado circular (tick verde / cruz roja / guion gris "pendiente"), nombre, badge de pastillas si corresponde, y un chevron puramente indicativo — tocar cualquier parte del encabezado (no solo el chevron) expande o colapsa. Expandido, revela Limpieza/Pastillas/Extra/Empleado y, antes del botón Editar, dirección y teléfono con ícono. El reordenamiento dentro de un barrio se hace con drag-and-drop nativo en desktop y con mantener-presionado + arrastrar en mobile (mismo endpoint de persistencia en ambos casos).
+Cada cliente arranca colapsado: handle de arrastre (mismo ícono SVG, violeta al 60%), ícono de estado circular de 26px (tick verde / cruz roja / guion gris "pendiente"), nombre, badge de pastillas si corresponde, y un chevron puramente indicativo — tocar cualquier parte del encabezado (no solo el chevron) expande o colapsa. Expandido, revela Limpieza/Pastillas/Extra/Empleado y, antes del botón Editar, dirección y teléfono con ícono. El reordenamiento dentro de un barrio se hace con drag-and-drop nativo en desktop y con mantener-presionado + arrastrar en mobile (mismo endpoint de persistencia en ambos casos).
 
 ## Do's and Don'ts
 

@@ -1,6 +1,7 @@
-import { Fragment, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ClienteModal } from "../components/ClienteModal.jsx";
 import { ClienteRow } from "../components/ClienteRow.jsx";
+import { IconoArrastre } from "../components/IconoArrastre.jsx";
 import { LimpiezaAdicionalModal } from "../components/LimpiezaAdicionalModal.jsx";
 import { Skeleton } from "../components/Skeleton.jsx";
 import {
@@ -379,7 +380,7 @@ export function ClientesPage({ onPrimeraCarga }) {
 
     const actualizarHover = () => {
       const target = document.elementFromPoint(ultimoX, ultimoY);
-      const fila = target?.closest("tr[data-cliente-id]");
+      const fila = target?.closest("[data-cliente-id]");
       if (fila && fila.dataset.grupo === grupoKey && fila.dataset.clienteId !== clienteId) {
         setTouchOverId(fila.dataset.clienteId);
       } else {
@@ -418,7 +419,7 @@ export function ClientesPage({ onPrimeraCarga }) {
     const onUp = async (upEvent) => {
       const wasDragging = state.dragging;
       const target = document.elementFromPoint(upEvent.clientX, upEvent.clientY);
-      const fila = target?.closest("tr[data-cliente-id]");
+      const fila = target?.closest("[data-cliente-id]");
       const targetId = fila?.dataset.grupo === grupoKey ? fila.dataset.clienteId : null;
       cleanup();
       setTouchDragId(null);
@@ -462,7 +463,7 @@ export function ClientesPage({ onPrimeraCarga }) {
 
     const actualizarHover = () => {
       const target = document.elementFromPoint(ultimoX, ultimoY);
-      const fila = target?.closest("tr[data-barrio-id]");
+      const fila = target?.closest("[data-barrio-id]");
       if (fila && fila.dataset.barrioId !== barrioId && fila.dataset.barrioId !== SIN_BARRIO) {
         setTouchOverBarrioId(fila.dataset.barrioId);
       } else {
@@ -501,7 +502,7 @@ export function ClientesPage({ onPrimeraCarga }) {
     const onUp = async (upEvent) => {
       const wasDragging = state.dragging;
       const target = document.elementFromPoint(upEvent.clientX, upEvent.clientY);
-      const fila = target?.closest("tr[data-barrio-id]");
+      const fila = target?.closest("[data-barrio-id]");
       const targetId = fila && fila.dataset.barrioId !== SIN_BARRIO ? fila.dataset.barrioId : null;
       cleanup();
       setTouchDragBarrioId(null);
@@ -567,6 +568,13 @@ export function ClientesPage({ onPrimeraCarga }) {
 
   const matchea = crearMatcher(busqueda);
 
+  // Contador X/Y: clientes con la limpieza de esta semana marcada (tick o cruz).
+  const clientesConLimpiezaMarcada = new Set(
+    limpiezas
+      .filter((limpieza) => typeof limpieza.realizada === "boolean")
+      .map((limpieza) => limpieza.cliente)
+  );
+
   // Barrio que matchea: la sección entera. Si no, solo los clientes que matchean.
   const grupos = gruposDeBarrio
     .map((grupo) => ({
@@ -575,7 +583,11 @@ export function ClientesPage({ onPrimeraCarga }) {
         ? grupo.clientes
         : grupo.clientes.filter((cliente) => matchea(cliente.nombre)),
     }))
-    .filter((grupo) => grupo.clientes.length > 0);
+    .filter((grupo) => grupo.clientes.length > 0)
+    .map((grupo) => ({
+      ...grupo,
+      marcadas: grupo.clientes.filter((cliente) => clientesConLimpiezaMarcada.has(cliente.id)).length,
+    }));
 
   const clienteArrastrado = touchDragId ? clientes.find((cliente) => cliente.id === touchDragId) : null;
   const limpiezaArrastrado = clienteArrastrado
@@ -665,77 +677,76 @@ export function ClientesPage({ onPrimeraCarga }) {
       {cargando ? (
         <Skeleton filas={6} />
       ) : (
-      <div className="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>Nombre</th>
-              <th>Limpieza</th>
-              <th>Pastillas</th>
-              <th>Extra</th>
-              <th>Empleado</th>
-              <th></th>
-            </tr>
-          </thead>
-          {grupos.map((grupo) => (
-            <Fragment key={grupo.key}>
-              <tbody>
-                <tr
-                  className={`barrio-header-row ${touchOverBarrioId === grupo.key ? "drag-over" : ""}`}
-                  data-barrio-id={grupo.key}
-                  onDragOver={(event) => event.preventDefault()}
-                  onDrop={() => handleBarrioDrop(grupo.key)}
+      <div className="lista-clientes">
+        {grupos.length > 0 && (
+          <div className="lista-clientes-columnas">
+            <span className="columna-nombre">Nombre</span>
+            <span>Limpieza</span>
+            <span>Pastillas</span>
+            <span>Extra</span>
+            <span>Empleado</span>
+          </div>
+        )}
+        {grupos.map((grupo) => (
+          <div key={grupo.key} className="barrio-card">
+            <div
+              className={`barrio-card-header ${touchOverBarrioId === grupo.key ? "drag-over" : ""}`}
+              data-barrio-id={grupo.key}
+              onDragOver={(event) => event.preventDefault()}
+              onDrop={() => handleBarrioDrop(grupo.key)}
+            >
+              {grupo.key !== SIN_BARRIO ? (
+                <span
+                  className="drag-handle"
+                  draggable
+                  onDragStart={(event) => handleBarrioDragStart(event, grupo.key)}
+                  onPointerDown={(event) => handlePointerDownDragBarrio(event, grupo.key)}
+                  title="Arrastrar para reordenar el barrio"
                 >
-                  <td colSpan="100%">
-                    <div className="barrio-header">
-                      {grupo.key !== SIN_BARRIO && (
-                        <span
-                          className="drag-handle"
-                          draggable
-                          onDragStart={(event) => handleBarrioDragStart(event, grupo.key)}
-                          onPointerDown={(event) => handlePointerDownDragBarrio(event, grupo.key)}
-                          title="Arrastrar para reordenar el barrio"
-                        >
-                          ⠿
-                        </span>
-                      )}
-                      {grupo.nombre}
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-              {grupo.clientes.map((cliente, index) => (
-                <ClienteRow
-                  key={cliente.claveRender ?? cliente.id}
-                  cliente={cliente}
-                  temporal={esTemporal(cliente)}
-                  index={index}
-                  grupoKey={grupo.key}
-                  limpiezaHoy={limpiezas.find((limpieza) => limpieza.cliente === cliente.id)}
-                  pastillasHoy={pastillas.find((uso) => uso.cliente === cliente.id)}
-                  extras={extras.filter((uso) => uso.cliente === cliente.id)}
-                  empleadoSemanaHoy={empleadosSemana.find((e) => e.cliente === cliente.id)}
-                  onEditar={abrirEdicion}
-                  onLimpieza={handleLimpieza}
-                  onPastillas={handlePastillas}
-                  estadoPastillas={guardadorPastillas.estados[cliente.id]}
-                  onReintentarPastillas={guardadorPastillas.reintentar}
-                  onExtra={handleExtra}
-                  onEliminarExtra={handleEliminarExtra}
-                  onEmpleado={handleEmpleado}
-                  onDragStart={(event) => handleClienteDragStart(event, cliente.id, grupo.key)}
-                  onDragOver={(event) => event.preventDefault()}
-                  onDrop={() => handleClienteDrop(cliente.id, grupo.key)}
-                  onPointerDownDrag={handlePointerDownDrag}
-                  arrastrando={touchDragId === cliente.id}
-                  dragOver={touchOverId === cliente.id}
-                  expandido={clienteExpandidoId === cliente.id}
-                  onToggleExpandido={() => handleToggleExpandido(cliente.id)}
-                />
-              ))}
-            </Fragment>
-          ))}
-        </table>
+                  <IconoArrastre />
+                </span>
+              ) : (
+                <span className="drag-handle-espacio" aria-hidden="true" />
+              )}
+              <h3 className="barrio-card-nombre">{grupo.nombre}</h3>
+              <span
+                className="barrio-contador"
+                title={`${grupo.marcadas} de ${grupo.clientes.length} con la limpieza marcada`}
+              >
+                {grupo.marcadas}/{grupo.clientes.length}
+              </span>
+            </div>
+            {grupo.clientes.map((cliente, index) => (
+              <ClienteRow
+                key={cliente.claveRender ?? cliente.id}
+                cliente={cliente}
+                temporal={esTemporal(cliente)}
+                index={index}
+                grupoKey={grupo.key}
+                limpiezaHoy={limpiezas.find((limpieza) => limpieza.cliente === cliente.id)}
+                pastillasHoy={pastillas.find((uso) => uso.cliente === cliente.id)}
+                extras={extras.filter((uso) => uso.cliente === cliente.id)}
+                empleadoSemanaHoy={empleadosSemana.find((e) => e.cliente === cliente.id)}
+                onEditar={abrirEdicion}
+                onLimpieza={handleLimpieza}
+                onPastillas={handlePastillas}
+                estadoPastillas={guardadorPastillas.estados[cliente.id]}
+                onReintentarPastillas={guardadorPastillas.reintentar}
+                onExtra={handleExtra}
+                onEliminarExtra={handleEliminarExtra}
+                onEmpleado={handleEmpleado}
+                onDragStart={(event) => handleClienteDragStart(event, cliente.id, grupo.key)}
+                onDragOver={(event) => event.preventDefault()}
+                onDrop={() => handleClienteDrop(cliente.id, grupo.key)}
+                onPointerDownDrag={handlePointerDownDrag}
+                arrastrando={touchDragId === cliente.id}
+                dragOver={touchOverId === cliente.id}
+                expandido={clienteExpandidoId === cliente.id}
+                onToggleExpandido={() => handleToggleExpandido(cliente.id)}
+              />
+            ))}
+          </div>
+        ))}
         {grupos.length === 0 && <p className="empty-state">No hay clientes para mostrar.</p>}
       </div>
       )}

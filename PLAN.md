@@ -45,6 +45,8 @@ orden: number (requerido, default 0 — posición de la sección en la pantalla 
 
 **Agrupar clientes por barrio en la pantalla de Cliente:** en vez de una tabla plana, la lista se organiza en secciones — una por barrio, con su nombre como header (no se repite el nombre del barrio en cada fila). Los clientes sin barrio asignado caen en una sección "Sin barrio" al final.
 
+**Contador por barrio:** en el header de cada sección (incluida "Sin barrio") hay una pill "X/Y". Y = cantidad de clientes visibles en esa sección (respeta el filtro de semana, "Ver todos", el filtro de encargado y el buscador). X = cuántos de esos tienen la limpieza de la semana actual marcada, sea con tick (realizada: true) o con cruz (realizada: false). Se calcula en el frontend con las limpiezas que ya trae la pantalla, sin endpoint nuevo. Las limpiezas adicionales no cuentan.
+
 **Orden por arrastre (drag and drop), directo en la pantalla de Cliente:**
 - Arrastrando el header de una sección de barrio, se reordenan las secciones entre sí — actualiza el campo `orden` de los barrios afectados.
 - Arrastrando la fila de un cliente, se reordena su posición dentro de su misma sección de barrio — actualiza `ordenEnBarrio`. Arrastrar un cliente a la sección de OTRO barrio no le cambia el barrio asignado — eso se hace únicamente desde el modal de editar cliente.

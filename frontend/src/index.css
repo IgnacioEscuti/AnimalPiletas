@@ -7,6 +7,8 @@
   --accent: #9184d9;
   --accent-hover: #7c6fc4;
   --accent-bg: rgba(145, 132, 217, 0.14);
+  --accent-soft: #c7bef2;
+  --barrio-header-bg: #2a2a41;
   --success: #29c34f;
   --success-hover: #28a745;
   --danger: #f1344a;
@@ -649,10 +651,6 @@ li.row input {
   white-space: nowrap;
 }
 
-.table-wrapper {
-  overflow-x: auto;
-}
-
 table {
   width: 100%;
   border-collapse: separate;
@@ -924,56 +922,103 @@ button.pastillas-marca-error:hover {
 }
 
 .drag-handle {
-  display: inline-block;
-  margin-right: 8px;
-  color: var(--text-muted);
-  font-size: 16px;
-  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  color: var(--accent);
   cursor: grab;
   user-select: none;
-  vertical-align: middle;
   touch-action: none;
+}
+
+.drag-handle svg {
+  display: block;
 }
 
 .drag-handle:active {
   cursor: grabbing;
 }
 
-tr.fila-cliente.arrastrando {
+/* Lista de clientes: una tarjeta por barrio, con los clientes adentro.
+   --columnas-clientes la comparten los títulos de columna (afuera de las
+   tarjetas) y cada fila, para que queden alineados en escritorio. */
+.lista-clientes {
+  --columnas-clientes: minmax(0, 1fr) 94px 76px 196px 140px 150px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.lista-clientes-columnas {
+  display: none;
+}
+
+.barrio-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.barrio-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: var(--barrio-header-bg);
+}
+
+.barrio-card-header.drag-over {
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+
+.drag-handle-espacio {
+  flex: none;
+  width: 18px;
+}
+
+.barrio-card-nombre {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--accent-soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.barrio-contador {
+  flex: none;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--bg);
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.fila-cliente-grupo {
+  position: relative;
+}
+
+.fila-cliente-grupo:has(.fila-cliente.drag-over) {
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+
+.fila-cliente.arrastrando {
   opacity: 0.5;
 }
 
-tbody.fila-cliente-grupo:has(tr.fila-cliente.drag-over) {
-  box-shadow: inset 0 0 0 2px var(--accent);
+.fila-cliente .drag-handle {
+  opacity: 0.6;
 }
 
-tr.barrio-header-row.drag-over {
-  box-shadow: inset 0 0 0 2px var(--accent);
-}
-
-.barrio-header-row td {
-  background: transparent;
-  padding: 22px 8px 8px;
-}
-
-tbody:first-of-type .barrio-header-row td {
-  padding-top: 0;
-}
-
-.barrio-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--text-muted);
-}
-
-.barrio-header .drag-handle {
-  margin-right: 0;
-}
-
-.td-titulo {
+.celda-titulo {
   cursor: pointer;
 }
 
@@ -994,10 +1039,8 @@ tbody:first-of-type .barrio-header-row td {
 }
 
 .chevron {
-  display: inline-block;
-  margin-right: 5px;
-  font-size: 15px;
-  font-weight: 600;
+  display: inline-flex;
+  flex: none;
   color: var(--text-muted);
   transition: transform 0.15s ease;
 }
@@ -1006,9 +1049,8 @@ tbody:first-of-type .barrio-header-row td {
   transform: rotate(90deg);
 }
 
-.fila-expandida td {
-  background: transparent;
-  padding: 0 12px;
+.fila-expandida {
+  padding: 0 16px 14px;
 }
 
 .detalle-cliente {
@@ -1653,6 +1695,141 @@ input[type="number"]::-webkit-inner-spin-button {
   display: none;
 }
 
+/* Lista de clientes en escritorio: filas en grid con las mismas columnas
+   que los títulos de arriba de las tarjetas. Va scopeado a .fila-cliente
+   para no tocar la tarjeta de Limpieza adicional. */
+@media (min-width: 701px) {
+  .lista-clientes-columnas {
+    display: grid;
+    grid-template-columns: var(--columnas-clientes);
+    gap: 12px;
+    padding: 0 17px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  /* handle (18) + gap (10) + chevron (14) + gap (10) */
+  .lista-clientes-columnas .columna-nombre {
+    padding-left: 52px;
+  }
+
+  .fila-cliente {
+    display: grid;
+    grid-template-columns: var(--columnas-clientes);
+    gap: 12px;
+    align-items: center;
+    padding: 12px 16px;
+  }
+
+  .fila-cliente-grupo:not(:nth-child(2)) {
+    border-top: 1px solid var(--border);
+  }
+
+  .fila-cliente .celda {
+    min-width: 0;
+  }
+
+  .fila-cliente .celda-titulo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .fila-cliente .cliente-nombre {
+    min-width: 0;
+    font-size: 16px;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+  }
+
+  /* Limpieza: tick y cruz neutros, cada uno se llena solo cuando es el estado activo */
+  .fila-cliente .limpieza-buttons .icon-button {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    font-size: 17px;
+    background: rgba(233, 233, 237, 0.08);
+    border-color: transparent;
+    color: var(--text);
+  }
+
+  .fila-cliente .limpieza-buttons .icon-button:hover {
+    background: rgba(233, 233, 237, 0.14);
+  }
+
+  .fila-cliente .limpieza-buttons .icon-button.active-tick {
+    background: var(--success);
+    border-color: var(--success);
+    color: #fff;
+  }
+
+  .fila-cliente .limpieza-buttons .icon-button.active-cross {
+    background: var(--danger);
+    border-color: var(--danger);
+    color: #fff;
+  }
+
+  .fila-cliente .pastillas-control {
+    width: 100%;
+  }
+
+  .fila-cliente .pastillas-input {
+    width: 100%;
+    height: 44px;
+    padding: 0 14px;
+    font-size: 15px;
+  }
+
+  /* La marca de guardado/error va adentro del input: al costado taparía Extra */
+  .fila-cliente .pastillas-marca {
+    left: auto;
+    right: 8px;
+  }
+
+  .fila-cliente .extra-columna {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .fila-cliente .extra-inputs {
+    width: 100%;
+    height: 44px;
+  }
+
+  .fila-cliente .extra-inputs input {
+    flex: 1;
+    width: auto;
+    height: 100%;
+    padding: 0 14px;
+    font-size: 15px;
+  }
+
+  .fila-cliente .extra-chips {
+    margin: 0;
+  }
+
+  .fila-cliente .empleado-input {
+    width: 100%;
+    height: 44px;
+    padding: 0 14px;
+    font-size: 15px;
+  }
+
+  .fila-cliente .celda-accion .btn-outline-accent {
+    width: 100%;
+    height: 44px;
+    padding: 0 10px;
+    font-size: 15px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+}
+
 /* ==========================================================================
   Mobile (≤700px) — tarjetas estilo iOS. La paleta y el radio de bordes ya
   son globales (ver :root); acá solo viven las diferencias de LAYOUT: tabla
@@ -1845,25 +2022,30 @@ input[type="number"]::-webkit-inner-spin-button {
     background-position: 16px center;
   }
 
-  /* Header de sección de barrio */
-  .barrio-header-row td {
-    padding: 20px 4px 10px;
+  /* Tarjeta de barrio: handle y nombre del header alineados con el handle
+     y el punto de estado de las filas de abajo. */
+  .barrio-card-header {
+    gap: 10px;
+    padding: 11px 16px;
   }
 
-  tbody:first-of-type .barrio-header-row td {
-    padding-top: 0;
+  .barrio-card-nombre {
+    font-size: 19px;
   }
 
-  .barrio-header {
-    font-size: 12px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
+  .barrio-card-header .drag-handle,
+  .celda-titulo .drag-handle {
+    padding: 8px;
+    margin-right: -4px;
   }
 
-  /* Tabla -> tarjetas */
-  .table-wrapper {
-    overflow-x: visible;
+  .drag-handle svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .drag-handle-espacio {
+    width: 32px;
   }
 
   table {
@@ -1879,79 +2061,56 @@ input[type="number"]::-webkit-inner-spin-button {
     display: block;
   }
 
-  tr.barrio-header-row {
-    display: block;
-  }
-
-  tbody.fila-cliente-grupo {
-    display: block;
-    background: var(--surface);
-    border-radius: 18px;
-    margin-bottom: 12px;
-    overflow: hidden;
+  .fila-cliente-grupo {
     overflow-anchor: none;
   }
 
-  tr.fila-cliente {
-    display: block;
-    background: transparent;
+  /* Separador entre clientes: arranca alineado con el punto de estado */
+  .fila-cliente-grupo:not(:nth-child(2))::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 58px;
+    right: 16px;
+    height: 1px;
+    background: var(--border);
   }
 
-  tr.fila-cliente td {
+  .fila-cliente .celda {
     display: block;
-    background: transparent;
-    padding: 0;
-    border-radius: 0 !important;
   }
 
-  tr.fila-cliente:not(.expandido) td:not(.td-titulo) {
+  .fila-cliente:not(.expandido) .celda:not(.celda-titulo) {
     display: none;
   }
 
   /* Altura real de .main-nav (icono + label + padding + safe-area) más aire,
      para que scrollIntoView no deje el final de la tarjeta tapado detrás
      de la tab bar fija. scroll-margin solo aplica al elemento que recibe
-     scrollIntoView() -por eso va en tr.fila-cliente, no en .fila-expandida-. */
-  tr.fila-cliente.expandido {
+     scrollIntoView() -por eso va en .fila-cliente, no en .fila-expandida-. */
+  .fila-cliente.expandido {
     scroll-margin-top: 120px;
   }
 
   .fila-expandida {
-    display: block;
-    background: transparent;
-  }
-
-  .fila-expandida td {
-    display: block;
-    width: 100%;
     padding: 0;
   }
 
   /* Fila título (siempre visible, colapsada o expandida) */
-  tr.fila-cliente td.td-titulo {
+  .fila-cliente .celda.celda-titulo {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 11px 16px !important;
+    padding: 11px 16px;
   }
 
   .td-titulo,
-  .td-titulo * {
+  .td-titulo *,
+  .celda-titulo,
+  .celda-titulo * {
     -webkit-user-select: none;
     user-select: none;
     -webkit-touch-callout: none;
-  }
-
-  .td-titulo .drag-handle {
-    font-size: 24px;
-    padding: 8px;
-    margin-right: -4px;
-  }
-
-  .barrio-header .drag-handle {
-    font-size: 24px;
-    padding: 8px;
-    margin-right: -4px;
   }
 
   .estado-punto {
@@ -2021,7 +2180,12 @@ input[type="number"]::-webkit-inner-spin-button {
     padding: 0 16px 18px !important;
   }
 
-  td[data-label]::before {
+  .fila-cliente .celda[data-label] {
+    padding: 0 16px 18px;
+  }
+
+  td[data-label]::before,
+  .celda[data-label]::before {
     content: attr(data-label);
     display: block;
     text-transform: uppercase;
@@ -2052,11 +2216,11 @@ input[type="number"]::-webkit-inner-spin-button {
   }
 
   /* Pastillas cargadas: label a la izquierda, stepper a la derecha */
-  tr.fila-cliente.expandido td:has(.pastillas-stepper) {
-    display: flex !important;
+  .fila-cliente.expandido .celda.celda-pastillas {
+    display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 16px 18px !important;
+    padding: 0 16px 18px;
   }
 
   .pastillas-label {
@@ -2180,6 +2344,10 @@ input[type="number"]::-webkit-inner-spin-button {
      queda el de la fila expandida */
   td.td-accion {
     display: none !important;
+  }
+
+  .fila-cliente .celda.celda-accion {
+    display: none;
   }
 
   .detalle-cliente {

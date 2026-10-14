@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { IconoArrastre } from "./IconoArrastre.jsx";
 
 export function ClienteRow({
   cliente,
@@ -74,8 +75,8 @@ export function ClienteRow({
   const simboloEstado = estadoLimpieza === "tick" ? "✓" : estadoLimpieza === "cross" ? "✕" : "–";
 
   return (
-    <tbody className="fila-cliente-grupo">
-      <motion.tr
+    <div className="fila-cliente-grupo">
+      <motion.div
         ref={filaRef}
         className={`fila-cliente row-motion ${expandido ? "expandido" : ""} ${arrastrando ? "arrastrando" : ""} ${
           dragOver ? "drag-over" : ""
@@ -89,8 +90,8 @@ export function ClienteRow({
         animate={{ opacity: arrastrando ? 0.4 : temporal ? 0.5 : 1, y: 0 }}
         transition={{ duration: 0.2, delay: Math.min(index ?? 0, 10) * 0.03 }}
       >
-        <td
-          className="td-titulo"
+        <div
+          className="celda celda-titulo"
           onClick={onToggleExpandido}
           title={expandido ? "Colapsar" : "Expandir"}
         >
@@ -101,13 +102,15 @@ export function ClienteRow({
             onPointerDown={(event) => onPointerDownDrag?.(event, cliente.id, grupoKey)}
             title="Mantené presionado para reordenar"
           >
-            ⠿
+            <IconoArrastre />
           </span>
           <span className={`estado-punto estado-${estadoLimpieza}`} aria-hidden="true">
             {simboloEstado}
           </span>
           <span className={`chevron ${expandido ? "chevron-abierto" : ""}`} aria-hidden="true">
-            ▸
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+              <path d="m9 6 6 6-6 6" />
+            </svg>
           </span>
           <span className="cliente-nombre">{cliente.nombre}</span>
           <span className="td-titulo-derecha">
@@ -115,8 +118,8 @@ export function ClienteRow({
               <span className="badge-pastillas">{pastillasHoy.cantidad} past.</span>
             )}
           </span>
-        </td>
-        <td data-label="Limpieza de hoy">
+        </div>
+        <div className="celda" data-label="Limpieza de hoy">
           <div className="limpieza-buttons">
             <button
               className={`icon-button ${limpiezaHoy?.realizada === true ? "active-tick" : ""}`}
@@ -139,8 +142,8 @@ export function ClienteRow({
               <span className="limpieza-label">No se pudo</span>
             </button>
           </div>
-        </td>
-        <td>
+        </div>
+        <div className="celda celda-pastillas">
           <span className="pastillas-label">Pastillas cargadas</span>
           <div className="pastillas-control">
             <div className="pastillas-stepper">
@@ -191,8 +194,8 @@ export function ClienteRow({
               )}
             </AnimatePresence>
           </div>
-        </td>
-        <td data-label="Extra de hoy">
+        </div>
+        <div className="celda" data-label="Extra de hoy">
           <div className="extra-columna">
             <div className="extra-inputs">
               <input
@@ -231,8 +234,8 @@ export function ClienteRow({
               </div>
             )}
           </div>
-        </td>
-        <td data-label="Empleado">
+        </div>
+        <div className="celda" data-label="Empleado">
           <div className="empleado-columna">
             <input
               type="text"
@@ -243,60 +246,58 @@ export function ClienteRow({
               onBlur={() => onEmpleado(cliente.id, empleado)}
             />
           </div>
-        </td>
-        <td className="td-accion">
+        </div>
+        <div className="celda celda-accion">
           <button className="btn-outline-accent" onClick={() => onEditar(cliente)}>
             <svg width="14" height="14" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true">
               <path d="M227.32,73.37,182.63,28.68a16,16,0,0,0-22.63,0L36.69,152A15.86,15.86,0,0,0,32,163.31V208a16,16,0,0,0,16,16H92.69A15.86,15.86,0,0,0,104,219.31L227.32,96A16,16,0,0,0,227.32,73.37ZM192,88,168,64l16-16,24,24ZM48,172.69,152,68.69,171.31,88,67.31,192H48Z" />
             </svg>
             Editar cliente
           </button>
-        </td>
-      </motion.tr>
+        </div>
+      </motion.div>
       {expandido && (
-        <tr className="fila-expandida">
-          <td colSpan="100%">
-            <div className="detalle-cliente">
-              <span className="detalle-item">
-                <svg
-                  className="detalle-icono"
-                  width="14"
-                  height="14"
-                  viewBox="0 0 256 256"
-                  fill="currentColor"
-                  aria-hidden="true"
-                >
-                  <path d="M128,16a88.1,88.1,0,0,0-88,88c0,75.3,80,132,83.41,134.36a8,8,0,0,0,9.18,0C136,236,216,179.3,216,104A88.1,88.1,0,0,0,128,16Zm0,120a32,32,0,1,1,32-32A32,32,0,0,1,128,136Z" />
-                </svg>
-                {cliente.direccion || "—"}
-              </span>
-              <span className="detalle-item">
-                <svg
-                  className="detalle-icono"
-                  width="14"
-                  height="14"
-                  viewBox="0 0 256 256"
-                  fill="currentColor"
-                  aria-hidden="true"
-                >
-                  <path d="M222.37,158.46l-47.11-21.11-.13-.06a16,16,0,0,0-15.17,1.4,8.12,8.12,0,0,0-.75.56L134.87,160c-15.42-7.49-31.34-23.29-38.83-38.51l20.78-24.71c.2-.25.39-.5.57-.77a16,16,0,0,0,1.32-15.06l0-.12L97.54,33.63a16,16,0,0,0-16.62-9.52A56.26,56.26,0,0,0,32,80c0,79.4,64.6,144,144,144a56.26,56.26,0,0,0,55.89-48.92A16,16,0,0,0,222.37,158.46Z" />
-                </svg>
-                {cliente.telefono || "—"}
-              </span>
-            </div>
-            <button
-              type="button"
-              className="btn-outline-accent btn-editar-mobile"
-              onClick={() => onEditar(cliente)}
-            >
-              <svg width="14" height="14" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true">
-                <path d="M227.32,73.37,182.63,28.68a16,16,0,0,0-22.63,0L36.69,152A15.86,15.86,0,0,0,32,163.31V208a16,16,0,0,0,16,16H92.69A15.86,15.86,0,0,0,104,219.31L227.32,96A16,16,0,0,0,227.32,73.37ZM192,88,168,64l16-16,24,24ZM48,172.69,152,68.69,171.31,88,67.31,192H48Z" />
+        <div className="fila-expandida">
+          <div className="detalle-cliente">
+            <span className="detalle-item">
+              <svg
+                className="detalle-icono"
+                width="14"
+                height="14"
+                viewBox="0 0 256 256"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <path d="M128,16a88.1,88.1,0,0,0-88,88c0,75.3,80,132,83.41,134.36a8,8,0,0,0,9.18,0C136,236,216,179.3,216,104A88.1,88.1,0,0,0,128,16Zm0,120a32,32,0,1,1,32-32A32,32,0,0,1,128,136Z" />
               </svg>
-              Editar cliente
-            </button>
-          </td>
-        </tr>
+              {cliente.direccion || "—"}
+            </span>
+            <span className="detalle-item">
+              <svg
+                className="detalle-icono"
+                width="14"
+                height="14"
+                viewBox="0 0 256 256"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <path d="M222.37,158.46l-47.11-21.11-.13-.06a16,16,0,0,0-15.17,1.4,8.12,8.12,0,0,0-.75.56L134.87,160c-15.42-7.49-31.34-23.29-38.83-38.51l20.78-24.71c.2-.25.39-.5.57-.77a16,16,0,0,0,1.32-15.06l0-.12L97.54,33.63a16,16,0,0,0-16.62-9.52A56.26,56.26,0,0,0,32,80c0,79.4,64.6,144,144,144a56.26,56.26,0,0,0,55.89-48.92A16,16,0,0,0,222.37,158.46Z" />
+              </svg>
+              {cliente.telefono || "—"}
+            </span>
+          </div>
+          <button
+            type="button"
+            className="btn-outline-accent btn-editar-mobile"
+            onClick={() => onEditar(cliente)}
+          >
+            <svg width="14" height="14" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true">
+              <path d="M227.32,73.37,182.63,28.68a16,16,0,0,0-22.63,0L36.69,152A15.86,15.86,0,0,0,32,163.31V208a16,16,0,0,0,16,16H92.69A15.86,15.86,0,0,0,104,219.31L227.32,96A16,16,0,0,0,227.32,73.37ZM192,88,168,64l16-16,24,24ZM48,172.69,152,68.69,171.31,88,67.31,192H48Z" />
+            </svg>
+            Editar cliente
+          </button>
+        </div>
       )}
-    </tbody>
+    </div>
   );
 }
