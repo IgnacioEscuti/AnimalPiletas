@@ -4,8 +4,66 @@ import { AnimatePresence, motion } from "framer-motion";
 import { IconoArrastre } from "./IconoArrastre.jsx";
 
 const MEDIA_MOBILE = "(max-width: 700px)";
-// Mismo easing que --expandir-cliente en index.css (margen, borde y sombra de la card)
-const EASING_MOBILE = "cubic-bezier(0.32, 0.72, 0, 1)";
+const DURACION_MOBILE = 450;
+// Misma curva que --expandir-cliente en index.css (margen, borde y sombra de la card)
+const CURVA_MOBILE = [0.32, 0.72, 0, 1];
+const EASING_MOBILE = `cubic-bezier(${CURVA_MOBILE.join(", ")})`;
+
+// La misma cubic-bezier como función de JS, para que el scroll avance igual
+// que la animación de altura: busca el t de la curva para ese x y devuelve su y.
+const crearEasing = (x1, y1, x2, y2) => {
+  const bezier = (t, p1, p2) => 3 * p1 * t * (1 - t) ** 2 + 3 * p2 * t ** 2 * (1 - t) + t ** 3;
+  return (x) => {
+    let desde = 0;
+    let hasta = 1;
+    let t = x;
+    for (let i = 0; i < 20; i++) {
+      t = (desde + hasta) / 2;
+      if (bezier(t, x1, x2) < x) desde = t;
+      else hasta = t;
+    }
+    return bezier(t, y1, y2);
+  };
+};
+const easingMobile = crearEasing(...CURVA_MOBILE);
+
+// Lleva la fila expandida a scroll-margin-top (120px en mobile) del borde de
+// arriba, salvo que la card ya entre completa entre el borde y la tab bar.
+// Animado, avanza a la par de la altura y recalcula el destino en cada frame
+// (otra card cerrándose arriba corre todo mientras tanto). Si el usuario
+// toca o usa la rueda, lo suelta. Devuelve la función para cancelarlo.
+const scrollearALaCard = (fila, alturaFinal, animado) => {
+  const margenSuperior = parseFloat(getComputedStyle(fila).scrollMarginTop) || 0;
+  const topInicial = fila.getBoundingClientRect().top;
+  const limiteInferior =
+    document.querySelector(".main-nav")?.getBoundingClientRect().top ?? window.innerHeight;
+  if (topInicial >= 0 && topInicial + alturaFinal <= limiteInferior) return null;
+
+  const destino = () => window.scrollY + fila.getBoundingClientRect().top - margenSuperior;
+  if (!animado) {
+    window.scrollTo(0, destino());
+    return null;
+  }
+
+  const inicio = window.scrollY;
+  const comienzo = performance.now();
+  let frame;
+  const cancelar = () => {
+    cancelAnimationFrame(frame);
+    window.removeEventListener("touchstart", cancelar);
+    window.removeEventListener("wheel", cancelar);
+  };
+  const avanzar = (ahora) => {
+    const progreso = Math.min((ahora - comienzo) / DURACION_MOBILE, 1);
+    window.scrollTo(0, inicio + (destino() - inicio) * easingMobile(progreso));
+    if (progreso < 1) frame = requestAnimationFrame(avanzar);
+    else cancelar();
+  };
+  window.addEventListener("touchstart", cancelar, { passive: true });
+  window.addEventListener("wheel", cancelar, { passive: true });
+  frame = requestAnimationFrame(avanzar);
+  return cancelar;
+};
 
 const animaEnMobile = () =>
   window.matchMedia(MEDIA_MOBILE).matches &&
@@ -48,6 +106,7 @@ export function ClienteRow({
   const tituloRef = useRef(null);
   const alturaAnteriorRef = useRef(null);
   const animacionRef = useRef(null);
+  const cancelarScrollRef = useRef(null);
 
   // En mobile, al colapsar el contenido sigue visible (con fade-out) mientras
   // la card se achica, y recién se oculta al terminar la animación.
@@ -68,11 +127,13 @@ export function ClienteRow({
     const alturaAnterior = animacionPrevia ? grupo.offsetHeight : alturaAnteriorRef.current;
     animacionPrevia?.cancel();
     animacionRef.current = null;
+    cancelarScrollRef.current?.();
+    cancelarScrollRef.current = null;
     if (alturaAnterior === null) return;
 
     const mobile = window.matchMedia(MEDIA_MOBILE).matches;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      if (expandido && mobile) filaRef.current.scrollIntoView({ block: "start" });
+      if (expandido && mobile) scrollearALaCard(filaRef.current, grupo.offsetHeight, false);
       return;
     }
 
@@ -84,7 +145,7 @@ export function ClienteRow({
     const animacion = grupo.animate(
       [{ height: `${alturaAnterior}px` }, { height: `${alturaNueva}px` }],
       mobile
-        ? { duration: 450, easing: EASING_MOBILE }
+        ? { duration: DURACION_MOBILE, easing: EASING_MOBILE }
         : { duration: 280, easing: "cubic-bezier(0.2, 0.8, 0.2, 1)" }
     );
     animacionRef.current = animacion;
@@ -97,10 +158,10 @@ export function ClienteRow({
       // flushSync: oculta el contenido antes del próximo frame, sin que se vea un salto
       if (!expandido) flushSync(() => setCerrando(false));
       alturaAnteriorRef.current = grupo.offsetHeight;
-      if (expandido && mobile) {
-        filaRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
     };
+    if (expandido && mobile) {
+      cancelarScrollRef.current = scrollearALaCard(filaRef.current, alturaNueva, true);
+    }
   }, [expandido]);
 
   // Guarda la altura después de cada render: es el "antes" del próximo cambio.
@@ -110,7 +171,13 @@ export function ClienteRow({
   });
 
   // Si el componente se desmonta a mitad de una animación, no la deja colgada
-  useEffect(() => () => animacionRef.current?.cancel(), []);
+  useEffect(
+    () => () => {
+      animacionRef.current?.cancel();
+      cancelarScrollRef.current?.();
+    },
+    []
+  );
 
   // Mientras haya un valor sin confirmar, manda lo que cargó el encargado.
   useEffect(() => {
