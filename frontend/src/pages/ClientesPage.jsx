@@ -612,20 +612,6 @@ export function ClientesPage({ onPrimeraCarga }) {
           onChange={(event) => setBusqueda(event.target.value)}
           className="search-input"
         />
-        {esAdmin && (
-          <select
-            className="select-encargado"
-            value={encargadoSeleccionado}
-            onChange={(event) => setEncargadoSeleccionado(event.target.value)}
-          >
-            <option value={TODOS}>Todos</option>
-            {usuarios.map((usuarioItem) => (
-              <option key={usuarioItem.id} value={usuarioItem.id}>
-                {usuarioItem.nombre || usuarioItem.email}
-              </option>
-            ))}
-          </select>
-        )}
         <div className="fila-semana">
           <label className="toggle-ver-todos">
             <input
@@ -635,6 +621,20 @@ export function ClientesPage({ onPrimeraCarga }) {
             />
             Ver todos
           </label>
+          {esAdmin && (
+            <select
+              className="select-encargado"
+              value={encargadoSeleccionado}
+              onChange={(event) => setEncargadoSeleccionado(event.target.value)}
+            >
+              <option value={TODOS}>Todos</option>
+              {usuarios.map((usuarioItem) => (
+                <option key={usuarioItem.id} value={usuarioItem.id}>
+                  {usuarioItem.nombre || usuarioItem.email}
+                </option>
+              ))}
+            </select>
+          )}
           <span className="indicador-semana">
             {verTodos ? "Semana 1 y 2" : `Semana ${SEMANA_ACTUAL}`}
           </span>
