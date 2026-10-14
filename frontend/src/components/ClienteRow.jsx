@@ -1,6 +1,15 @@
 import { useState, useEffect, useLayoutEffect, useRef } from "react";
+import { flushSync } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { IconoArrastre } from "./IconoArrastre.jsx";
+
+const MEDIA_MOBILE = "(max-width: 700px)";
+// Mismo easing que --expandir-cliente en index.css (margen, borde y sombra de la card)
+const EASING_MOBILE = "cubic-bezier(0.32, 0.72, 0, 1)";
+
+const animaEnMobile = () =>
+  window.matchMedia(MEDIA_MOBILE).matches &&
+  !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 export function ClienteRow({
   cliente,
@@ -36,36 +45,72 @@ export function ClienteRow({
   const [empleado, setEmpleado] = useState(empleadoSemanaHoy?.nombre ?? "");
   const filaRef = useRef(null);
   const grupoRef = useRef(null);
+  const tituloRef = useRef(null);
   const alturaAnteriorRef = useRef(null);
+  const animacionRef = useRef(null);
+
+  // En mobile, al colapsar el contenido sigue visible (con fade-out) mientras
+  // la card se achica, y recién se oculta al terminar la animación.
+  // Se ajusta durante el render para que el primer frame ya lo tenga en cuenta.
+  const [cerrando, setCerrando] = useState(false);
+  const [expandidoPrevio, setExpandidoPrevio] = useState(expandido);
+  if (expandido !== expandidoPrevio) {
+    setExpandidoPrevio(expandido);
+    setCerrando(!expandido && animaEnMobile());
+  }
 
   // Al expandir/colapsar, anima la altura desde la que tenía antes hasta la
   // nueva, así la fila se ve abriéndose en vez de aparecer de golpe.
   useLayoutEffect(() => {
     const grupo = grupoRef.current;
-    const alturaAnterior = alturaAnteriorRef.current;
-    const alturaNueva = grupo.offsetHeight;
-    if (alturaAnterior === null || alturaAnterior === alturaNueva) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const animacionPrevia = animacionRef.current;
+    // Si interrumpe una animación en curso, arranca desde la altura que se ve en pantalla
+    const alturaAnterior = animacionPrevia ? grupo.offsetHeight : alturaAnteriorRef.current;
+    animacionPrevia?.cancel();
+    animacionRef.current = null;
+    if (alturaAnterior === null) return;
+
+    const mobile = window.matchMedia(MEDIA_MOBILE).matches;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      if (expandido && mobile) filaRef.current.scrollIntoView({ block: "start" });
+      return;
+    }
+
+    // Colapsando en mobile el contenido todavía está visible: el destino es solo la fila título
+    const alturaNueva = !expandido && mobile ? tituloRef.current.offsetHeight : grupo.offsetHeight;
+    if (alturaAnterior === alturaNueva) return;
+
     grupo.style.overflow = "hidden";
     const animacion = grupo.animate(
       [{ height: `${alturaAnterior}px` }, { height: `${alturaNueva}px` }],
-      { duration: 280, easing: "cubic-bezier(0.2, 0.8, 0.2, 1)" }
+      mobile
+        ? { duration: 450, easing: EASING_MOBILE }
+        : { duration: 280, easing: "cubic-bezier(0.2, 0.8, 0.2, 1)" }
     );
-    animacion.onfinish = animacion.oncancel = () => {
+    animacionRef.current = animacion;
+    animacion.oncancel = () => {
       grupo.style.overflow = "";
+    };
+    animacion.onfinish = () => {
+      animacionRef.current = null;
+      grupo.style.overflow = "";
+      // flushSync: oculta el contenido antes del próximo frame, sin que se vea un salto
+      if (!expandido) flushSync(() => setCerrando(false));
+      alturaAnteriorRef.current = grupo.offsetHeight;
+      if (expandido && mobile) {
+        filaRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
     };
   }, [expandido]);
 
   // Guarda la altura después de cada render: es el "antes" del próximo cambio.
   useLayoutEffect(() => {
+    if (animacionRef.current) return;
     alturaAnteriorRef.current = grupoRef.current.offsetHeight;
   });
 
-  useEffect(() => {
-    if (!expandido) return;
-    if (!window.matchMedia("(max-width: 700px)").matches) return;
-    filaRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, [expandido]);
+  // Si el componente se desmonta a mitad de una animación, no la deja colgada
+  useEffect(() => () => animacionRef.current?.cancel(), []);
 
   // Mientras haya un valor sin confirmar, manda lo que cargó el encargado.
   useEffect(() => {
@@ -103,7 +148,9 @@ export function ClienteRow({
     <div ref={grupoRef} className="fila-cliente-grupo">
       <motion.div
         ref={filaRef}
-        className={`fila-cliente row-motion ${expandido ? "expandido" : ""} ${arrastrando ? "arrastrando" : ""} ${
+        className={`fila-cliente row-motion ${expandido ? "expandido" : ""} ${cerrando ? "cerrando" : ""} ${
+          arrastrando ? "arrastrando" : ""
+        } ${
           dragOver ? "drag-over" : ""
         }`}
         data-cliente-id={cliente.id}
@@ -116,6 +163,7 @@ export function ClienteRow({
         transition={{ duration: 0.2, delay: Math.min(index ?? 0, 10) * 0.03 }}
       >
         <div
+          ref={tituloRef}
           className="celda celda-titulo"
           onClick={onToggleExpandido}
           title={expandido ? "Colapsar" : "Expandir"}
@@ -281,7 +329,7 @@ export function ClienteRow({
           </button>
         </div>
       </motion.div>
-      {expandido && (
+      {(expandido || cerrando) && (
         <div className="fila-expandida">
           <div className="detalle-cliente">
             <span className="detalle-item">
