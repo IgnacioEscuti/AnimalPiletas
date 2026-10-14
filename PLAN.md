@@ -184,7 +184,7 @@ Limpieza, UsoPastillas y UsoExtra se filtran por `fecha`. EmpleadoSemana se filt
 
 ## Limpieza adicional
 
-**Dónde:** botón "+ Limpieza adicional" (outline violeta, ancho completo) en la pantalla de Clientes, debajo de la fila "Ver todos" / "Semana N".
+**Dónde:** botón "Limpieza adicional" (outline violeta, con ícono de destello) en la pantalla de Clientes, debajo de la tarjeta del encabezado, al lado de "+ Nuevo cliente" y con el mismo ancho.
 
 **Modal paso 1, buscador:** hoja inferior con el título "Limpieza adicional" y una barra "Buscar cliente...". Sin texto escrito muestra, dentro de un recuadro con scroll propio: arriba "LIMPIEZAS ADICIONALES DE ESTA SEMANA" (solo si hay alguna; cliente, día y precio) y debajo "CLIENTES", con todos los clientes activos de cualquier encargado en orden alfabético (nombre + barrio). Al escribir quedan solo los clientes que coinciden. El título, el buscador y los botones Cancelar / Guardar quedan siempre visibles; solo scrollea el recuadro. Deslizar dentro del recuadro con el teclado abierto lo cierra. En la lista de adicionales, el encargado ve las que cargó él y el admin todas. Al tocar una aparece la confirmación "¿Eliminar esta limpieza adicional?" (Cancelar / Eliminar), que borra la visita entera.
 
@@ -244,7 +244,7 @@ Se suman a la fila del cliente como cualquier carga: limpieza (+1 solo si realiz
 - Clientes sin `encargado` asignado: solo los ve el admin, hasta que se los asigne a alguien.
 - **Única excepción:** el buscador del modal de Limpieza adicional muestra a cualquier usuario todos los clientes activos, con nombre, barrio, dirección, teléfono y tarifa (más el id de su encargado, para saber si mostrar "Editar"), porque un encargado puede tener que limpiar un cliente que no es suyo.
 **Agrupado en el Resumen:** siempre por barrio (mismo criterio de "Sin barrio" que la pantalla de Cliente), nunca por encargado. El admin tiene un selector "Todos" + cada usuario, debajo del buscador. El encargado no ve el selector.
-**Selector de encargado en la pantalla de Cliente (solo admin):** en la fila de Ver todos, entre el toggle y el indicador de semana, un selector "Todos" + cada usuario aprobado (incluido el propio admin), igual al del Resumen. Arranca en el propio admin, así que por defecto ve sus clientes. La elección no se guarda: al volver a entrar a Clientes arranca otra vez en el admin. El filtro es solo visual, en el frontend, sobre la lista que ya devuelve el backend, y se aplica después del filtro de semana y antes del buscador. Sin opción "Sin asignar": esos clientes solo aparecen en "Todos". Si el admin le asigna a otro un cliente que se ve en su vista, el cliente desaparece de la vista al guardar. El encargado no ve el selector.
+**Selector de encargado en la pantalla de Cliente (solo admin):** en la fila de Ver todos, a la derecha del switch (el indicador de semana pasó a ser un chip junto al título), un selector "Todos" + cada usuario aprobado (incluido el propio admin), igual al del Resumen. Arranca en el propio admin, así que por defecto ve sus clientes. La elección no se guarda: al volver a entrar a Clientes arranca otra vez en el admin. El filtro es solo visual, en el frontend, sobre la lista que ya devuelve el backend, y se aplica después del filtro de semana y antes del buscador. Sin opción "Sin asignar": esos clientes solo aparecen en "Todos". Si el admin le asigna a otro un cliente que se ve en su vista, el cliente desaparece de la vista al guardar. El encargado no ve el selector.
 
 ## Guardador de cargas (frontend)
 

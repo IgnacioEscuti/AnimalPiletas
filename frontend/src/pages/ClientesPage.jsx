@@ -594,36 +594,43 @@ export function ClientesPage({ onPrimeraCarga }) {
 
   return (
     <section>
-      <div className="page-title">
-        <h2>Clientes</h2>
-        <button onClick={abrirNuevo} className="btn-nuevo">
-          <span className="btn-nuevo-full">+ Nuevo cliente</span>
-          <span className="btn-nuevo-icon" aria-hidden="true">
-            +
+      <div className="clientes-header">
+        <div className="clientes-header-titulo">
+          <h2>Clientes</h2>
+          <span className="chip-semana">
+            {verTodos ? "Semana 1 y 2" : `Semana ${SEMANA_ACTUAL}`}
           </span>
-        </button>
-      </div>
+        </div>
 
-      <div className="filtros-clientes">
-        <input
-          type="text"
-          placeholder="Buscar por cliente o barrio..."
-          value={busqueda}
-          onChange={(event) => setBusqueda(event.target.value)}
-          className="search-input"
-        />
-        <div className="fila-semana">
-          <label className="toggle-ver-todos">
+        <label className="buscador-clientes">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="7" />
+            <path d="m20 20-3.5-3.5" />
+          </svg>
+          <input
+            type="text"
+            placeholder="Buscar por cliente o barrio..."
+            aria-label="Buscar por cliente o barrio"
+            value={busqueda}
+            onChange={(event) => setBusqueda(event.target.value)}
+          />
+        </label>
+
+        <div className="clientes-header-filtros">
+          <label className="switch-ver-todos">
             <input
               type="checkbox"
+              role="switch"
               checked={verTodos}
               onChange={(event) => setVerTodos(event.target.checked)}
             />
+            <span className="switch-track" aria-hidden="true" />
             Ver todos
           </label>
           {esAdmin && (
             <select
               className="select-encargado"
+              aria-label="Filtrar por encargado"
               value={encargadoSeleccionado}
               onChange={(event) => setEncargadoSeleccionado(event.target.value)}
             >
@@ -635,19 +642,23 @@ export function ClientesPage({ onPrimeraCarga }) {
               ))}
             </select>
           )}
-          <span className="indicador-semana">
-            {verTodos ? "Semana 1 y 2" : `Semana ${SEMANA_ACTUAL}`}
-          </span>
         </div>
       </div>
 
-      <button
-        type="button"
-        className="btn-outline-accent btn-limpieza-adicional"
-        onClick={() => setAdicionalAbierto(true)}
-      >
-        + Limpieza adicional
-      </button>
+      <div className="clientes-acciones">
+        <button type="button" onClick={abrirNuevo}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true">
+            <path d="M12 5v14M5 12h14" />
+          </svg>
+          Nuevo cliente
+        </button>
+        <button type="button" className="btn-outline-accent" onClick={() => setAdicionalAbierto(true)}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M12 3v3M12 18v3M3 12h3M18 12h3M6 6l2 2M16 16l2 2M6 18l2-2M16 8l2-2" />
+          </svg>
+          Limpieza adicional
+        </button>
+      </div>
 
       {error && <p className="error-message">{error}</p>}
 
