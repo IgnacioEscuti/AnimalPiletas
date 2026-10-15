@@ -381,9 +381,218 @@ li.row input {
   color: var(--text);
 }
 
-/* Tarjetas de cliente: solo mobile. En desktop se ve la tabla. */
+/* Tarjetas de cliente: solo mobile. En desktop se ve ResumenTable. */
 .resumen-cards {
   display: none;
+}
+
+/* ---------- Resumen: lista de clientes en desktop (ResumenTable) ----------
+   Encabezado y filas usan el mismo grid. El encabezado lleva el mismo
+   padding y un borde transparente igual al de las filas, para que las
+   columnas queden alineadas. */
+.rt-grid {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1.3fr) minmax(0, 0.95fr) minmax(0, 0.95fr) minmax(0, 2.1fr)
+    minmax(0, 1fr) minmax(0, 1fr) 120px;
+  align-items: center;
+  column-gap: 16px;
+  padding: 0 20px;
+  border: 1px solid transparent;
+}
+
+.rt-grid.rt-sin-empleado {
+  grid-template-columns:
+    minmax(0, 1.4fr) minmax(0, 0.8fr) minmax(0, 0.8fr) minmax(0, 2.6fr)
+    minmax(0, 1fr) 120px;
+}
+
+.rt-limpieza {
+  --cat: var(--cat-limpieza);
+}
+
+.rt-pastillas {
+  --cat: var(--cat-pastillas);
+}
+
+.rt-extras {
+  --cat: var(--cat-extras);
+}
+
+.rt-encabezado {
+  margin-bottom: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.rt-encabezado > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.rt-punto {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--cat);
+}
+
+.rt-fila {
+  min-height: 84px;
+  padding-top: 16px;
+  padding-bottom: 16px;
+  background: var(--bg);
+  border-color: var(--border);
+  border-radius: 18px;
+}
+
+.rt-fila + .rt-fila {
+  margin-top: 10px;
+}
+
+.rt-nombre {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+.rt-celda {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.rt-cantidad {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.rt-precio {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--cat);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.rt-cero .rt-cantidad,
+.rt-cero .rt-precio {
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+.rt-celda-extras {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.rt-extras-toggle,
+.rt-extras-toggle-espacio {
+  flex: none;
+  width: 32px;
+  height: 32px;
+}
+
+.rt-extras-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--cat-extras) 18%, transparent);
+  color: var(--cat-extras);
+}
+
+.rt-extras-toggle:hover {
+  background: color-mix(in srgb, var(--cat-extras) 26%, transparent);
+}
+
+.rt-extras-toggle svg {
+  transition: transform 0.25s ease;
+}
+
+.rt-extras-toggle.abierto svg {
+  transform: rotate(180deg);
+}
+
+.rt-extras-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.rt-extras-resto {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow: hidden;
+}
+
+/* Si no entra en una línea, el precio baja antes de cortar el nombre. */
+.rt-extra-linea {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 10px;
+  min-width: 0;
+}
+
+.rt-extra-nombre {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  overflow-wrap: break-word;
+  min-width: 0;
+}
+
+.rt-empleado {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+.rt-vacio {
+  color: var(--text-muted);
+}
+
+.rt-total {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.rt-copiar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 11px 12px;
+  font-size: 15px;
+  font-weight: 600;
+  background: var(--accent);
+  color: var(--bg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rt-extras-toggle svg {
+    transition: none;
+  }
 }
 
 /* ---------- Resumen: parte superior ----------
@@ -825,14 +1034,6 @@ li.row input {
   }
 }
 
-/* La columna de "Copiar" no tiene texto en el header, así que sin esto
-   el layout automático de la tabla le reparte espacio de más y el botón
-   queda pegado a la izquierda con un hueco vacío a la derecha. */
-.resumen-table td.td-accion {
-  width: 1%;
-  white-space: nowrap;
-}
-
 .error-message {
   color: var(--danger);
   font-size: 14px;
@@ -1040,40 +1241,6 @@ li.row input {
   font-size: 15px;
   font-weight: 600;
   white-space: nowrap;
-}
-
-table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0 6px;
-}
-
-thead th {
-  text-align: left;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-  padding: 0 8px 10px;
-}
-
-tbody tr {
-  animation: fade-in 0.2s ease;
-}
-
-tbody td {
-  background: var(--bg);
-  padding: 12px 8px;
-  vertical-align: middle;
-}
-
-tbody tr td:first-child {
-  border-radius: 14px 0 0 14px;
-}
-
-tbody tr td:last-child {
-  border-radius: 0 14px 14px 0;
 }
 
 .badge {
@@ -2385,19 +2552,6 @@ input[type="number"]::-webkit-inner-spin-button {
     width: 32px;
   }
 
-  table {
-    display: block;
-    border-spacing: 0;
-  }
-
-  thead {
-    display: none;
-  }
-
-  tbody {
-    display: block;
-  }
-
   /* --expandir-cliente: misma duración y easing que la animación de altura
      de ClienteRow (EASING_MOBILE), para que todo se mueva sincronizado. */
   .fila-cliente-grupo {
@@ -2533,8 +2687,6 @@ input[type="number"]::-webkit-inner-spin-button {
     padding: 11px 16px;
   }
 
-  .td-titulo,
-  .td-titulo *,
   .celda-titulo,
   .celda-titulo * {
     -webkit-user-select: none;
@@ -2605,15 +2757,10 @@ input[type="number"]::-webkit-inner-spin-button {
   }
 
   /* Celdas con label generado desde data-label (Limpieza / Extra / Empleado) */
-  td[data-label] {
-    padding: 0 16px 18px !important;
-  }
-
   .fila-cliente .celda[data-label] {
     padding: 0 16px 18px;
   }
 
-  td[data-label]::before,
   .celda[data-label]::before {
     content: attr(data-label);
     display: block;
@@ -2771,10 +2918,6 @@ input[type="number"]::-webkit-inner-spin-button {
 
   /* Botón de editar: se oculta el de la fila título (desktop),
      queda el de la fila expandida */
-  td.td-accion {
-    display: none !important;
-  }
-
   .fila-cliente .celda.celda-accion {
     display: none;
   }
@@ -2886,7 +3029,7 @@ input[type="number"]::-webkit-inner-spin-button {
     background: var(--bg);
   }
 
-  /* Resumen: en mobile la tabla se reemplaza por ResumenClienteCard. */
+  /* Resumen: en mobile la lista de desktop se reemplaza por ResumenClienteCard. */
   .resumen-table {
     display: none;
   }
