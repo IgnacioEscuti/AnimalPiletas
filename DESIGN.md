@@ -11,6 +11,9 @@ colors:
   accent-hover: "#7c6fc4"
   accent-bg: "rgba(145, 132, 217, 0.14)"
   barrio-header-bg: "#2a2a41"
+  cat-limpieza: "#4fd1b8"
+  cat-pastillas: "#9184d9"
+  cat-extras: "#f0b44c"
   success: "#34c759"
   success-hover: "#28a745"
   success-bg: "rgba(52, 199, 89, 0.16)"
@@ -21,6 +24,12 @@ colors:
   scrim: "rgba(10, 10, 16, 0.6)"
   nav-blur: "rgba(28, 30, 42, 0.92)"
 typography:
+  stat:
+    fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+    fontSize: "44px"
+    fontWeight: 700
+    lineHeight: 1
+    letterSpacing: "-0.02em"
   display:
     fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
     fontSize: "34px"
@@ -154,8 +163,16 @@ Paleta mono-acento sobre fondo casi negro: dos tonos oscuros neutros para profun
 - **Texto sobre color** (`#ffffff`): texto/ícono cuando el fondo es un color lleno y saturado (botón primario, estado verde/rojo activo). Nunca se usa blanco sobre una superficie neutra.
 - **Scrim** (`rgba(10,10,16,0.6)`): fondo semitransparente detrás de cualquier modal, en desktop y mobile por igual.
 
+### Categorías del Resumen
+Cada categoría del Resumen tiene un color propio que **solo la identifica** (ícono, label, chip de cantidad y el tinte de su tarjeta de total). Nunca marca algo interactivo: el "Ver más" de extras toma el color de su tarjeta, pero los tabs, flechas y botones siguen en violeta.
+- **Limpieza** (`#4fd1b8`, `--cat-limpieza`): verde azulado. Distinto del verde de "confirmado" (`--success`), que sigue siendo semántico.
+- **Pastillas** (`#9184d9`, `--cat-pastillas`): el mismo violeta del acento, con variable propia para poder separarlo si hace falta.
+- **Extras** (`#f0b44c`, `--cat-extras`): ámbar.
+
+Los fondos y bordes de esas tarjetas siguen la Regla del Tinte por Opacidad (`color-mix` del color de categoría al 12% de fondo, 24% de borde, 18% para el ícono y el chip).
+
 ### Named Rules
-**La Regla del Acento Único.** El violeta es la única voz de color no semántica en toda la app. Si un control necesita destacar y no es "confirmar" ni "cancelar", es violeta o no es nada.
+**La Regla del Acento Único.** El violeta es la única voz de color no semántica para lo interactivo. Si un control necesita destacar y no es "confirmar" ni "cancelar", es violeta o no es nada. Los colores de categoría del Resumen no compiten con esta regla: identifican datos, no controles.
 
 **La Regla del Verde y Rojo Reservados.** Verde = confirmado/ok (limpieza realizada). Rojo = rechazado/cancelado (limpieza no realizada, cancelar cliente). Ningún otro elemento usa estos colores, ni siquiera como acento decorativo.
 
@@ -170,6 +187,7 @@ Paleta mono-acento sobre fondo casi negro: dos tonos oscuros neutros para profun
 ### Hierarchy
 Escala completa, de mayor a menor. Varios roles se reutilizan a propósito en más de un lugar cuando cumplen la misma función visual en contextos distintos (p. ej. "title" es el `h1` en mobile y el `h2` en desktop — ambos son el título de la pantalla en su propio contexto).
 
+- **Stat** (700, 44px, letter-spacing -0.02em, line-height 1): número grande de los totales del Resumen (34px en la tarjeta de extras en mobile).
 - **Display** (600, 34px, letter-spacing -0.02em): título de página en desktop ("AnimalPiletas").
 - **Title** (600, 22px, letter-spacing -0.01em): subtítulo de sección en desktop (`h2`), título de página en mobile (`h1`) y nombre de barrio en las tarjetas de Clientes (desktop; 19px en mobile).
 - **Subtitle** (600, 19px): subtítulo de sección en mobile (`h2`).
@@ -241,6 +259,12 @@ Todo redondeado, sin esquinas duras en ningún control. Botones cuadrados muy ch
 
 ### Tarjeta de barrio (Clientes)
 Cada barrio (y "Sin barrio") es una sola tarjeta: `surface`, borde 1px `border`, radio 18px, `overflow: hidden` en escritorio (en mobile no, para no recortar la sombra del cliente expandido: el header y la última fila redondean sus propias esquinas), 14px entre tarjetas. Header con fondo `barrio-header-bg`: handle de arrastre (ícono SVG de dos líneas, violeta), nombre del barrio en Title (22px desktop / 19px mobile) en `text`, y el contador a la derecha. Los clientes van adentro, sin tarjeta propia, separados por una línea de 1px `border` (en mobile arranca alineada con el punto de estado). En mobile, el cliente expandido queda demarcado: borde 1px `accent` (anillo inset, no cambia la altura), radio 18px, 8px de separación con los bordes de la tarjeta, chevron hacia arriba a la derecha, la sombra de "Cliente expandido" y sin separadores pegados. Al abrir, la altura se anima en 450ms (`cubic-bezier(0.32, 0.72, 0, 1)`) y margen, borde, radio y sombra entran con la misma curva; el contenido hace fade-in con 100ms de delay y, al terminar, la fila se scrollea a la vista. Al cerrar, el contenido hace fade-out mientras la card se achica (mismos 450ms) y recién al final se oculta. En escritorio la altura se anima en 280ms (ease-out). Con "reducir movimiento" activado todo aparece directo. En escritorio, los títulos de columna van una sola vez arriba de todas las tarjetas, en Caption Small mayúscula y `text-muted`, y las filas son un grid con las mismas columnas; Pastillas, Extra/Precio (un solo contenedor partido por una línea), Empleado y "Editar cliente" miden 44px de alto.
+
+### Encabezado del Resumen
+- **Título + tabs:** "Resumen" en Display y, a su derecha, los tabs Semanal/Mensual en una cápsula (`surface`, borde sutil, radio 999px). El activo es violeta lleno con texto `bg`, y el indicador se desliza entre tabs (framer-motion).
+- **Período:** tarjeta `surface` con borde, radio 18px: flecha ‹ y › en cuadrados de 44px (radio 14px) y al centro ícono de calendario violeta + label del período (Lead). Tocar el label abre el date picker nativo (el input de fecha está oculto). En desktop va a la derecha de la fila del título; en mobile, a ancho completo debajo, y el label puede partirse en dos líneas.
+- **Totales:** una tarjeta por categoría (radio 22px desktop / 18px mobile) con ícono lucide en un cuadrado de 44px, label en el color de la categoría y el número en Stat. Desktop: las tres en una fila; extras arranca compacta (título, "Ver más" y número) y al desplegar muestra la lista adentro. Mobile: limpiezas y pastillas en dos columnas (ícono arriba, número, label abajo), extras a ancho completo con los 3 primeros visibles y "Ver más" abajo a la derecha. Cada extra es una fila con el nombre y un chip `×N`, separadas por una línea tintada de la categoría.
+- **Buscador + selector:** en la misma fila; el buscador (ícono de lupa, fondo `surface`) ocupa el resto y el selector de encargado va a la derecha (solo admin).
 
 ### Fila de cliente colapsable (componente de firma)
 Cada cliente arranca colapsado: handle de arrastre (mismo ícono SVG, violeta al 60%), ícono de estado circular de 26px (tick verde / cruz roja / guion gris "pendiente"), nombre, badge de pastillas si corresponde, y un chevron puramente indicativo — tocar cualquier parte del encabezado (no solo el chevron) expande o colapsa. Expandido, revela Limpieza/Pastillas/Extra/Empleado y, antes del botón Editar, dirección y teléfono con ícono. El reordenamiento dentro de un barrio se hace con drag-and-drop nativo en desktop y con mantener-presionado + arrastrar en mobile (mismo endpoint de persistencia en ambos casos).

@@ -41,6 +41,12 @@ function agruparPorBarrio(filas, barrios) {
   return grupos;
 }
 
+// Cada extra suma +1 a la cantidad y su precio al de ese nombre.
+function sumarExtra(extras, nombre, precio) {
+  const actual = extras.get(nombre) ?? { cantidad: 0, precio: 0 };
+  extras.set(nombre, { cantidad: actual.cantidad + 1, precio: actual.precio + precio });
+}
+
 function datosVacios() {
   return {
     limpiezaCantidad: 0,
@@ -160,7 +166,7 @@ export class ResumenService {
 
     for (const uso of usosExtra) {
       const datos = datosDe(uso.cliente);
-      datos.extras.set(uso.nombreExtra, (datos.extras.get(uso.nombreExtra) ?? 0) + 1);
+      sumarExtra(datos.extras, uso.nombreExtra, uso.precioUnitario);
       datos.extraPrecio += uso.precioUnitario;
     }
 
@@ -187,7 +193,7 @@ export class ResumenService {
       datos.pastillasCantidad += adicional.cantidadPastillas;
       datos.pastillasPrecio += adicional.cantidadPastillas * adicional.precioPastillasUsado;
       for (const { nombre, precio } of adicional.extras) {
-        datos.extras.set(nombre, (datos.extras.get(nombre) ?? 0) + 1);
+        sumarExtra(datos.extras, nombre, precio);
         datos.extraPrecio += precio;
       }
       const empleado = adicional.empleado || adicional.cargadoPor?.nombre || adicional.cargadoPor?.email;
@@ -197,7 +203,7 @@ export class ResumenService {
     const filas = [...clientes, ...clientesFueraDeFiltro].map((cliente) => {
       const datos = porCliente.get(cliente.id) ?? datosVacios();
       const extra = {
-        extras: Array.from(datos.extras, ([nombre, cantidad]) => ({ nombre, cantidad })),
+        extras: Array.from(datos.extras, ([nombre, { cantidad, precio }]) => ({ nombre, cantidad, precio })),
         precio: datos.extraPrecio,
       };
       const totalGeneral = datos.limpiezaPrecio + datos.pastillasPrecio + datos.extraPrecio;

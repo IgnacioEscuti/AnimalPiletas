@@ -1,4 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { motion } from "framer-motion";
+import { CalendarDays, ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { ResumenTable } from "../components/ResumenTable.jsx";
 import { ResumenTotales } from "../components/ResumenTotales.jsx";
 import { ResumenGrupo } from "../components/ResumenGrupo.jsx";
@@ -32,6 +34,7 @@ export function ResumenPage() {
   const [usuarios, setUsuarios] = useState([]);
   const [encargadoSeleccionado, setEncargadoSeleccionado] = useState(TODOS);
   const [error, setError] = useState("");
+  const inputFechaRef = useRef(null);
 
   const fechaActiva = tab === "semanal" ? fechaSemanal : fechaMensual;
   const periodo = resumen ? formatoPeriodo(tab, resumen.inicio, resumen.fin) : "";
@@ -87,6 +90,24 @@ export function ResumenPage() {
     else setFechaMensual(nuevaFecha);
   };
 
+  // El input de fecha está oculto: tocar el label abre el picker nativo.
+  // showPicker() no existe en navegadores viejos (y puede tirar error), así
+  // que el fallback es enfocar y clickear el input.
+  const abrirSelectorFecha = () => {
+    const input = inputFechaRef.current;
+    if (!input) return;
+    try {
+      if (typeof input.showPicker === "function") {
+        input.showPicker();
+        return;
+      }
+    } catch {
+      // sigue al fallback
+    }
+    input.focus();
+    input.click();
+  };
+
   const matchea = crearMatcher(busqueda);
 
   // Barrio que matchea: la sección entera. Si no, solo los clientes que matchean.
@@ -117,71 +138,86 @@ export function ResumenPage() {
 
   return (
     <>
-      <div className="page-title">
-        <h2>Resumen</h2>
-      </div>
-
-      <section className="card-mobile">
-        <div className="tabs">
-          <button
-            className={tab === "semanal" ? "" : "secondary"}
-            onClick={() => setTab("semanal")}
-          >
-            Semanal
-          </button>
-          <button
-            className={tab === "mensual" ? "" : "secondary"}
-            onClick={() => setTab("mensual")}
-          >
-            Mensual
-          </button>
+      <div className="resumen-top">
+        <div className="resumen-encabezado">
+          <h2>Resumen</h2>
+          <div className="resumen-tabs">
+            {[
+              ["semanal", "Semanal"],
+              ["mensual", "Mensual"],
+            ].map(([clave, label]) => (
+              <button
+                key={clave}
+                type="button"
+                className={tab === clave ? "activo" : ""}
+                onClick={() => setTab(clave)}
+              >
+                {tab === clave && (
+                  <motion.span
+                    layoutId="resumen-tab-indicador"
+                    className="resumen-tab-indicador"
+                    transition={{ type: "spring", stiffness: 500, damping: 45 }}
+                  />
+                )}
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
 
-        <div className="periodo-nav">
-          <div className="periodo-nav-grupo">
-            <button className="secondary" onClick={irAnterior} title="Período anterior">
-              ←
-            </button>
-            <span className="periodo-label">{periodo}</span>
-            <button className="secondary" onClick={irSiguiente} title="Período siguiente">
-              →
-            </button>
-          </div>
+        <div className="periodo-card">
+          <button type="button" className="periodo-flecha" onClick={irAnterior} aria-label="Período anterior">
+            <ChevronLeft size={20} strokeWidth={2.2} />
+          </button>
+          <button type="button" className="periodo-actual" onClick={abrirSelectorFecha}>
+            <CalendarDays size={20} strokeWidth={2} className="periodo-icono" />
+            <span className="periodo-label">{periodo || " "}</span>
+          </button>
+          <button type="button" className="periodo-flecha" onClick={irSiguiente} aria-label="Período siguiente">
+            <ChevronRight size={20} strokeWidth={2.2} />
+          </button>
           <input
+            ref={inputFechaRef}
             type="date"
-            className="periodo-fecha"
+            className="periodo-fecha-oculta"
             value={fechaISO(fechaActiva)}
             onChange={handleFechaManual}
+            tabIndex={-1}
+            aria-hidden="true"
           />
         </div>
+      </div>
+
+      {resumen && <ResumenTotales totales={resumen.totales} />}
+
+      <div className="resumen-filtros">
+        <label className="resumen-buscador">
+          <Search size={18} strokeWidth={2} className="resumen-buscador-icono" />
+          <input
+            type="text"
+            placeholder="Buscar cliente o barrio"
+            value={busqueda}
+            onChange={(event) => setBusqueda(event.target.value)}
+          />
+        </label>
 
         {esAdmin && (
-          <div className="resumen-selector-wrap">
-            <select
-              className="select-encargado"
-              value={encargadoSeleccionado}
-              onChange={(event) => setEncargadoSeleccionado(event.target.value)}
-            >
-              <option value={TODOS}>Todos</option>
-              {usuarios.map((usuarioItem) => (
-                <option key={usuarioItem.id} value={usuarioItem.id}>
-                  {usuarioItem.nombre || usuarioItem.email}
-                </option>
-              ))}
-            </select>
-          </div>
+          <select
+            className="select-encargado"
+            value={encargadoSeleccionado}
+            onChange={(event) => setEncargadoSeleccionado(event.target.value)}
+          >
+            <option value={TODOS}>Todos</option>
+            {usuarios.map((usuarioItem) => (
+              <option key={usuarioItem.id} value={usuarioItem.id}>
+                {usuarioItem.nombre || usuarioItem.email}
+              </option>
+            ))}
+          </select>
         )}
+      </div>
 
-        {resumen && <ResumenTotales totales={resumen.totales} />}
-
-        <input
-          type="text"
-          placeholder="Buscar por cliente o barrio..."
-          value={busqueda}
-          onChange={(event) => setBusqueda(event.target.value)}
-          className="search-input resumen-search"
-        />
-
+      <section className="card-mobile resumen-lista">
         {error && <p className="error-message">{error}</p>}
 
         {resumen ? (

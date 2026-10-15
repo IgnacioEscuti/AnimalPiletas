@@ -8,6 +8,11 @@
   --accent-hover: #7c6fc4;
   --accent-bg: rgba(145, 132, 217, 0.14);
   --barrio-header-bg: #2a2a41;
+  /* Colores de categoría del Resumen: solo identifican la categoría,
+     no marcan nada interactivo (eso sigue siendo --accent). */
+  --cat-limpieza: #4fd1b8;
+  --cat-pastillas: #9184d9;
+  --cat-extras: #f0b44c;
   --success: #29c34f;
   --success-hover: #28a745;
   --danger: #f1344a;
@@ -331,15 +336,7 @@ li.row input {
   padding: 8px 0;
 }
 
-.resumen-selector-wrap {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: 40px;
-}
 
-.search-input.resumen-search {
-  margin-bottom: 0;
-}
 
 .select-encargado {
   width: 120px;
@@ -366,15 +363,11 @@ li.row input {
   margin: 40px 0;
 }
 
-/* El primer .resumen-grupo no es el primer hijo de la sección (antes
-   están tabs/período/buscador), así que :first-child nunca lo agarra —
-   se apunta con el buscador, que siempre es el hermano inmediato
-   anterior cuando hay resultados para mostrar. */
-.resumen-search + .resumen-grupo {
-  margin-top: 20px;
+.resumen-grupo:first-child {
+  margin-top: 0;
 }
 
-.resumen-search + .resumen-grupo .resumen-grupo-header {
+.resumen-grupo:first-child .resumen-grupo-header {
   padding-top: 0;
 }
 
@@ -396,48 +389,443 @@ li.row input {
   margin-top: 4px;
 }
 
-/* Card de totales del período. Toma el look que la fila de totales tenía
-   en mobile (fondo de acento, "Total" en negrita, labels en mayúscula) y lo
-   usa también en desktop, ahí en una sola línea. */
-.resumen-totales {
+/* ---------- Resumen: parte superior ----------
+   Título + tabs, tarjeta de período, totales por categoría y la fila de
+   buscador/selector. Viven sobre el fondo de la página (fuera de la
+   section), la lista de clientes sigue en su propia tarjeta abajo. */
+.resumen-top {
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 16px 24px;
-  background: var(--accent-bg);
-  border-radius: 14px;
-  padding: 14px 18px;
-  margin-bottom: 20px;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
 }
 
-.resumen-totales-titulo {
-  font-weight: 700;
-  font-size: 17px;
-}
-
-.resumen-totales-items {
+.resumen-encabezado {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px 24px;
-  margin-left: auto;
+  align-items: center;
+  gap: 20px;
 }
 
-.resumen-totales-item {
+.resumen-encabezado h2 {
+  margin: 0;
+  font-size: 34px;
+  letter-spacing: -0.02em;
+}
+
+/* Tabs Semanal/Mensual: cápsula con el activo en violeta lleno. El
+   indicador se desliza entre tabs (framer-motion, layoutId). */
+.resumen-tabs {
   display: flex;
-  align-items: baseline;
+  gap: 4px;
+  padding: 4px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  isolation: isolate;
+}
+
+.resumen-tabs button {
+  position: relative;
+  padding: 9px 18px;
+  font-size: 16px;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-muted);
+  transition: color 0.2s ease;
+}
+
+.resumen-tabs button:hover {
+  background: transparent;
+  color: var(--text);
+}
+
+.resumen-tabs button.activo {
+  color: var(--bg);
+  font-weight: 600;
+}
+
+.resumen-tab-indicador {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: var(--accent);
+}
+
+/* Navegación de período: ‹ [calendario + período] › */
+.periodo-card {
+  position: relative;
+  display: flex;
+  align-items: center;
   gap: 8px;
+  min-width: 380px;
+  padding: 6px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
 }
 
-.resumen-totales-label {
-  text-transform: uppercase;
-  font-size: 11px;
+.periodo-flecha {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  flex-shrink: 0;
+  background: rgba(233, 233, 237, 0.06);
+  color: var(--text);
+}
+
+.periodo-flecha:hover {
+  background: var(--accent-bg);
+}
+
+.periodo-actual {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: transparent;
+  color: var(--text);
+}
+
+.periodo-actual:hover {
+  background: transparent;
+}
+
+.periodo-icono {
+  flex-shrink: 0;
+  color: var(--accent);
+}
+
+.periodo-label {
+  font-size: 17px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* El input de fecha sigue existiendo para el picker nativo, pero no se ve:
+   se abre tocando el label (showPicker). Queda debajo del label para que
+   el picker aparezca anclado ahí. */
+.periodo-fecha-oculta {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 1px;
+  min-width: 0;
+  height: 1px;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Totales por categoría */
+.resumen-totales {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: start;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.total-card {
+  --cat: var(--accent);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas: "icono label numero";
+  align-items: center;
+  column-gap: 14px;
+  min-height: 92px;
+  padding: 18px 22px;
+  border-radius: 22px;
+  background: color-mix(in srgb, var(--cat) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--cat) 24%, transparent);
+}
+
+.total-limpieza {
+  --cat: var(--cat-limpieza);
+}
+
+.total-pastillas {
+  --cat: var(--cat-pastillas);
+}
+
+.total-extras {
+  --cat: var(--cat-extras);
+  grid-template-areas:
+    "icono label numero"
+    "icono vermas numero"
+    "lista lista lista";
+}
+
+.total-icono {
+  grid-area: icono;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--cat) 18%, transparent);
+  color: var(--cat);
+}
+
+.total-label {
+  grid-area: label;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--cat);
+}
+
+.total-numero {
+  grid-area: numero;
+  font-size: 44px;
   font-weight: 700;
-  letter-spacing: 0.05em;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.total-extras .total-label {
+  align-self: end;
+}
+
+.total-ver-mas {
+  grid-area: vermas;
+  justify-self: start;
+  align-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 0;
+  font-size: 14px;
+  font-weight: 600;
+  background: transparent;
+  color: var(--cat);
+  border-radius: 8px;
+}
+
+.total-ver-mas:hover {
+  background: transparent;
+  color: var(--text);
+}
+
+.total-ver-mas svg {
+  transition: transform 0.25s ease;
+}
+
+.total-extras.abierto .total-ver-mas svg {
+  transform: rotate(180deg);
+}
+
+/* Desktop: la tarjeta de extras arranca compacta; la lista aparece al
+   desplegar. */
+.total-extras-lista,
+.total-extras-vacio {
+  grid-area: lista;
+  display: none;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.total-extras.abierto .total-extras-lista {
+  display: block;
+  animation: fade-in 0.2s ease;
+}
+
+.total-extras-lista li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid color-mix(in srgb, var(--cat) 16%, transparent);
+}
+
+.total-extras-nombre {
+  font-size: 16px;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.total-extras-chip {
+  flex-shrink: 0;
+  min-width: 52px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--cat);
+  background: color-mix(in srgb, var(--cat) 18%, transparent);
+  font-variant-numeric: tabular-nums;
+}
+
+.total-extras-vacio {
+  font-size: 14px;
   color: var(--text-muted);
 }
 
-.resumen-totales-valor {
-  font-weight: 600;
+/* Buscador + selector de encargado en la misma fila */
+.resumen-filtros {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.resumen-buscador {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+}
+
+.resumen-buscador input {
+  width: 100%;
+  min-width: 0;
+  padding-left: 44px;
+  background: var(--surface);
+}
+
+.resumen-buscador-icono {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.resumen-filtros .select-encargado {
+  flex-shrink: 0;
+  width: 140px;
+  background-color: var(--surface);
+}
+
+@media (max-width: 700px) {
+  .resumen-top {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+    margin-bottom: 16px;
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .resumen-encabezado {
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .resumen-tabs button {
+    padding: 9px 16px;
+  }
+
+  .periodo-card {
+    min-width: 0;
+  }
+
+  /* Una semana que cruza de mes ("23 de febrero al 1 de marzo de 2026")
+     no entra en una línea a 390px: se parte en dos en vez de cortarse. */
+  .periodo-actual {
+    padding: 6px 4px;
+    gap: 8px;
+  }
+
+  .periodo-label {
+    font-size: 15px;
+    white-space: normal;
+    text-align: center;
+  }
+
+  .resumen-totales {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  /* Limpiezas y pastillas: ícono arriba, número grande y label abajo */
+  .total-limpieza,
+  .total-pastillas {
+    grid-template-columns: auto;
+    grid-template-areas:
+      "icono"
+      "numero"
+      "label";
+    justify-items: start;
+    row-gap: 4px;
+    padding: 16px;
+    border-radius: 18px;
+  }
+
+  .total-limpieza .total-numero,
+  .total-pastillas .total-numero {
+    margin-top: 14px;
+  }
+
+  /* Extras: a ancho completo, con la lista visible (3 primeros) */
+  .total-extras {
+    grid-column: 1 / -1;
+    grid-template-areas:
+      "icono label numero"
+      "lista lista lista"
+      "vermas vermas vermas";
+    padding: 16px;
+    border-radius: 18px;
+  }
+
+  .total-extras .total-label {
+    align-self: center;
+    color: var(--text);
+  }
+
+  .total-extras .total-numero {
+    font-size: 34px;
+  }
+
+  .total-extras-lista,
+  .total-extras-vacio {
+    display: block;
+  }
+
+  .total-extras-resto {
+    display: none !important;
+  }
+
+  .total-extras.abierto .total-extras-resto {
+    display: flex !important;
+    animation: fade-in 0.2s ease;
+  }
+
+  .total-ver-mas {
+    justify-self: end;
+    margin-top: 8px;
+    font-size: 15px;
+  }
+
+  .total-ver-mas.solo-desktop {
+    display: none;
+  }
+
+  .resumen-filtros {
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .resumen-filtros .select-encargado {
+    width: 120px;
+  }
 }
 
 /* La columna de "Copiar" no tiene texto en el header, así que sin esto
@@ -1619,13 +2007,7 @@ button.adicional-volver:hover {
   margin-bottom: 24px;
 }
 
-.tabs {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 20px;
-}
 
-.tabs button,
 .main-nav button {
   padding: 10px 18px;
   position: relative;
@@ -1639,47 +2021,10 @@ button.adicional-volver:hover {
   background: color-mix(in srgb, var(--accent) 16%, transparent);
 }
 
-.periodo-nav {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  margin-bottom: 20px;
-}
 
-.periodo-nav-grupo {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  flex-wrap: nowrap;
-  flex: 1 1 auto;
-  min-width: 0;
-}
 
-.periodo-nav-grupo button {
-  width: 40px;
-  height: 40px;
-  padding: 0;
-  flex-shrink: 0;
-}
 
-.periodo-label {
-  font-size: 17px;
-  font-weight: 600;
-  flex: 1 1 auto;
-  min-width: 0;
-  text-align: center;
-}
 
-.periodo-fecha {
-  flex: none;
-  width: auto;
-  min-width: 0;
-  padding: 8px 10px;
-  font-size: 14px;
-}
 
 
 input[type="number"]::-webkit-outer-spin-button,
@@ -1985,19 +2330,8 @@ input[type="number"]::-webkit-inner-spin-button {
     letter-spacing: -0.02em;
   }
 
-  .periodo-nav {
-    gap: 12px;
-  }
 
-  .periodo-label {
-    min-width: 0;
-    font-size: 15px;
-  }
 
-  .periodo-fecha {
-    flex-basis: 100%;
-    order: 1;
-  }
 
   /* Encabezado de Clientes: la section ya no tiene fondo en mobile, así que
      la tarjeta pasa a surface y sus controles bajan a bg. */
@@ -2555,12 +2889,7 @@ input[type="number"]::-webkit-inner-spin-button {
     background: var(--bg);
   }
 
-  /* Tabs de Resumen: pill como el resto de los chips/badges en mobile */
-  .tabs button {
-    border-radius: 999px;
-  }
-
-  /* Tabla de Resumen -> tarjetas apiladas, mismo patrón que Clientes
+    /* Tabla de Resumen -> tarjetas apiladas, mismo patrón que Clientes
      (label en mayúscula vía data-label), sin scroll horizontal. */
   .resumen-table thead {
     display: none;
@@ -2628,22 +2957,8 @@ input[type="number"]::-webkit-inner-spin-button {
     border: none;
   }
 
-  .resumen-totales {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 6px;
-    padding: 14px 16px;
-  }
 
-  .resumen-totales-titulo {
-    text-align: center;
-  }
 
-  .resumen-totales-items {
-    flex-direction: column;
-    gap: 6px;
-    margin-left: 0;
-  }
 
   /* Modal de cliente -> bottom sheet */
   .modal-overlay {

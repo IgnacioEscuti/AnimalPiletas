@@ -172,13 +172,13 @@ Limpieza, UsoPastillas y UsoExtra se filtran por `fecha`. EmpleadoSemana se filt
 **Qué devuelve cada fila (por cliente):**
 - **Limpieza:** `cantidad` = limpiezas con `realizada: true` en el período · `precio` = suma de `precioUnitarioUsado + extra` · `fechas` = las fechas de esas limpiezas, ordenadas
 - **Pastillas:** `cantidad` = suma del campo `cantidad` · `precio` = suma de `cantidad × precioUnitarioUsado`
-- **Extras:** lista de `{ nombre, cantidad }` agrupando los UsoExtra por `nombreExtra` · `precio` = suma de `precioUnitario`
+- **Extras:** lista de `{ nombre, cantidad, precio }` agrupando los UsoExtra por `nombreExtra`, donde `precio` es la suma de `precioUnitario` de ese nombre · `precio` (total) = suma de `precioUnitario`
 - **empleados:** nombres únicos de EmpleadoSemana del período, unidos por coma
 - **totalGeneral:** limpieza + pastillas + extras
 
 **Fila de totales al pie** (solo cantidades, sin plata): total de limpiezas, total de pastillas, y extras desglosados por nombre.
 
-**Navegación entre períodos:** el endpoint recibe un tipo (`semanal` o `mensual`) y una fecha de referencia cualquiera dentro del período. A partir de esa fecha calcula el inicio/fin y corre la misma consulta. Un solo endpoint sirve para el período actual y para cualquier período pasado. En el frontend: dos pestañas, flechas anterior/siguiente, texto del período y un `<input type="date">` para saltar a cualquier período.
+**Navegación entre períodos:** el endpoint recibe un tipo (`semanal` o `mensual`) y una fecha de referencia cualquiera dentro del período. A partir de esa fecha calcula el inicio/fin y corre la misma consulta. Un solo endpoint sirve para el período actual y para cualquier período pasado. En el frontend: dos pestañas, flechas anterior/siguiente y texto del período; tocar el texto abre el selector de fecha nativo (un `<input type="date">` oculto) para saltar a cualquier período.
 
 **Buscador de clientes dentro del resumen:** campo de texto que filtra las filas por nombre, del lado del frontend, sobre los clientes que ya trajo la consulta.
 
@@ -245,7 +245,7 @@ Se suman a la fila del cliente como cualquier carga: limpieza (+1 solo si realiz
 - Admin: todos (en la pantalla de Cliente puede acotar la vista con el selector de encargado, ver abajo).
 - Clientes sin `encargado` asignado: solo los ve el admin, hasta que se los asigne a alguien.
 - **Única excepción:** el buscador del modal de Limpieza adicional muestra a cualquier usuario todos los clientes activos, con nombre, barrio, dirección, teléfono y tarifa (más el id de su encargado, para saber si mostrar "Editar"), porque un encargado puede tener que limpiar un cliente que no es suyo.
-**Agrupado en el Resumen:** siempre por barrio (mismo criterio de "Sin barrio" que la pantalla de Cliente), nunca por encargado. El admin tiene un selector "Todos" + cada usuario, debajo del buscador. El encargado no ve el selector.
+**Agrupado en el Resumen:** siempre por barrio (mismo criterio de "Sin barrio" que la pantalla de Cliente), nunca por encargado. El admin tiene un selector "Todos" + cada usuario, a la derecha del buscador. El encargado no ve el selector.
 **Selector de encargado en la pantalla de Cliente (solo admin):** en la fila de Ver todos, a la derecha del switch (el indicador de semana pasó a ser un chip junto al título), un selector "Todos" + cada usuario aprobado (incluido el propio admin), igual al del Resumen. Arranca en el propio admin, así que por defecto ve sus clientes. La elección no se guarda: al volver a entrar a Clientes arranca otra vez en el admin. El filtro es solo visual, en el frontend, sobre la lista que ya devuelve el backend, y se aplica después del filtro de semana y antes del buscador. Sin opción "Sin asignar": esos clientes solo aparecen en "Todos". Si el admin le asigna a otro un cliente que se ve en su vista, el cliente desaparece de la vista al guardar. El encargado no ve el selector.
 
 ## Guardador de cargas (frontend)
