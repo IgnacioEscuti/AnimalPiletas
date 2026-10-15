@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { CalendarDays, ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { ResumenTable } from "../components/ResumenTable.jsx";
+import { ResumenClienteCard } from "../components/ResumenClienteCard.jsx";
 import { ResumenTotales } from "../components/ResumenTotales.jsx";
 import { ResumenGrupo } from "../components/ResumenGrupo.jsx";
 import { Skeleton } from "../components/Skeleton.jsx";
@@ -125,6 +126,18 @@ export function ResumenPage() {
     const grupos = gruposVisibles.map(({ grupo, filas }) => (
       <ResumenGrupo key={grupo.barrioId} titulo={grupo.barrioNombre}>
         <ResumenTable filas={filas} periodo={periodo} tab={tab} inicioISO={resumen.inicio} />
+        <div className="resumen-cards">
+          {filas.map((fila, index) => (
+            <ResumenClienteCard
+              key={fila.clienteId}
+              fila={fila}
+              periodo={periodo}
+              tab={tab}
+              inicioISO={resumen.inicio}
+              index={index}
+            />
+          ))}
+        </div>
       </ResumenGrupo>
     ));
 
@@ -217,7 +230,7 @@ export function ResumenPage() {
         )}
       </div>
 
-      <section className="card-mobile resumen-lista">
+      <section className="resumen-lista">
         {error && <p className="error-message">{error}</p>}
 
         {resumen ? (

@@ -1,8 +1,9 @@
+// Un barrio del Resumen: su nombre como título suelto y, abajo, sus clientes.
 export function ResumenGrupo({ titulo, children }) {
   return (
     <div className="resumen-grupo">
-      <div className="resumen-grupo-header">{titulo}</div>
-      <div className="resumen-grupo-body">{children}</div>
+      <h3 className="resumen-grupo-titulo">{titulo}</h3>
+      {children}
     </div>
   );
 }

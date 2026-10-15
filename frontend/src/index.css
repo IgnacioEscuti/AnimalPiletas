@@ -367,26 +367,23 @@ li.row input {
   margin-top: 0;
 }
 
-.resumen-grupo:first-child .resumen-grupo-header {
-  padding-top: 0;
-}
-
 .resumen-grupo:last-child {
   margin-bottom: 0;
 }
 
-.resumen-grupo-header {
-  width: 100%;
-  padding: 8px 4px;
-  margin-bottom: 20px;
-  font-size: 19px;
+/* Nombre del barrio: título suelto arriba de sus clientes, sin header. */
+.resumen-grupo-titulo {
+  margin: 0 0 16px;
+  padding: 0 4px;
+  font-size: 22px;
   font-weight: 600;
+  letter-spacing: -0.01em;
   color: var(--text);
-  text-align: left;
 }
 
-.resumen-grupo-body {
-  margin-top: 4px;
+/* Tarjetas de cliente: solo mobile. En desktop se ve la tabla. */
+.resumen-cards {
+  display: none;
 }
 
 /* ---------- Resumen: parte superior ----------
@@ -2889,76 +2886,209 @@ input[type="number"]::-webkit-inner-spin-button {
     background: var(--bg);
   }
 
-    /* Tabla de Resumen -> tarjetas apiladas, mismo patrón que Clientes
-     (label en mayúscula vía data-label), sin scroll horizontal. */
-  .resumen-table thead {
+  /* Resumen: en mobile la tabla se reemplaza por ResumenClienteCard. */
+  .resumen-table {
     display: none;
   }
 
-  .resumen-table,
-  .resumen-table tbody {
-    display: block;
+  .resumen-grupo {
+    margin: 32px 0;
   }
 
-  .resumen-table tbody {
+  .resumen-grupo-titulo {
+    margin-bottom: 14px;
+  }
+
+  .resumen-cards {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 16px;
   }
 
-  .resumen-table tr {
-    display: block;
-    background: var(--bg);
-    border-radius: 14px;
-    animation: fade-in 0.2s ease;
+  .resumen-cliente-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 18px 16px;
   }
 
-  .resumen-table td {
-    display: block;
-    background: transparent;
-    padding: 0;
-    border-radius: 0 !important;
-  }
-
-  .resumen-table td.td-titulo {
+  .rcc-nombre {
+    margin: 0;
+    padding: 4px 0 16px;
+    font-size: 19px;
     font-weight: 700;
-    font-size: 17px;
-    padding: 14px 16px 4px !important;
     text-align: center;
+    color: var(--text);
+    border-bottom: 1px solid var(--border);
+    overflow-wrap: anywhere;
   }
 
-  .resumen-table td[data-label] {
-    padding: 0 16px 14px !important;
+  .rcc-limpieza { --cat: var(--cat-limpieza); }
+  .rcc-pastillas { --cat: var(--cat-pastillas); }
+  .rcc-extras { --cat: var(--cat-extras); }
+  .rcc-empleado { --cat: var(--text-muted); }
+
+  .rcc-fila {
     display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 6px;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+    line-height: 24px;
   }
 
-  .resumen-table td[data-label]::before {
-    margin-bottom: 0;
+  /* La última fila no lleva divisor: abajo ya viene el bloque de TOTAL. */
+  .rcc-fila:has(+ .rcc-total) {
+    border-bottom: none;
   }
 
-  .resumen-table td.td-accion {
-    display: block !important;
-    width: auto;
-    white-space: normal;
-    padding: 0 16px 16px !important;
+  .rcc-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
   }
 
-  .resumen-table td.td-accion button {
-    width: 100%;
+  .rcc-punto {
+    width: 8px;
+    height: 8px;
     border-radius: 999px;
+    background: var(--cat);
   }
 
-  .resumen-table td.td-accion button.copiar-btn {
+  .rcc-valores {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+    min-width: 0;
+  }
+
+  .rcc-extras-resto {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+    overflow: hidden;
+  }
+
+  .rcc-linea {
+    display: flex;
+    justify-content: flex-end;
+    align-items: baseline;
+    gap: 12px;
+    min-width: 0;
+  }
+
+  .rcc-cantidad {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    text-align: right;
+    overflow-wrap: anywhere;
+  }
+
+  /* Ancho fijo: así la cantidad queda alineada en todas las filas aunque
+     los precios tengan distinta cantidad de dígitos. */
+  .rcc-precio {
+    min-width: 76px;
+    font-size: 16px;
+    font-weight: 500;
+    text-align: right;
+    color: var(--cat);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .rcc-empleado-nombre {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text);
+    text-align: right;
+    overflow-wrap: anywhere;
+  }
+
+  .rcc-vacio {
+    font-weight: 400;
+    color: var(--text-muted);
+  }
+
+  .rcc-ver-mas {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 0;
+    font-size: 15px;
+    font-weight: 600;
+    background: transparent;
+    color: var(--cat);
+    border-radius: 8px;
+  }
+
+  .rcc-ver-mas:hover {
+    background: transparent;
+  }
+
+  .rcc-ver-mas svg {
+    transition: transform 0.25s ease;
+  }
+
+  .rcc-ver-mas.abierto svg {
+    transform: rotate(180deg);
+  }
+
+  .rcc-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-top: 16px;
+    padding: 16px 18px;
+    background: var(--bg);
+    border-radius: 18px;
+  }
+
+  .rcc-total-label {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+
+  .rcc-total-valor {
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .rcc-copiar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    min-height: 48px;
+    margin-top: 12px;
+    border-radius: 999px;
+    font-size: 17px;
     background: var(--accent);
-    color: #fff;
-    border: none;
+    color: var(--bg);
   }
 
-
-
+  @media (prefers-reduced-motion: reduce) {
+    .rcc-ver-mas svg {
+      transition: none;
+    }
+  }
 
   /* Modal de cliente -> bottom sheet */
   .modal-overlay {
