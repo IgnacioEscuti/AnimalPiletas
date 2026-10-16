@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Plus } from "lucide-react";
 import { TarifaList } from "../components/TarifaList.jsx";
 import { PrecioPastillasRow } from "../components/PrecioPastillasRow.jsx";
 import { BarrioList } from "../components/BarrioList.jsx";
@@ -142,53 +143,60 @@ export function TarifasPage() {
         <h2>Configuración</h2>
       </div>
 
-      <section className="card-mobile">
-        <h2>Tarifas</h2>
-        {error && <p className="error-message">{error}</p>}
-        {cargando ? (
-          <Skeleton filas={3} />
-        ) : (
-          <ul>
-            <TarifaList
-              tarifas={tarifas}
-              onActualizar={handleActualizarTarifa}
-              onEliminar={handleEliminarTarifa}
-            />
-            {precioPastillas && (
-              <PrecioPastillasRow
-                precioPastillas={precioPastillas}
-                onActualizar={handleActualizarPastillas}
+      <div className="config-grid">
+        <section className="card-mobile">
+          <div className="config-card-header">
+            <h2>Tarifas</h2>
+            <button className="btn-nueva-tarifa" onClick={() => setModalTarifaAbierto(true)}>
+              <Plus size={18} aria-hidden="true" />
+              Nueva
+            </button>
+          </div>
+          {error && <p className="error-message">{error}</p>}
+          {cargando ? (
+            <Skeleton filas={3} />
+          ) : (
+            <ul className="lista-precios">
+              <TarifaList
+                tarifas={tarifas}
+                onActualizar={handleActualizarTarifa}
+                onEliminar={handleEliminarTarifa}
               />
-            )}
-          </ul>
-        )}
-        <button className="btn-nueva-tarifa" onClick={() => setModalTarifaAbierto(true)}>
-          + Nueva tarifa
-        </button>
-      </section>
+              {precioPastillas && (
+                <PrecioPastillasRow
+                  precioPastillas={precioPastillas}
+                  onActualizar={handleActualizarPastillas}
+                />
+              )}
+            </ul>
+          )}
+        </section>
 
-      <section className="card-mobile">
-        <h2>Barrios</h2>
-        <form onSubmit={handleAgregarBarrio}>
-          <input
-            type="text"
-            placeholder="Nombre del barrio"
-            value={nombreBarrio}
-            onChange={(event) => setNombreBarrio(event.target.value)}
-          />
-          <button type="submit">Agregar</button>
-        </form>
-        {cargando ? (
-          <Skeleton filas={2} />
-        ) : (
-          <ul>
-            <BarrioList barrios={barrios} onEliminar={handleEliminarBarrio} />
-          </ul>
-        )}
-        {!cargando && barrios.length === 0 && (
-          <p className="empty-state">Todavía no hay barrios cargados.</p>
-        )}
-      </section>
+        <section className="card-mobile">
+          <div className="config-card-header">
+            <h2>Barrios</h2>
+          </div>
+          <form onSubmit={handleAgregarBarrio}>
+            <input
+              type="text"
+              placeholder="Nombre del barrio"
+              value={nombreBarrio}
+              onChange={(event) => setNombreBarrio(event.target.value)}
+            />
+            <button type="submit">Agregar</button>
+          </form>
+          {cargando ? (
+            <Skeleton filas={2} />
+          ) : (
+            <ul className="lista-chips-barrios">
+              <BarrioList barrios={barrios} onEliminar={handleEliminarBarrio} />
+            </ul>
+          )}
+          {!cargando && barrios.length === 0 && (
+            <p className="empty-state">Todavía no hay barrios cargados.</p>
+          )}
+        </section>
+      </div>
 
       {modalTarifaAbierto && (
         <TarifaModal onClose={() => setModalTarifaAbierto(false)} onGuardar={handleCrearTarifa} />
