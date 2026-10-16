@@ -139,10 +139,11 @@ export function TarifasPage() {
   return (
     <>
       <div className="page-title">
-        <h2>Tarifas de limpieza</h2>
+        <h2>Configuración</h2>
       </div>
 
       <section className="card-mobile">
+        <h2>Tarifas</h2>
         {error && <p className="error-message">{error}</p>}
         {cargando ? (
           <Skeleton filas={3} />

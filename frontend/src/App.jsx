@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { Settings } from "lucide-react";
 import { useAuth } from "./context/AuthContext.jsx";
 import { LoginPage } from "./pages/LoginPage.jsx";
 import { RegistroPage } from "./pages/RegistroPage.jsx";
@@ -45,29 +46,13 @@ const ICONOS = {
       <path d="M9 13h6M9 17h6"></path>
     </svg>
   ),
-  tarifas: (
-    <svg
-      className="nav-icon"
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <rect x="5" y="4" width="14" height="17" rx="2"></rect>
-      <path d="M9 2.5h6v3H9z"></path>
-      <path d="M9 12h6M9 16h4"></path>
-    </svg>
-  ),
+  tarifas: <Settings className="nav-icon" size={20} strokeWidth={1.8} />,
 };
 
 const PANTALLAS = {
   clientes: { label: "Clientes", Componente: ClientesPage },
   resumen: { label: "Resumen", Componente: ResumenPage },
-  tarifas: { label: "Tarifas", Componente: TarifasPage },
+  tarifas: { label: "Config", Componente: TarifasPage },
 };
 
 function SafariBgFix() {
