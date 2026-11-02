@@ -2,6 +2,7 @@ import { limpiezaRepository } from "../repositories/limpieza.repository.js";
 import { clienteRepository } from "../repositories/cliente.repository.js";
 import { handleMongooseError } from "../utils/mongooseError.utils.js";
 import { hoyNormalizado, rangoSemanal } from "../utils/fecha.utils.js";
+import { formatearNombre } from "../utils/formato.utils.js";
 
 export class LimpiezaService {
   constructor(repository, clienteRepository) {
@@ -31,7 +32,7 @@ export class LimpiezaService {
         precioUnitarioUsado: cliente.tarifaLimpieza.precio,
         extra,
         realizada,
-        empleado,
+        empleado: formatearNombre(empleado),
       });
     } catch (error) {
       handleMongooseError(error);

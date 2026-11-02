@@ -10,7 +10,8 @@
     "seed:tarifas": "node src/seeds/tarifaSeed.js",
     "seed:pastillas": "node src/seeds/precioPastillasSeed.js",
     "seed:eventos-prueba": "node src/seeds/eventosPruebaSeed.js",
-    "migrate:consolidar-semana": "node src/migrations/consolidarSemanaActual.migration.js"
+    "migrate:consolidar-semana": "node src/migrations/consolidarSemanaActual.migration.js",
+    "migrate:formato-textos": "node src/migrations/formatoTextos.migration.js"
   },
   "keywords": [],
   "author": "",

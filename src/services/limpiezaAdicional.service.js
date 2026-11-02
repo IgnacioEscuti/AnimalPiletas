@@ -1,9 +1,9 @@
 import { limpiezaAdicionalRepository } from "../repositories/limpiezaAdicional.repository.js";
 import { clienteRepository } from "../repositories/cliente.repository.js";
 import { precioPastillasService } from "./precioPastillas.service.js";
-import { normalizarNombreExtra } from "./usoExtra.service.js";
 import { handleMongooseError } from "../utils/mongooseError.utils.js";
 import { hoyNormalizado, rangoSemanal } from "../utils/fecha.utils.js";
+import { formatearExtra, formatearNombre } from "../utils/formato.utils.js";
 
 function idDe(usuarioODoc) {
   return (usuarioODoc.id ?? usuarioODoc._id).toString();
@@ -50,11 +50,11 @@ export class LimpiezaAdicionalService {
         precioUnitarioUsado: cliente.tarifaLimpieza.precio,
         extra,
         realizada,
-        empleado,
+        empleado: formatearNombre(empleado),
         cantidadPastillas,
         precioPastillasUsado: precioPastillas.precio,
         extras: extras?.map((item) => ({
-          nombre: normalizarNombreExtra(String(item?.nombre ?? "")),
+          nombre: formatearExtra(item?.nombre),
           precio: item?.precio,
         })),
         cargadoPor: idDe(usuarioActual),

@@ -261,7 +261,11 @@ export function ClientesPage({ onPrimeraCarga }) {
     const anterior = empleadosSemana;
     setEmpleadosSemana(actualizarPorCliente(anterior, clienteId, { nombre }));
     try {
-      await guardarEmpleadoSemana(clienteId, nombre);
+      // El backend le da formato al nombre: se muestra el que devuelve.
+      const guardado = await guardarEmpleadoSemana(clienteId, nombre);
+      setEmpleadosSemana((actuales) =>
+        actualizarPorCliente(actuales, clienteId, { nombre: guardado.nombre })
+      );
     } catch {
       setEmpleadosSemana(anterior);
       setError("No se pudo guardar el empleado.");

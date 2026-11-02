@@ -1,6 +1,7 @@
 import { barrioRepository } from "../repositories/barrio.repository.js";
 import { clienteRepository } from "../repositories/cliente.repository.js";
 import { handleMongooseError } from "../utils/mongooseError.utils.js";
+import { formatearNombre } from "../utils/formato.utils.js";
 
 export class BarrioService {
   constructor(repository) {
@@ -11,7 +12,7 @@ export class BarrioService {
     const cantidad = await this.repository.countDocuments();
 
     try {
-      return await this.repository.create({ nombre, orden: cantidad });
+      return await this.repository.create({ nombre: formatearNombre(nombre), orden: cantidad });
     } catch (error) {
       handleMongooseError(error);
     }

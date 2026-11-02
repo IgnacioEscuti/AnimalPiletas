@@ -2142,8 +2142,23 @@ button.adicional-volver:hover {
   border-radius: 50%;
   font-size: 12px;
   font-weight: 700;
+}
+
+/* Mismos colores que .estado-* de la fila de Clientes (que solo existen en
+   mobile); acá van fuera del media query porque el modal se ve en ambos. */
+.adicional-tarjeta .estado-pendiente {
   background: rgba(233, 233, 237, 0.12);
   color: var(--text-muted);
+}
+
+.adicional-tarjeta .estado-tick {
+  background: var(--success);
+  color: #fff;
+}
+
+.adicional-tarjeta .estado-cross {
+  background: var(--danger);
+  color: #fff;
 }
 
 .adicional-tarjeta .cliente-nombre {

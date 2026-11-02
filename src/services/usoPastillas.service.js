@@ -3,6 +3,7 @@ import { clienteRepository } from "../repositories/cliente.repository.js";
 import { precioPastillasService } from "./precioPastillas.service.js";
 import { handleMongooseError } from "../utils/mongooseError.utils.js";
 import { hoyNormalizado, rangoSemanal } from "../utils/fecha.utils.js";
+import { formatearNombre } from "../utils/formato.utils.js";
 
 export class UsoPastillasService {
   constructor(repository, clienteRepository) {
@@ -31,7 +32,7 @@ export class UsoPastillasService {
       return await this.repository.upsertPorClienteYFecha(clienteId, weekStart, hoyNormalizado(), {
         cantidad,
         precioUnitarioUsado: precioPastillas.precio,
-        empleado,
+        empleado: formatearNombre(empleado),
       });
     } catch (error) {
       handleMongooseError(error);

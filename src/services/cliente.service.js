@@ -4,6 +4,7 @@ import { barrioRepository } from "../repositories/barrio.repository.js";
 import { usuarioRepository } from "../repositories/usuario.repository.js";
 import { handleMongooseError } from "../utils/mongooseError.utils.js";
 import { estaEnSemanaActual } from "../utils/fecha.utils.js";
+import { formatearNombre } from "../utils/formato.utils.js";
 
 function escaparRegExp(texto) {
   return texto.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -143,6 +144,16 @@ export class ClienteService {
     return yaTeniaUnaVezVigente ? undefined : new Date();
   }
 
+  // Se llama antes de cualquier validación, así el chequeo de nombre
+  // duplicado compara contra el nombre ya formateado. Solo toca los campos
+  // que vinieron: una edición puede ser parcial.
+  formatearTextos(data) {
+    const datos = { ...data };
+    if (data.nombre !== undefined) datos.nombre = formatearNombre(data.nombre);
+    if (data.direccion !== undefined) datos.direccion = formatearNombre(data.direccion);
+    return datos;
+  }
+
   verificarAcceso(cliente, usuarioActual) {
     if (usuarioActual.rol !== "encargado") return;
 
@@ -172,7 +183,8 @@ export class ClienteService {
     return cliente;
   }
 
-  async createCliente(data, usuarioActual) {
+  async createCliente(body, usuarioActual) {
+    const data = this.formatearTextos(body);
     await this.validarTarifaExiste(data.tarifaLimpieza);
     await this.validarBarrioExiste(data.barrio);
     await this.validarNombreDisponible(data.nombre);
@@ -222,8 +234,9 @@ export class ClienteService {
     return this.obtenerClienteConAcceso(id, usuarioActual);
   }
 
-  async updateCliente(id, data, usuarioActual) {
+  async updateCliente(id, body, usuarioActual) {
     const clienteAntes = await this.obtenerClienteConAcceso(id, usuarioActual);
+    const data = this.formatearTextos(body);
 
     if (data.tarifaLimpieza) {
       await this.validarTarifaExiste(data.tarifaLimpieza);

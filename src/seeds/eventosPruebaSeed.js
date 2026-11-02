@@ -26,9 +26,9 @@ function mesPasadoDia(fecha, dia) {
 const seedEventosPrueba = async () => {
   await connectDB();
 
-  const tarifa = await tarifaLimpiezaModel.findOne({ nombre: "medio" });
+  const tarifa = await tarifaLimpiezaModel.findOne({ nombre: "Medio" });
   if (!tarifa) {
-    throw new Error("No existe la tarifa 'medio' — corré primero: npm run seed:tarifas");
+    throw new Error("No existe la tarifa 'Medio' — corré primero: npm run seed:tarifas");
   }
 
   const precioPastillas = await precioPastillasModel.findOne();

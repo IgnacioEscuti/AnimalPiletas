@@ -3,9 +3,9 @@ import { connectDB } from "../config/database.js";
 import { tarifaLimpiezaModel } from "../models/tarifaLimpieza.model.js";
 
 const tarifas = [
-  { nombre: "bajo", precio: 22000 },
-  { nombre: "medio", precio: 25000 },
-  { nombre: "alto", precio: 28000 },
+  { nombre: "Bajo", precio: 22000 },
+  { nombre: "Medio", precio: 25000 },
+  { nombre: "Alto", precio: 28000 },
 ];
 
 const seedTarifas = async () => {

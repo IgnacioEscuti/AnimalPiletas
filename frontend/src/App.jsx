@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Settings } from "lucide-react";
 import { useAuth } from "./context/AuthContext.jsx";
 import { LoginPage } from "./pages/LoginPage.jsx";
@@ -70,6 +70,17 @@ function App() {
   const [vistaAuth, setVistaAuth] = useState("login");
   const [listo, setListo] = useState(false);
   const [mostrarSolicitudes, setMostrarSolicitudes] = useState(true);
+  const reducirMovimiento = useReducedMotion();
+
+  // Tocar la pantalla en la que ya estás vuelve al inicio. Scrollea la
+  // ventana: en escritorio y en mobile no hay otro contenedor con scroll.
+  const irAPantalla = (clave) => {
+    if (clave === pantalla) {
+      window.scrollTo({ top: 0, behavior: reducirMovimiento ? "auto" : "smooth" });
+      return;
+    }
+    setPantalla(clave);
+  };
 
   useEffect(() => {
     const UMBRAL_SCROLL_PX = 15;
@@ -255,7 +266,7 @@ function App() {
           <motion.button
             key={clave}
             className={pantalla === clave ? "" : "secondary"}
-            onClick={() => setPantalla(clave)}
+            onClick={() => irAPantalla(clave)}
           >
             {pantalla === clave && (
               <motion.span

@@ -1,6 +1,7 @@
 import { tarifaLimpiezaRepository } from "../repositories/tarifaLimpieza.repository.js";
 import { clienteRepository } from "../repositories/cliente.repository.js";
 import { handleMongooseError } from "../utils/mongooseError.utils.js";
+import { formatearTarifa } from "../utils/formato.utils.js";
 
 export class TarifaLimpiezaService {
   constructor(repository) {
@@ -11,8 +12,9 @@ export class TarifaLimpiezaService {
     return this.repository.find();
   }
 
-  async createTarifa(nombre, precio) {
-    if (!nombre?.trim()) {
+  async createTarifa(nombreSinFormato, precio) {
+    const nombre = formatearTarifa(nombreSinFormato);
+    if (!nombre) {
       const error = new Error("el nombre es obligatorio");
       error.statusCode = 400;
       throw error;
@@ -25,7 +27,7 @@ export class TarifaLimpiezaService {
     }
 
     try {
-      return await this.repository.create({ nombre: nombre.trim(), precio });
+      return await this.repository.create({ nombre, precio });
     } catch (error) {
       handleMongooseError(error);
     }

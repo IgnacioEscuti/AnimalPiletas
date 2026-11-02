@@ -2,13 +2,7 @@ import { usoExtraRepository } from "../repositories/usoExtra.repository.js";
 import { clienteRepository } from "../repositories/cliente.repository.js";
 import { handleMongooseError } from "../utils/mongooseError.utils.js";
 import { hoyNormalizado, rangoSemanal } from "../utils/fecha.utils.js";
-
-// Normaliza "cloro", "CLORO", "  cloro " -> "Cloro", para que el mismo
-// extra agrupe siempre bajo el mismo nombre en el resumen.
-export function normalizarNombreExtra(nombre) {
-  const limpio = nombre.trim();
-  return limpio.charAt(0).toUpperCase() + limpio.slice(1).toLowerCase();
-}
+import { formatearExtra, formatearNombre } from "../utils/formato.utils.js";
 
 export class UsoExtraService {
   constructor(repository, clienteRepository) {
@@ -34,9 +28,9 @@ export class UsoExtraService {
       return await this.repository.crear({
         cliente: clienteId,
         fecha: hoyNormalizado(),
-        nombreExtra: normalizarNombreExtra(nombreExtra),
+        nombreExtra: formatearExtra(nombreExtra),
         precioUnitario,
-        empleado,
+        empleado: formatearNombre(empleado),
       });
     } catch (error) {
       handleMongooseError(error);

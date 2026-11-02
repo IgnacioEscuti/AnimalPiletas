@@ -2,6 +2,7 @@ import { empleadoSemanaRepository } from "../repositories/empleadoSemana.reposit
 import { clienteRepository } from "../repositories/cliente.repository.js";
 import { handleMongooseError } from "../utils/mongooseError.utils.js";
 import { rangoSemanal } from "../utils/fecha.utils.js";
+import { formatearNombre } from "../utils/formato.utils.js";
 
 export class EmpleadoSemanaService {
   constructor(repository, clienteRepository) {
@@ -26,7 +27,11 @@ export class EmpleadoSemanaService {
     const { inicio: weekStart } = rangoSemanal();
 
     try {
-      return await this.repository.upsertPorClienteYSemana(clienteId, weekStart, nombre);
+      return await this.repository.upsertPorClienteYSemana(
+        clienteId,
+        weekStart,
+        formatearNombre(nombre)
+      );
     } catch (error) {
       handleMongooseError(error);
     }

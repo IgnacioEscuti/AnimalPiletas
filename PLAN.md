@@ -297,6 +297,27 @@ Problema que resuelve: varias acciones esperaban la respuesta del servidor para 
 - **Solicitudes (admin):** aprobar o rechazar pasa a la siguiente al instante. Un 409 (ya la resolvió otro admin) se ignora. Con cualquier otro error, la solicitud vuelve a la cola con el aviso.
 
 Ya eran optimistas antes de esta sección: pastillas (guardador), limpieza, extras, eliminar extra, empleado y reordenar clientes.
+
+## Volver arriba desde el navbar
+
+Tocar en el navbar el botón de la pantalla en la que ya estás lleva al inicio de esa pantalla con scroll suave (directo si está activado "reducir movimiento"). Cambiar de pantalla funciona igual que antes.
+
+## Formato de textos
+
+El formato se aplica en el backend, en los services, para que valga desde cualquier pantalla. Siempre se sacan los espacios de los extremos y los repetidos.
+
+| Tipo | Campos | Regla | Ejemplo |
+|---|---|---|---|
+| Nombres | `Cliente.nombre`, `Cliente.direccion`, `Barrio.nombre`, `Usuario.nombre`, `empleado` (Limpieza, UsoPastillas, UsoExtra, LimpiezaAdicional), `EmpleadoSemana.nombre` | Mayúscula al inicio de cada palabra y el resto en minúscula. Respeta los acentos. | `JUAN PÉREZ` → `Juan Pérez` |
+| Extras | `UsoExtra.nombreExtra`, `nombre` de cada ítem de `LimpiezaAdicional.extras` | Solo la primera letra en mayúscula. Sin acentos, pero la ñ se mantiene. | `CLÓRO LÍQUIDO` → `Cloro liquido`, `PIÑA` → `Piña` |
+| Tarifas | `TarifaLimpieza.nombre` | Solo la primera letra en mayúscula. Respeta los acentos. | `PILETA GRANDE` → `Pileta grande` |
+
+- Nombres: también va mayúscula después de un guion (`Ana-María`) y en las palabras chicas (`Juan de La Cruz`), salvo `y`, `de` y `del`, que van en minúscula cuando no son la primera palabra del texto (`Ramón y Cajal`, `Al Lado de Palmito`, `De Gaetano`). Las palabras que empiezan con un número quedan como se escribieron (`Lote 5B`). Las siglas no se conservan (`YPF` → `Ypf`).
+- No se agregan acentos que no se escribieron: `Perez` sigue siendo `Perez`.
+- Email, PIN y teléfono no se tocan.
+
+**Migración de datos existentes.** Se corre una sola vez, después de deployar el formato. Por defecto solo simula y lista los cambios. Con `--apply` primero guarda un backup completo de la base en `backups/` (fuera de git) y recién después escribe. Solo actualiza estos campos de texto: no borra documentos, y si dos clientes, barrios o tarifas quedarían con el mismo nombre, no los toca y los informa. Se puede revertir con los valores originales que guarda y se puede volver a correr sin efectos.
+
 ## Decisiones evaluadas y descartadas
 
 - **React Router** — descartado. Con 3 pantallas planas, sin rutas anidadas ni detalle por cliente, y usándose como PWA standalone en iPhone (sin barra de direcciones ni botón atrás), no aporta nada que se use. Reevaluar solo si aparece una pantalla de detalle (`/cliente/:id`). Único costo actual: al refrescar se vuelve siempre a "clientes".
@@ -331,5 +352,7 @@ Ya eran optimistas antes de esta sección: pastillas (guardador), limpieza, extr
     - `src/config/env.js` valida al importarse y corta el arranque con `process.exit(1)` y un mensaje que nombra cuáles faltan. Obligatorias siempre: `MONGO_URI`, `JWT_SECRET`. Obligatoria solo cuando `NODE_ENV === "production"`: `FRONTEND_URLS`.
 12. ✅ Aprobación de registros por un admin (estado pendiente/aprobado + pop-up al abrir la app) — Función 12
 13. Limpieza adicional (visita extra en la semana, cuenta para quien la cargó) — Función 13
+14. Volver arriba desde el navbar — Función 14
+15. Formato de textos y migración de datos existentes — Función 15
 
 App deployada y en uso: frontend en Vercel, backend en Render, base en MongoDB Atlas. Instalada como PWA en iPhone. Login y roles activos — todos los endpoints requieren sesión.
